@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "7e0d8498-2fa0-4c22-b531-cfc798d34227",
     "name": "Orizzonti Training API",
-    "description": "Manual smoke tests for all currently exposed NestJS endpoints. Run requests in folder order. The current mailer is a placeholder that logs contact requests rather than sending SMTP mail. Mail settings PATCH changes persisted settings and intentionally omits the password.",
+    "description": "Manual smoke tests for the NestJS API, including protected local user and role management. Run requests in folder order. The current mailer is a placeholder that logs contact requests rather than sending SMTP mail. Mail settings PATCH omits the password.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -20,7 +20,11 @@
     { "key": "courseId", "value": "" },
     { "key": "languageId", "value": "" },
     { "key": "mediaId", "value": "" },
-    { "key": "courseRequestId", "value": "" }
+    { "key": "courseRequestId", "value": "" },
+    { "key": "superAdminRoleId", "value": "" },
+    { "key": "permissionIdManageBlog", "value": "" },
+    { "key": "adminUserId", "value": "" },
+    { "key": "testRoleId", "value": "" }
   ],
   "item": [
     {
@@ -49,7 +53,52 @@
         {
           "name": "Admin - roles",
           "request": { "method": "GET", "url": "{{apiBaseUrl}}/auth/roles" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('roles respond', () => pm.response.to.have.status(200));"] } }]
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('roles respond', () => pm.response.to.have.status(200));", "const roles = pm.response.json();", "const superAdmin = roles.find((role) => role.name === 'super-admin');", "if (superAdmin) pm.collectionVariables.set('superAdminRoleId', superAdmin.id);"] } }]
+        },
+        {
+          "name": "Admin - permissions",
+          "request": { "method": "GET", "url": "{{apiBaseUrl}}/auth/permissions" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('permissions respond', () => pm.response.to.have.status(200));", "const permission = pm.response.json().find((item) => item.name === 'manage_blog');", "if (permission) pm.collectionVariables.set('permissionIdManageBlog', permission.id);"] } }]
+        },
+        {
+          "name": "Admin - users (unauthorized request is rejected)",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "url": "{{apiBaseUrl}}/auth/users?page=0&size=10&search=" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('users endpoint requires authentication', () => pm.expect([401, 403]).to.include(pm.response.code));"] } }]
+        },
+        {
+          "name": "Admin - list users",
+          "request": { "method": "GET", "url": "{{apiBaseUrl}}/auth/users?page=0&size=10&search=" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('users are paginated', () => pm.response.to.have.status(200));", "pm.test('response has items and count', () => { const body = pm.response.json(); pm.expect(body.items).to.be.an('array'); pm.expect(body.total).to.be.a('number'); });"] } }]
+        },
+        {
+          "name": "Admin - create temporary user",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"username\": \"postman-editor\",\n  \"password\": \"TemporaryPass123!\",\n  \"roleId\": {{superAdminRoleId}},\n  \"isActive\": true\n}" }, "url": "{{apiBaseUrl}}/auth/users" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary user is created without a password hash in response', () => { pm.response.to.have.status(201); pm.expect(pm.response.json()).not.to.have.property('password'); });", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('adminUserId', body.id);"] } }]
+        },
+        {
+          "name": "Admin - update temporary user",
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"username\": \"postman-editor-updated\",\n  \"isActive\": true\n}" }, "url": "{{apiBaseUrl}}/auth/users/{{adminUserId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary user is updated', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Admin - delete temporary user",
+          "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/auth/users/{{adminUserId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary user is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('adminUserId');"] } }]
+        },
+        {
+          "name": "Admin - create temporary role",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"postman-test-role\",\n  \"description\": \"Temporary role used by Postman tests\",\n  \"permissionIds\": [{{permissionIdManageBlog}}]\n}" }, "url": "{{apiBaseUrl}}/auth/roles" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary role is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('testRoleId', body.id);"] } }]
+        },
+        {
+          "name": "Admin - update temporary role",
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"description\": \"Updated temporary Postman role\"\n}" }, "url": "{{apiBaseUrl}}/auth/roles/{{testRoleId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary role is updated', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Admin - delete temporary role",
+          "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/auth/roles/{{testRoleId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary role is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('testRoleId');"] } }]
         },
         {
           "name": "Dashboard - stats",

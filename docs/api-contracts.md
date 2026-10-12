@@ -2,6 +2,8 @@
 
 ## Authentication and profile
 
+Except for login, public content reads, contact submission, the root route, and course-request creation, API routes require `Authorization: Bearer {{accessToken}}`. Admin writes require their corresponding permission.
+
 ### POST /auth/login
 
 Request:
@@ -32,11 +34,52 @@ Response:
 
 ### GET /auth/roles
 
-Returns the available roles and their permissions.
+Requires `manage_users` or `manage_roles`. Returns roles and their permission assignments.
+
+### GET /auth/permissions
+
+Requires `manage_roles`. Returns the permission catalog.
 
 ### GET /auth/profile
 
-Returns the profile payload for the current seeded admin user.
+Returns the authenticated user's profile and current permissions.
+
+### GET /auth/users?page=0&size=20&search=
+
+Requires `manage_users`. Returns `{ items, total, page, size }`; user items never contain password hashes.
+
+### POST /auth/users
+
+Requires `manage_users`.
+
+```json
+{
+  "username": "postman-editor",
+  "password": "TemporaryPass123!",
+  "roleId": 1,
+  "isActive": true
+}
+```
+
+### PATCH /auth/users/:id and DELETE /auth/users/:id
+
+Require `manage_users`. Update accepts username, an optional new password, roleId, or isActive. The current account cannot be deactivated or deleted, and the last active super-admin cannot be removed or demoted.
+
+### POST /auth/roles
+
+Requires `manage_roles`.
+
+```json
+{
+  "name": "postman-test-role",
+  "description": "Temporary role used by Postman tests",
+  "permissionIds": []
+}
+```
+
+### PATCH /auth/roles/:id and DELETE /auth/roles/:id
+
+Require `manage_roles`. The super-admin role cannot be renamed or deleted; assigned users must be moved before a role is removed.
 
 ## Contact
 
@@ -92,6 +135,8 @@ Request:
 ### GET /settings/mail
 
 ### PATCH /settings/mail
+
+Both routes require `manage_mail_settings`. SMTP passwords are never returned by GET; PATCH with an empty or omitted password preserves the stored password. Responses include `passwordConfigured`.
 
 ## Media
 

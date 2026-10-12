@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -19,6 +20,8 @@ import { Language } from './language/language.entity';
 import { MailSettings } from './settings/mail-settings.entity';
 import { SliderMedia } from './media/media.entity';
 import { CourseRequest } from './course-request/course-request.entity';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from './auth/guards/permissions.guard';
 
 const databaseConfig = {
   host: process.env.DB_HOST ?? 'localhost',
@@ -72,6 +75,10 @@ console.info(
     CourseRequestModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: PermissionsGuard },
+  ],
 })
 export class AppModule {}

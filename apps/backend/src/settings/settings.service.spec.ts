@@ -21,10 +21,20 @@ describe('SettingsService', () => {
   });
 
   it('returns the latest existing mail settings', async () => {
-    const latest = { id: 3, host: 'smtp.example.com' } as MailSettings;
+    const latest = {
+      id: 3,
+      host: 'smtp.example.com',
+      password: 'smtp-secret',
+    } as MailSettings;
     repository.find.mockResolvedValue([latest]);
 
-    await expect(service.getMailSettings()).resolves.toBe(latest);
+    const result = await service.getMailSettings();
+    expect(result).toMatchObject({
+      id: 3,
+      host: 'smtp.example.com',
+      passwordConfigured: true,
+    });
+    expect(result).not.toHaveProperty('password');
     expect(repository.find).toHaveBeenCalledWith({
       order: { id: 'DESC' },
       take: 1,
@@ -37,7 +47,10 @@ describe('SettingsService', () => {
     repository.find.mockResolvedValue([]);
     repository.save.mockResolvedValue(created);
 
-    await expect(service.getMailSettings()).resolves.toBe(created);
+    await expect(service.getMailSettings()).resolves.toMatchObject({
+      id: 1,
+      passwordConfigured: false,
+    });
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         host: expect.any(String),
@@ -49,17 +62,41 @@ describe('SettingsService', () => {
   });
 
   it('updates the latest mail settings', async () => {
-    const current = { id: 2, host: 'old.example.com' } as MailSettings;
+    const current = {
+      id: 2,
+      host: 'old.example.com',
+      password: 'keep-this-secret',
+    } as MailSettings;
     const updated = { ...current, host: 'smtp.example.com' };
     repository.find.mockResolvedValue([current]);
     repository.save.mockResolvedValue(updated);
 
     await expect(
       service.updateMailSettings({ host: 'smtp.example.com' }),
-    ).resolves.toBe(updated);
+    ).resolves.toMatchObject({
+      id: 2,
+      host: 'smtp.example.com',
+      passwordConfigured: true,
+    });
     expect(repository.merge).toHaveBeenCalledWith(current, {
       host: 'smtp.example.com',
     });
     expect(repository.save).toHaveBeenCalledWith(updated);
+  });
+
+  it('does not overwrite the stored SMTP password with an empty value', async () => {
+    const current = {
+      id: 4,
+      host: 'smtp.example.com',
+      password: 'keep-this-secret',
+    } as MailSettings;
+    repository.find.mockResolvedValue([current]);
+    repository.save.mockImplementation(async (entity) => entity);
+
+    const result = await service.updateMailSettings({ password: '' });
+
+    expect(repository.merge).toHaveBeenCalledWith(current, {});
+    expect(result).not.toHaveProperty('password');
+    expect(result.passwordConfigured).toBe(true);
   });
 });

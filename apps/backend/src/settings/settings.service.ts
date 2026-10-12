@@ -11,6 +11,18 @@ export class SettingsService {
   ) {}
 
   async getMailSettings() {
+    return this.toSafeSettings(await this.getOrCreateMailSettings());
+  }
+
+  async updateMailSettings(dto: Partial<MailSettings>) {
+    const settings = await this.getOrCreateMailSettings();
+    const values = { ...dto };
+    if (!values.password) delete values.password;
+    const updated = this.mailSettingsRepository.merge(settings, values);
+    return this.toSafeSettings(await this.mailSettingsRepository.save(updated));
+  }
+
+  private async getOrCreateMailSettings(): Promise<MailSettings> {
     const [latestSettings] = await this.mailSettingsRepository.find({
       order: { id: 'DESC' },
       take: 1,
@@ -31,9 +43,8 @@ export class SettingsService {
     return settings;
   }
 
-  async updateMailSettings(dto: Partial<MailSettings>) {
-    const settings = await this.getMailSettings();
-    const updated = this.mailSettingsRepository.merge(settings, dto);
-    return this.mailSettingsRepository.save(updated);
+  private toSafeSettings(settings: MailSettings) {
+    const { password, ...safeSettings } = settings;
+    return { ...safeSettings, passwordConfigured: Boolean(password) };
   }
 }

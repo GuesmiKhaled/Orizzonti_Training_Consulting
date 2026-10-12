@@ -10,28 +10,28 @@
 - CRUD modules for blog, course, language, settings, and media are present.
 - Frontend and backend compile successfully.
 
-## Phase 2 — Current focus: RBAC and backoffice completion
+## Phase 2 — Completed: RBAC and backoffice completion
 
 ### Goal
 
-Add the missing role-based administration and request management model while preserving the current admin CRUD implementation.
+Persist role-based administration and course-request management while preserving the current admin CRUD implementation.
 
-### Work items
+### Completed work
 
-1. Add persisted role and permission metadata.
-2. Link admin users to roles.
-3. Expose user/profile and role data through auth endpoints.
-4. Add a course-request entity and request workflow.
-5. Add a dashboard statistics endpoint.
-6. Add tests for new entities and the authentication layer.
+1. Persist role and permission metadata; link admin users to roles.
+2. Expose profile, role, permission, and protected user-management APIs.
+3. Add course-request persistence/workflow and dashboard statistics.
+4. Add JWT authentication and permission guards, DTO validation, safe user responses, and last-super-admin protections.
+5. Separate the admin workspace from the public shell and add permission-filtered sidebar sections for CMS, Users, and Roles.
+6. Add backend tests for password hashing, role assignment, permission checks, and account safety.
 
-### Proposed new entities
+### Entities
 
 - `Role`
 - `Permission`
 - `CourseRequest`
 
-### Proposed endpoints
+### Endpoints
 
 - `GET /auth/profile`
 - `GET /auth/roles`
@@ -48,17 +48,16 @@ Add the missing role-based administration and request management model while pre
 - Preserve existing CRUD endpoints while layering RBAC on top.
 - Use TypeORM `synchronize: true` only for this local development setup, not as a production migration strategy.
 
-## Phase 3 — Frontend follow-up
+## Phase 3 — Completed: Frontend backoffice
 
-- Add a proper admin user management screen.
-- Add a course-request listing and status-management screen.
-- Add role-based visibility checks in the dashboard UI.
-- Add loading and empty states for dashboard widgets.
+- Added Users and Roles/Permissions sections with search, pagination, create/edit, activation, assignment, and deletion.
+- Added course-request listing/status management and role-aware sidebar sections.
+- Added loading, empty, error, and success states for dashboard data.
 
-## Phase 4 — Hardening
+## Phase 4 — In progress: Hardening and runtime checks
 
-- Add DTO validation and permission guards.
-- Add unit tests for auth, roles, and course requests.
+- Add audit logging, password reset/invitation, public contact rate limiting, and real SMTP delivery.
+- Add browser-based tests for the permission-filtered admin workspace and mobile navigation.
 - Add a clean setup guide and environment documentation.
 - Document production deployment restrictions and secrets handling.
 

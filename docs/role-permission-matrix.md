@@ -2,7 +2,7 @@
 
 ## Goal
 
-Define the minimum role model and permission structure for the Orizzonti backoffice while preserving the current simple admin login flow.
+Document the seeded role model and permission structure enforced by the Orizzonti backoffice API.
 
 ## Roles
 
@@ -50,11 +50,11 @@ Permissions:
 
 ## Notes
 
-These are the recommended default roles for the existing business domain. The current repository does not yet have a persisted role system, so this matrix is the proposed migration target and should be implemented in a backwards-compatible way.
+These roles and permissions are seeded by the backend when missing. Existing role assignments are preserved; missing default permissions are added to seeded roles.
 
 ## Enforcement strategy
 
-At the API layer, access should be checked using role and permission metadata, not by checking a raw user name in individual controllers. Future work should add a shared guard and permission decorator for endpoints such as:
+Admin API requests require a bearer JWT. `PermissionsGuard` reloads the active account and its current permissions for each request, so permission changes take effect without waiting for an existing JWT to expire. Controller permissions use metadata rather than username checks:
 
 - `@RequirePermission('manage_blog')`
 - `@RequirePermission('manage_courses')`

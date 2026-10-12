@@ -5,11 +5,13 @@ import { AuthService } from './auth.service';
 import { AdminUser } from './admin-user.entity';
 import { Permission } from './permission.entity';
 import { Role } from './role.entity';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { PermissionsGuard } from './guards/permissions.guard';
 
 @Module({
   imports: [TypeOrmModule.forFeature([AdminUser, Role, Permission])],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtAuthGuard, PermissionsGuard],
   exports: [AuthService],
 })
 export class AuthModule {}
