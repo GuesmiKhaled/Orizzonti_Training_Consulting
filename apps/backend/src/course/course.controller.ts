@@ -23,6 +23,12 @@ export class CourseController {
     return this.courseService.findAll();
   }
 
+  @Get('featured')
+  @Public()
+  findFeatured() {
+    return this.courseService.findFeatured();
+  }
+
   @Get(':id')
   @Public()
   findOne(@Param('id', ParseIntPipe) id: number) {

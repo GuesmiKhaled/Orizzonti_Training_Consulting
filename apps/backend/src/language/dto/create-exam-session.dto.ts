@@ -4,6 +4,8 @@ import {
   IsOptional,
   IsBoolean,
   IsUrl,
+  IsInt,
+  Min,
 } from 'class-validator';
 
 export class CreateExamSessionDto {
@@ -35,4 +37,9 @@ export class CreateExamSessionDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  maxParticipants?: number;
 }

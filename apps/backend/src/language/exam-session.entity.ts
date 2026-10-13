@@ -38,6 +38,9 @@ export class ExamSession {
   @Column({ nullable: true })
   subscriptionUrl: string; // Link to booking system
 
+  @Column({ type: 'int', nullable: true })
+  maxParticipants: number | null;
+
   @Column({ default: true })
   isActive: boolean;
 

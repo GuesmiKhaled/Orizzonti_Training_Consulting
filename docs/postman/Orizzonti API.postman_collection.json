@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "7e0d8498-2fa0-4c22-b531-cfc798d34227",
     "name": "Orizzonti Training API",
-    "description": "Manual smoke tests for the NestJS API, including protected local user and role management. Run requests in folder order. The current mailer is a placeholder that logs contact requests rather than sending SMTP mail. Mail settings PATCH omits the password.",
+    "description": "Complete API collection for Orizzonti Training & Consulting platform. Includes authentication, content management (blogs, courses, languages with CEFR levels and exam sessions), media management, course requests, and admin settings. Run requests in folder order.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -19,6 +19,8 @@
     { "key": "blogId", "value": "" },
     { "key": "courseId", "value": "" },
     { "key": "languageId", "value": "" },
+    { "key": "languageLevelId", "value": "" },
+    { "key": "examSessionId", "value": "" },
     { "key": "mediaId", "value": "" },
     { "key": "courseRequestId", "value": "" },
     { "key": "superAdminRoleId", "value": "" },
@@ -133,8 +135,29 @@
         { "name": "List languages", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('languages list responds', () => pm.response.to.have.status(200));"] } }] },
         { "name": "Create language (saves languageId)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Postman Test Language\",\n  \"code\": \"ptl\",\n  \"nativeName\": \"Postman Test Language\",\n  \"isActive\": false\n}" }, "url": "{{apiBaseUrl}}/languages" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('languageId', body.id);"] } }] },
         { "name": "Get created language", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages/{{languageId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language is retrieved', () => pm.response.to.have.status(200));"] } }] },
-        { "name": "Update created language", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nativeName\": \"Updated Postman Test Language\",\n  \"isActive\": true\n}" }, "url": "{{apiBaseUrl}}/languages/{{languageId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language is updated', () => pm.response.to.have.status(200));"] } }] },
-        { "name": "Delete created language", "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/languages/{{languageId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('languageId');"] } }] }
+        { "name": "Update created language", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nativeName\": \"Updated Postman Test Language\",\n  \"isActive\": true\n}" }, "url": "{{apiBaseUrl}}/languages/{{languageId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language is updated', () => pm.response.to.have.status(200));"] } }] }
+      ]
+    },
+    {
+      "name": "Language Levels",
+      "item": [
+        { "name": "List language levels", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language levels list responds', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Create language level (saves languageLevelId)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"cefrLevel\": \"A1\",\n  \"courseHours\": 120,\n  \"price\": 500\n}" }, "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language level is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('languageLevelId', body.id);"] } }] },
+        { "name": "Get language level", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language level is retrieved', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Update language level", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"courseHours\": 150,\n  \"price\": 600\n}" }, "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language level is updated', () => pm.response.to.have.status(200));"] } }] }
+      ]
+    },
+    {
+      "name": "Exam Sessions",
+      "item": [
+        { "name": "List exam sessions", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('exam sessions list responds', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Create exam session (saves examSessionId)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"examDate\": \"2025-06-15T10:00:00Z\",\n  \"registrationStartDate\": \"2025-05-01T00:00:00Z\",\n  \"registrationDeadline\": \"2025-06-01T23:59:59Z\",\n  \"subscriptionUrl\": \"https://example.com/exam-booking\",\n  \"maxParticipants\": 30\n}" }, "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('exam session is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('examSessionId', body.id);"] } }] },
+        { "name": "Get exam session", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('exam session is retrieved', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Update exam session", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"maxParticipants\": 40\n}" }, "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('exam session is updated', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Check booking eligibility", "request": { "method": "POST", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}/subscribe" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('booking eligibility check responds', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Delete exam session", "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('exam session is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('examSessionId');"] } }] },
+        { "name": "Delete language level", "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language level is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('languageLevelId');"] } }] },
+        { "name": "Delete language", "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/languages/{{languageId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('languageId');"] } }] }
       ]
     },
     {

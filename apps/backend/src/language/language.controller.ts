@@ -11,6 +11,8 @@ import {
 import { LanguageService } from './language.service';
 import { LanguageLevelService } from './language-level.service';
 import { ExamSessionService } from './exam-session.service';
+import { ExamRegistrationService } from './exam-registration.service';
+import { CreateExamRegistrationDto } from './dto/create-exam-registration.dto';
 import { CreateLanguageDto } from './dto/create-language.dto';
 import { CreateLanguageLevelDto } from './dto/create-language-level.dto';
 import { UpdateLanguageLevelDto } from './dto/update-language-level.dto';
@@ -25,6 +27,7 @@ export class LanguageController {
     private readonly languageService: LanguageService,
     private readonly languageLevelService: LanguageLevelService,
     private readonly examSessionService: ExamSessionService,
+    private readonly examRegistrationService: ExamRegistrationService,
   ) {}
 
   @Get()
@@ -63,17 +66,23 @@ export class LanguageController {
   // Language Levels endpoints
   @Get(':id/levels')
   @Public()
-  getLevels(@Param('id', ParseIntPipe) id: number) {
-    return this.languageLevelService.findByLanguageId(id);
+  async getLevels(@Param('id', ParseIntPipe) id: number) {
+    const levels = await this.languageLevelService.findByLanguageId(id);
+    await this.examRegistrationService.decorate(
+      levels.flatMap((level) => level.examSessions ?? []),
+    );
+    return levels;
   }
 
   @Get(':id/levels/:levelId')
   @Public()
-  getLevel(
+  async getLevel(
     @Param('id', ParseIntPipe) id: number,
     @Param('levelId', ParseIntPipe) levelId: number,
   ) {
-    return this.languageLevelService.findOne(id, levelId);
+    const level = await this.languageLevelService.findOne(id, levelId);
+    await this.examRegistrationService.decorate(level.examSessions ?? []);
+    return level;
   }
 
   @Post(':id/levels')
@@ -107,21 +116,28 @@ export class LanguageController {
   // Exam Sessions endpoints
   @Get(':id/levels/:levelId/exams')
   @Public()
-  getExamSessions(
+  async getExamSessions(
     @Param('id', ParseIntPipe) id: number,
     @Param('levelId', ParseIntPipe) levelId: number,
   ) {
-    return this.examSessionService.findByLevelId(id, levelId);
+    const sessions = await this.examSessionService.findByLevelId(id, levelId);
+    return this.examRegistrationService.decorate(sessions);
   }
 
   @Get(':id/levels/:levelId/exams/:sessionId')
   @Public()
-  getExamSession(
+  async getExamSession(
     @Param('id', ParseIntPipe) id: number,
     @Param('levelId', ParseIntPipe) levelId: number,
     @Param('sessionId', ParseIntPipe) sessionId: number,
   ) {
-    return this.examSessionService.findOne(id, levelId, sessionId);
+    const session = await this.examSessionService.findOne(
+      id,
+      levelId,
+      sessionId,
+    );
+    const [decorated] = await this.examRegistrationService.decorate([session]);
+    return decorated;
   }
 
   @Post(':id/levels/:levelId/exams')
@@ -153,6 +169,17 @@ export class LanguageController {
     @Param('sessionId', ParseIntPipe) sessionId: number,
   ) {
     return this.examSessionService.delete(id, levelId, sessionId);
+  }
+
+  @Post(':id/levels/:levelId/exams/:sessionId/register')
+  @Public()
+  registerForExam(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('levelId', ParseIntPipe) levelId: number,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+    @Body() dto: CreateExamRegistrationDto,
+  ) {
+    return this.examRegistrationService.register(id, levelId, sessionId, dto);
   }
 
   @Post(':id/levels/:levelId/exams/:sessionId/subscribe')

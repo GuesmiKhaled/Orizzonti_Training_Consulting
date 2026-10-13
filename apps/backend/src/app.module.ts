@@ -19,6 +19,7 @@ import { Course } from './course/course.entity';
 import { Language } from './language/language.entity';
 import { LanguageLevel } from './language/language-level.entity';
 import { ExamSession } from './language/exam-session.entity';
+import { ExamRegistration } from './language/exam-registration.entity';
 import { MailSettings } from './settings/mail-settings.entity';
 import { SliderMedia } from './media/media.entity';
 import { CourseRequest } from './course-request/course-request.entity';
@@ -51,6 +52,7 @@ console.info(
         Language,
         LanguageLevel,
         ExamSession,
+        ExamRegistration,
         MailSettings,
         SliderMedia,
         CourseRequest,

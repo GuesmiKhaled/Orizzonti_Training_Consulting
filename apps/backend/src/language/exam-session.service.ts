@@ -56,11 +56,7 @@ export class ExamSessionService {
     return session;
   }
 
-  async create(
-    languageId: number,
-    levelId: number,
-    dto: CreateExamSessionDto,
-  ) {
+  async create(languageId: number, levelId: number, dto: CreateExamSessionDto) {
     // Verify level belongs to language
     const level = await this.languageLevelRepository.findOne({
       where: { id: levelId, languageId },
@@ -96,6 +92,7 @@ export class ExamSessionService {
       price: dto.price,
       courseHours: dto.courseHours,
       subscriptionUrl: dto.subscriptionUrl,
+      maxParticipants: dto.maxParticipants ?? null,
       isActive: dto.isActive ?? true,
     });
 
@@ -112,9 +109,7 @@ export class ExamSessionService {
 
     // Validate dates if they are being updated
     if (dto.examDate || dto.registrationDeadline) {
-      const examDate = dto.examDate
-        ? new Date(dto.examDate)
-        : session.examDate;
+      const examDate = dto.examDate ? new Date(dto.examDate) : session.examDate;
       const regDeadline = dto.registrationDeadline
         ? new Date(dto.registrationDeadline)
         : session.registrationDeadline;

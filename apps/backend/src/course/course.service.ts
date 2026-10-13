@@ -15,6 +15,13 @@ export class CourseService {
     return this.courseRepository.find({ order: { createdAt: 'DESC' } });
   }
 
+  findFeatured(limit = 6) {
+    return this.courseRepository.find({
+      order: { createdAt: 'DESC' },
+      take: limit,
+    });
+  }
+
   async findOne(id: number) {
     const course = await this.courseRepository.findOne({ where: { id } });
     if (!course) {
