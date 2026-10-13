@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
+import { LanguageLevel } from './language-level.entity';
 
 @Entity('languages')
 export class Language {
@@ -16,6 +24,12 @@ export class Language {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @OneToMany(() => LanguageLevel, (level) => level.language, {
+    cascade: true,
+    eager: true,
+  })
+  levels: LanguageLevel[];
 
   @CreateDateColumn()
   createdAt: Date;

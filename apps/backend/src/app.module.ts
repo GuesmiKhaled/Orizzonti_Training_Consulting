@@ -17,6 +17,8 @@ import { Role } from './auth/role.entity';
 import { Blog } from './blog/blog.entity';
 import { Course } from './course/course.entity';
 import { Language } from './language/language.entity';
+import { LanguageLevel } from './language/language-level.entity';
+import { ExamSession } from './language/exam-session.entity';
 import { MailSettings } from './settings/mail-settings.entity';
 import { SliderMedia } from './media/media.entity';
 import { CourseRequest } from './course-request/course-request.entity';
@@ -47,6 +49,8 @@ console.info(
         Blog,
         Course,
         Language,
+        LanguageLevel,
+        ExamSession,
         MailSettings,
         SliderMedia,
         CourseRequest,
