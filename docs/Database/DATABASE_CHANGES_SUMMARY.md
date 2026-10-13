@@ -54,7 +54,7 @@
 #### Blog Admin Form
 - **File**: `apps/frontend/src/app/pages/admin-dashboard/admin-dashboard.component.ts`
 - **Change**: Added missing `Content` textarea field to blog form
-- **Details**: 
+- **Details**:
   - Added label with textarea for `content` formControl
   - Textarea has 8 rows for better content editing experience
   - Positioned between `Excerpt` and `Slug` fields
@@ -68,4 +68,3 @@
 **Blog Content Issue**: Content field missing from admin portal blog form
 - **Root Cause**: Form template didn't include content textarea despite entity having the field
 - **Solution**: Added content textarea to blog form template
-
