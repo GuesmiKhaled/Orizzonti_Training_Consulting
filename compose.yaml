@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./apps/backend/.env
+    environment:
+      APP_PORT: 5007
+      DB_HOST: host.docker.internal
+      DB_PORT: 1433
+      DB_SYNCHRONIZE: "false"
+      CORS_ORIGINS: http://localhost:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${BACKEND_HOST_PORT:-5007}:5007"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    depends_on:
+      - backend
+    environment:
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:${BACKEND_HOST_PORT:-5007}}
+    ports:
+      - "8080:80"
+    restart: unless-stopped

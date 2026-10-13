@@ -1,0 +1,205 @@
+{
+  "info": {
+    "_postman_id": "7e0d8498-2fa0-4c22-b531-cfc798d34227",
+    "name": "Orizzonti Training API",
+    "description": "Complete API collection for Orizzonti Training & Consulting platform. Includes authentication, content management (blogs, courses, languages with CEFR levels and exam sessions), media management, course requests, and admin settings. Run requests in folder order.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "apiBaseUrl", "value": "http://localhost:5007" },
+    { "key": "adminUser", "value": "admin" },
+    { "key": "adminPassword", "value": "admin123" },
+    { "key": "accessToken", "value": "" },
+    { "key": "blogId", "value": "" },
+    { "key": "courseId", "value": "" },
+    { "key": "languageId", "value": "" },
+    { "key": "languageLevelId", "value": "" },
+    { "key": "examSessionId", "value": "" },
+    { "key": "mediaId", "value": "" },
+    { "key": "courseRequestId", "value": "" },
+    { "key": "superAdminRoleId", "value": "" },
+    { "key": "permissionIdManageBlog", "value": "" },
+    { "key": "adminUserId", "value": "" },
+    { "key": "testRoleId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health and Admin",
+      "item": [
+        {
+          "name": "Health - root",
+          "request": { "method": "GET", "url": "{{apiBaseUrl}}/" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns HTTP 200', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Admin - login (saves accessToken)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{adminUser}}\",\n  \"password\": \"{{adminPassword}}\"\n}" },
+            "url": "{{apiBaseUrl}}/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('login succeeds', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.accessToken) pm.collectionVariables.set('accessToken', body.accessToken);"] } }]
+        },
+        {
+          "name": "Admin - profile",
+          "request": { "method": "GET", "url": "{{apiBaseUrl}}/auth/profile" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('profile responds', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Admin - roles",
+          "request": { "method": "GET", "url": "{{apiBaseUrl}}/auth/roles" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('roles respond', () => pm.response.to.have.status(200));", "const roles = pm.response.json();", "const superAdmin = roles.find((role) => role.name === 'super-admin');", "if (superAdmin) pm.collectionVariables.set('superAdminRoleId', superAdmin.id);"] } }]
+        },
+        {
+          "name": "Admin - permissions",
+          "request": { "method": "GET", "url": "{{apiBaseUrl}}/auth/permissions" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('permissions respond', () => pm.response.to.have.status(200));", "const permission = pm.response.json().find((item) => item.name === 'manage_blog');", "if (permission) pm.collectionVariables.set('permissionIdManageBlog', permission.id);"] } }]
+        },
+        {
+          "name": "Admin - users (unauthorized request is rejected)",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "url": "{{apiBaseUrl}}/auth/users?page=0&size=10&search=" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('users endpoint requires authentication', () => pm.expect([401, 403]).to.include(pm.response.code));"] } }]
+        },
+        {
+          "name": "Admin - list users",
+          "request": { "method": "GET", "url": "{{apiBaseUrl}}/auth/users?page=0&size=10&search=" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('users are paginated', () => pm.response.to.have.status(200));", "pm.test('response has items and count', () => { const body = pm.response.json(); pm.expect(body.items).to.be.an('array'); pm.expect(body.total).to.be.a('number'); });"] } }]
+        },
+        {
+          "name": "Admin - create temporary user",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"username\": \"postman-editor\",\n  \"password\": \"TemporaryPass123!\",\n  \"roleId\": {{superAdminRoleId}},\n  \"isActive\": true\n}" }, "url": "{{apiBaseUrl}}/auth/users" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary user is created without a password hash in response', () => { pm.response.to.have.status(201); pm.expect(pm.response.json()).not.to.have.property('password'); });", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('adminUserId', body.id);"] } }]
+        },
+        {
+          "name": "Admin - update temporary user",
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"username\": \"postman-editor-updated\",\n  \"isActive\": true\n}" }, "url": "{{apiBaseUrl}}/auth/users/{{adminUserId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary user is updated', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Admin - delete temporary user",
+          "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/auth/users/{{adminUserId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary user is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('adminUserId');"] } }]
+        },
+        {
+          "name": "Admin - create temporary role",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"postman-test-role\",\n  \"description\": \"Temporary role used by Postman tests\",\n  \"permissionIds\": [{{permissionIdManageBlog}}]\n}" }, "url": "{{apiBaseUrl}}/auth/roles" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary role is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('testRoleId', body.id);"] } }]
+        },
+        {
+          "name": "Admin - update temporary role",
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"description\": \"Updated temporary Postman role\"\n}" }, "url": "{{apiBaseUrl}}/auth/roles/{{testRoleId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary role is updated', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Admin - delete temporary role",
+          "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/auth/roles/{{testRoleId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('temporary role is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('testRoleId');"] } }]
+        },
+        {
+          "name": "Dashboard - stats",
+          "request": { "method": "GET", "url": "{{apiBaseUrl}}/dashboard/stats" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('stats respond', () => pm.response.to.have.status(200));", "pm.test('stats include content counts', () => pm.expect(pm.response.json()).to.have.property('blogsCount'));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Blogs",
+      "item": [
+        { "name": "List blogs", "request": { "method": "GET", "url": "{{apiBaseUrl}}/blogs" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('blogs list responds', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Create blog (saves blogId)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Postman API test article\",\n  \"excerpt\": \"Sample excerpt for the Orizzonti API test article.\",\n  \"content\": \"This sample article content is long enough to satisfy the API validation rules.\",\n  \"slug\": \"postman-api-test-article\",\n  \"isPublished\": false\n}" }, "url": "{{apiBaseUrl}}/blogs" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('blog is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('blogId', body.id);"] } }] },
+        { "name": "Get created blog", "request": { "method": "GET", "url": "{{apiBaseUrl}}/blogs/{{blogId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('blog is retrieved', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Update created blog", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Postman API test article updated\",\n  \"isPublished\": false\n}" }, "url": "{{apiBaseUrl}}/blogs/{{blogId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('blog is updated', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Delete created blog", "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/blogs/{{blogId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('blog is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('blogId');"] } }] }
+      ]
+    },
+    {
+      "name": "Courses",
+      "item": [
+        { "name": "List courses", "request": { "method": "GET", "url": "{{apiBaseUrl}}/courses" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('courses list responds', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Create course (saves courseId)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Postman API test course\",\n  \"slug\": \"postman-api-test-course\",\n  \"level\": \"Beginner\",\n  \"price\": \"100\",\n  \"description\": \"Sample course record created by the Postman API collection.\"\n}" }, "url": "{{apiBaseUrl}}/courses" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('course is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('courseId', body.id);"] } }] },
+        { "name": "Get created course", "request": { "method": "GET", "url": "{{apiBaseUrl}}/courses/{{courseId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('course is retrieved', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Update created course", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"price\": \"125\",\n  \"description\": \"Updated by the Postman API collection.\"\n}" }, "url": "{{apiBaseUrl}}/courses/{{courseId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('course is updated', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Delete created course", "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/courses/{{courseId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('course is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('courseId');"] } }] }
+      ]
+    },
+    {
+      "name": "Languages",
+      "item": [
+        { "name": "List languages", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('languages list responds', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Create language (saves languageId)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Postman Test Language\",\n  \"code\": \"ptl\",\n  \"nativeName\": \"Postman Test Language\",\n  \"isActive\": false\n}" }, "url": "{{apiBaseUrl}}/languages" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('languageId', body.id);"] } }] },
+        { "name": "Get created language", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages/{{languageId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language is retrieved', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Update created language", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nativeName\": \"Updated Postman Test Language\",\n  \"isActive\": true\n}" }, "url": "{{apiBaseUrl}}/languages/{{languageId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language is updated', () => pm.response.to.have.status(200));"] } }] }
+      ]
+    },
+    {
+      "name": "Language Levels",
+      "item": [
+        { "name": "List language levels", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language levels list responds', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Create language level (saves languageLevelId)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"cefrLevel\": \"A1\",\n  \"courseHours\": 120,\n  \"price\": 500\n}" }, "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language level is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('languageLevelId', body.id);"] } }] },
+        { "name": "Get language level", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language level is retrieved', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Update language level", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"courseHours\": 150,\n  \"price\": 600\n}" }, "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language level is updated', () => pm.response.to.have.status(200));"] } }] }
+      ]
+    },
+    {
+      "name": "Exam Sessions",
+      "item": [
+        { "name": "List exam sessions", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('exam sessions list responds', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Create exam session (saves examSessionId)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"examDate\": \"2025-06-15T10:00:00Z\",\n  \"registrationStartDate\": \"2025-05-01T00:00:00Z\",\n  \"registrationDeadline\": \"2025-06-01T23:59:59Z\",\n  \"subscriptionUrl\": \"https://example.com/exam-booking\",\n  \"maxParticipants\": 30\n}" }, "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('exam session is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('examSessionId', body.id);"] } }] },
+        { "name": "Get exam session", "request": { "method": "GET", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('exam session is retrieved', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Update exam session", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"maxParticipants\": 40\n}" }, "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('exam session is updated', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Check booking eligibility", "request": { "method": "POST", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}/subscribe" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('booking eligibility check responds', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Delete exam session", "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('exam session is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('examSessionId');"] } }] },
+        { "name": "Delete language level", "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language level is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('languageLevelId');"] } }] },
+        { "name": "Delete language", "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/languages/{{languageId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('language is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('languageId');"] } }] }
+      ]
+    },
+    {
+      "name": "Slider Media",
+      "item": [
+        { "name": "List media", "request": { "method": "GET", "url": "{{apiBaseUrl}}/media" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('media list responds', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Create media (saves mediaId)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Postman test slider image\",\n  \"imageUrl\": \"https://example.com/postman-test.jpg\",\n  \"altText\": \"Sample slider image\",\n  \"isActive\": false\n}" }, "url": "{{apiBaseUrl}}/media" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('media is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('mediaId', body.id);"] } }] },
+        { "name": "Update created media", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated Postman test slider image\",\n  \"isActive\": true\n}" }, "url": "{{apiBaseUrl}}/media/{{mediaId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('media is updated', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Delete created media", "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/media/{{mediaId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('media is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('mediaId');"] } }] }
+      ]
+    },
+    {
+      "name": "Mail Settings",
+      "item": [
+        { "name": "Get mail settings (also initializes defaults if empty)", "request": { "method": "GET", "url": "{{apiBaseUrl}}/settings/mail" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('mail settings are returned', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Update mail settings (persists values; password omitted)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"host\": \"smtp.elasticemail.com\",\n  \"port\": 2525,\n  \"username\": \"info@orizzonti.tn\",\n  \"fromAddress\": \"info@orizzonti.tn\",\n  \"secure\": true\n}" }, "url": "{{apiBaseUrl}}/settings/mail" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('mail settings are updated', () => pm.response.to.have.status(200));"] } }] }
+      ]
+    },
+    {
+      "name": "Course Requests",
+      "item": [
+        { "name": "List course requests", "request": { "method": "GET", "url": "{{apiBaseUrl}}/course-requests" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('course requests list responds', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Create course request (saves courseRequestId)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Postman API Test User\",\n  \"email\": \"postman-test@example.com\",\n  \"phone\": \"+216 00 000 000\",\n  \"courseName\": \"Postman API test course\",\n  \"message\": \"Sample course request created by the Postman collection.\"\n}" }, "url": "{{apiBaseUrl}}/course-requests" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('course request is created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "if (body.id) pm.collectionVariables.set('courseRequestId', body.id);"] } }] },
+        { "name": "Get created course request", "request": { "method": "GET", "url": "{{apiBaseUrl}}/course-requests/{{courseRequestId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('course request is retrieved', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Update course request status", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"reviewed\"\n}" }, "url": "{{apiBaseUrl}}/course-requests/{{courseRequestId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('course request is updated', () => pm.response.to.have.status(200));"] } }] },
+        { "name": "Delete created course request", "request": { "method": "DELETE", "url": "{{apiBaseUrl}}/course-requests/{{courseRequestId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('course request is deleted', () => pm.response.to.have.status(200));", "pm.collectionVariables.unset('courseRequestId');"] } }] }
+      ]
+    },
+    {
+      "name": "Contact",
+      "item": [
+        {
+          "name": "Submit contact message (mailer placeholder logs request)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Postman API Test\",\n  \"email\": \"postman-test@example.com\",\n  \"subject\": \"Postman API test message\",\n  \"message\": \"This sample message tests the contact endpoint and configured mail delivery.\"\n}" },
+            "url": "{{apiBaseUrl}}/contact"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('contact message accepted', () => pm.response.to.have.status(201));", "pm.test('response reports success', () => pm.expect(pm.response.json().success).to.eql(true));"] } }]
+        }
+      ]
+    }
+  ]
+}
