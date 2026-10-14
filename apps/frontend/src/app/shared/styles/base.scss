@@ -1,0 +1,348 @@
+// Base Styles for Orizzonti Admin Portal
+@import './design-tokens.scss';
+
+// ============================================================================
+// RESET & NORMALIZE
+// ============================================================================
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  color: $color-gray-900;
+  background-color: $color-gray-50;
+}
+
+// ============================================================================
+// TYPOGRAPHY
+// ============================================================================
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+}
+
+h1 {
+  font-size: $font-size-4xl;
+  margin-bottom: $space-6;
+}
+
+h2 {
+  font-size: $font-size-3xl;
+  margin-bottom: $space-5;
+}
+
+h3 {
+  font-size: $font-size-2xl;
+  margin-bottom: $space-4;
+}
+
+h4 {
+  font-size: $font-size-xl;
+  margin-bottom: $space-3;
+}
+
+h5 {
+  font-size: $font-size-lg;
+  margin-bottom: $space-2;
+}
+
+h6 {
+  font-size: $font-size-base;
+  margin-bottom: $space-2;
+}
+
+p {
+  margin: 0;
+  margin-bottom: $space-4;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $color-primary-dark;
+    text-decoration: underline;
+  }
+
+  &:active {
+    color: $color-primary-dark;
+  }
+}
+
+small, .text-sm {
+  font-size: $font-size-sm;
+  color: $color-gray-600;
+}
+
+code {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  background-color: $color-gray-100;
+  padding: $space-1 $space-2;
+  border-radius: $radius-base;
+}
+
+// ============================================================================
+// LISTS
+// ============================================================================
+
+ul, ol {
+  margin: 0;
+  padding-left: $space-6;
+  margin-bottom: $space-4;
+
+  li {
+    margin-bottom: $space-2;
+  }
+}
+
+// ============================================================================
+// FORMS
+// ============================================================================
+
+label {
+  display: block;
+  font-weight: $font-weight-medium;
+  color: $color-gray-900;
+  margin-bottom: $space-2;
+  font-size: $font-size-sm;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+input[type='date'],
+input[type='datetime-local'],
+input[type='time'],
+input[type='search'],
+input[type='url'],
+input[type='tel'],
+textarea,
+select {
+  width: 100%;
+  height: $input-height;
+  padding: $space-2 $space-3;
+  border: 1px solid $input-border-color;
+  border-radius: $radius-md;
+  background-color: $input-bg-color;
+  color: $input-text-color;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+
+  &::placeholder {
+    color: $input-text-color-placeholder;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+  }
+
+  &:disabled {
+    background-color: $input-bg-color-disabled;
+    color: $color-gray-500;
+    cursor: not-allowed;
+  }
+
+  &:invalid {
+    border-color: $color-error;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba($color-error, 0.1);
+    }
+  }
+}
+
+textarea {
+  height: auto;
+  min-height: 100px;
+  resize: vertical;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right $space-2 center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: $space-8;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: 18px;
+  height: 18px;
+  margin-right: $space-2;
+  cursor: pointer;
+  accent-color: $color-primary;
+}
+
+// ============================================================================
+// BUTTONS
+// ============================================================================
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: $radius-md;
+  transition: all $transition-fast;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// ============================================================================
+// TABLES
+// ============================================================================
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+thead {
+  background-color: $table-header-bg;
+  border-bottom: 1px solid $table-border-color;
+}
+
+th {
+  padding: $space-3 $space-4;
+  text-align: left;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  color: $color-gray-700;
+}
+
+td {
+  padding: $space-3 $space-4;
+  border-bottom: 1px solid $table-border-color;
+  font-size: $font-size-sm;
+}
+
+tbody tr {
+  transition: background-color $transition-fast;
+
+  &:hover {
+    background-color: $table-row-hover-bg;
+  }
+
+  &:nth-child(even) {
+    background-color: $table-row-stripe-bg;
+  }
+}
+
+// ============================================================================
+// SCROLLBAR
+// ============================================================================
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $color-gray-300;
+  border-radius: $radius-full;
+
+  &:hover {
+    background: $color-gray-400;
+  }
+}
+
+// ============================================================================
+// SELECTION
+// ============================================================================
+
+::selection {
+  background-color: $color-primary;
+  color: $color-white;
+}
+
+// ============================================================================
+// FOCUS VISIBLE (Accessibility)
+// ============================================================================
+
+:focus-visible {
+  outline: 2px solid $color-primary;
+  outline-offset: 2px;
+}
+
+// ============================================================================
+// UTILITIES
+// ============================================================================
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

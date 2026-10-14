@@ -1,0 +1,205 @@
+<section class="page-header container-fluid bg-secondary py-5">
+  <div class="container py-4">
+    <h1 class="text-white" *ngIf="language">{{ language.name }} - Examination Calendar</h1>
+    <h1 class="text-white" *ngIf="!language && !loading">Language Not Found</h1>
+    <div class="d-inline-flex text-white">
+      <a routerLink="/" class="text-white">Home</a>
+      <span class="px-2">/</span>
+      <a routerLink="/courses" class="text-white">Languages</a>
+      <span class="px-2">/</span>
+      <span *ngIf="language">{{ language.name }}</span>
+    </div>
+  </div>
+</section>
+
+<section class="container-fluid py-5 language-detail-page">
+  <div class="container">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-5">
+      <p>Loading language details...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="alert alert-danger" role="alert">
+      {{ error }}
+    </div>
+
+    <!-- Language Info -->
+    <div *ngIf="language && !loading" class="language-info mb-5">
+      <h2>{{ language.name }}</h2>
+      <p *ngIf="language.nativeName" class="language-native-name">
+        {{ language.nativeName }}
+      </p>
+    </div>
+
+    <!-- No Levels State -->
+    <div *ngIf="language && !loading && levels.length === 0" class="empty-state">
+      <p class="text-center">No levels configured for this language yet.</p>
+    </div>
+
+    <!-- Levels and Exam Calendar -->
+    <div *ngFor="let level of levels" class="level-section mb-5">
+      <h3 class="level-title">
+        {{ level.cefrLevel }} - {{ level.cefrLevel | cefrLevelName }}
+      </h3>
+
+      <div class="table-responsive">
+        <table class="exam-calendar-table">
+          <thead>
+            <tr>
+              <th>Exam Date and Location</th>
+              <th>Period</th>
+              <th>Price</th>
+              <th>Online Subscription</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- No Exams State -->
+            <tr *ngIf="!level.examSessions || level.examSessions.length === 0">
+              <td colspan="4" class="no-exams text-center py-4">
+                No examinations scheduled for this level.
+              </td>
+            </tr>
+
+            <!-- Exam Sessions -->
+            <ng-container *ngFor="let session of level.examSessions">
+              <!-- Exam Date Header Row -->
+              <tr class="exam-date-row">
+                <td colspan="4" class="exam-date-header">
+                  <h5 class="mb-0">
+                    <span class="exam-date-label">Exam date</span>
+                    {{ session.examDate | date: 'dd.MM.yyyy' }}
+                  </h5>
+                </td>
+              </tr>
+
+              <!-- Exam Details Row -->
+              <tr class="exam-details-row" [ngClass]="{ 'nicht-buchbar': !session.isBookable }">
+                <td class="location">
+                  <p class="mb-0">{{ session.location || 'TBD' }}</p>
+                </td>
+                <td class="period">
+                  <p class="mb-0">
+                    {{ session.registrationStartDate | date: 'dd.MM.yyyy' }} -<br />
+                    {{ session.registrationDeadline | date: 'dd.MM.yyyy' }}
+                  </p>
+                </td>
+                <td class="price">
+                  <p class="mb-0">{{ session.price || level.price || 'TBD' }}</p>
+                  <p class="course-hours mb-0">
+                    {{ session.courseHours || level.courseHours || '' }}
+                  </p>
+                </td>
+                <td class="subscription">
+                  <ng-container *ngIf="session.isBookable; else closed">
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      (click)="openRegistration(level, session)"
+                    >
+                      Subscribe
+                    </button>
+                    <small
+                      *ngIf="session.placesLeft !== null && session.placesLeft !== undefined"
+                      class="places-left d-block"
+                    >
+                      {{ session.placesLeft }}
+                      {{ session.placesLeft === 1 ? 'place' : 'places' }} left
+                    </small>
+                  </ng-container>
+                  <ng-template #closed>
+                    <span class="expired-text">
+                      {{ session.bookingStatus || 'Not Available' }}
+                    </span>
+                  </ng-template>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div
+  *ngIf="registering"
+  class="registration-backdrop"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="registrationTitle"
+  (click)="closeRegistration()"
+>
+  <div class="registration-dialog" (click)="$event.stopPropagation()">
+    <h4 id="registrationTitle">
+      Exam registration - {{ registering.level.cefrLevel }}
+    </h4>
+    <p class="text-muted">
+      Exam date: {{ registering.session.examDate | date: 'dd.MM.yyyy' }}
+      <span *ngIf="registering.session.location">
+        - {{ registering.session.location }}</span
+      >
+    </p>
+
+    <div *ngIf="registerSuccess; else registrationForm">
+      <div class="alert alert-success" role="status">{{ registerSuccess }}</div>
+      <button type="button" class="btn btn-primary" (click)="closeRegistration()">
+        Close
+      </button>
+    </div>
+
+    <ng-template #registrationForm>
+      <form [formGroup]="registerForm" (ngSubmit)="submitRegistration()">
+        <div class="form-group">
+          <label for="regName">Full name *</label>
+          <input id="regName" class="form-control" formControlName="fullName" />
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Email *</label>
+          <input
+            id="regEmail"
+            type="email"
+            class="form-control"
+            formControlName="email"
+          />
+          <small
+            class="text-danger"
+            *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid"
+            >Enter a valid email address.</small
+          >
+        </div>
+        <div class="form-group">
+          <label for="regPhone">Phone</label>
+          <input id="regPhone" class="form-control" formControlName="phone" />
+        </div>
+        <div class="form-group">
+          <label for="regMessage">Message</label>
+          <textarea
+            id="regMessage"
+            class="form-control"
+            rows="3"
+            formControlName="message"
+          ></textarea>
+        </div>
+        <div *ngIf="registerError" class="alert alert-danger" role="alert">
+          {{ registerError }}
+        </div>
+        <p class="text-muted small">
+          Your request will be reviewed by our team before it is confirmed.
+        </p>
+        <div class="registration-actions">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="registerForm.invalid || isSubmitting"
+          >
+            {{ isSubmitting ? 'Sending...' : 'Send request' }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="closeRegistration()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </ng-template>
+  </div>
+</div>
