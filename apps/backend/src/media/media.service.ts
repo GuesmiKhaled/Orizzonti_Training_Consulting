@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SliderMedia } from './media.entity';
+import { CreateMediaDto, UpdateMediaDto } from './dto/create-media.dto';
 
 @Injectable()
 export class MediaService {
@@ -10,15 +11,26 @@ export class MediaService {
     private readonly mediaRepository: Repository<SliderMedia>,
   ) {}
 
+  /** Everything, including hidden images: for the admin area. Newest first. */
   findAll() {
-    return this.mediaRepository.find({ order: { createdAt: 'DESC' } });
+    return this.mediaRepository.find({
+      order: { createdAt: 'DESC', id: 'DESC' },
+    });
   }
 
-  create(dto: Partial<SliderMedia>) {
+  /** What the public carousel shows: active images, newest first. */
+  findActive() {
+    return this.mediaRepository.find({
+      where: { isActive: true },
+      order: { createdAt: 'DESC', id: 'DESC' },
+    });
+  }
+
+  create(dto: CreateMediaDto) {
     return this.mediaRepository.save(this.mediaRepository.create(dto));
   }
 
-  async update(id: number, dto: Partial<SliderMedia>) {
+  async update(id: number, dto: UpdateMediaDto) {
     const media = await this.mediaRepository.preload({ id, ...dto });
     if (!media) {
       throw new NotFoundException('Slider media not found');

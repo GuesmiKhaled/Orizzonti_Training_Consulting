@@ -22,6 +22,9 @@ export class Language {
   @Column({ nullable: true })
   nativeName: string;
 
+  @Column({ type: 'nvarchar', length: 255, nullable: true })
+  imageUrl: string | null;
+
   @Column({ default: true })
   isActive: boolean;
 

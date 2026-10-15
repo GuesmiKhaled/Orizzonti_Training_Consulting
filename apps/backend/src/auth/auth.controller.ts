@@ -10,10 +10,14 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
+import { LOGIN_THROTTLE, PASSWORD_CHANGE_THROTTLE } from '../throttling';
 import { LoginDto } from './dto/login.dto';
+import { AllowPendingPasswordChange } from './decorators/allow-pending-password-change.decorator';
 import { Public } from './decorators/public.decorator';
 import { RequirePermission } from './decorators/require-permission.decorator';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 import { ListAdminUsersDto } from './dto/list-admin-users.dto';
 import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
@@ -26,6 +30,7 @@ export class AuthController {
 
   @Post('login')
   @Public()
+  @Throttle(LOGIN_THROTTLE)
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto.username, dto.password);
   }
@@ -37,8 +42,19 @@ export class AuthController {
   }
 
   @Get('profile')
+  @AllowPendingPasswordChange()
   getProfile(@Req() request: { authUserId: number }) {
     return this.authService.getProfile(request.authUserId);
+  }
+
+  @Post('change-password')
+  @AllowPendingPasswordChange()
+  @Throttle(PASSWORD_CHANGE_THROTTLE)
+  changePassword(
+    @Body() dto: ChangePasswordDto,
+    @Req() request: { authUserId: number },
+  ) {
+    return this.authService.changePassword(request.authUserId, dto);
   }
 
   @Get('permissions')

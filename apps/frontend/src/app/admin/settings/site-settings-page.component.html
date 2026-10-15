@@ -1,0 +1,67 @@
+<app-page-header
+  title="Site settings"
+  subtitle="Contact details and highlights for the public website."
+/>
+
+@if (failed()) {
+  <p class="state error" role="alert">Could not load the site settings.</p>
+} @else if (loading()) {
+  <p class="state">Loading site settings...</p>
+} @else {
+  <form class="panel" [formGroup]="form" (ngSubmit)="save()">
+    <header class="panel-header">Website content</header>
+    <div class="panel-body">
+      <div class="grid">
+        <app-form-field
+          class="span-2"
+          label="Home page title"
+          hint="Large heading over the home page slider. Empty keeps 'Orizzonti'."
+        >
+          <input formControlName="heroTitle" maxlength="150" />
+        </app-form-field>
+        <app-form-field
+          class="span-2"
+          label="Home page subtitle"
+          hint="One sentence under the title. Empty keeps the original text."
+        >
+          <textarea formControlName="heroSubtitle" rows="2" maxlength="300"></textarea>
+        </app-form-field>
+        <app-form-field label="Contact email" [error]="error('contactEmail')">
+          <input type="email" formControlName="contactEmail" />
+        </app-form-field>
+        <app-form-field label="Contact phone" [error]="error('contactPhone')">
+          <input formControlName="contactPhone" inputmode="tel" />
+        </app-form-field>
+        <app-form-field class="span-2" label="Address">
+          <input formControlName="contactAddress" />
+        </app-form-field>
+        <app-form-field label="Facebook URL" [error]="error('facebookUrl')">
+          <input formControlName="facebookUrl" placeholder="https://..." />
+        </app-form-field>
+        <app-form-field label="Instagram URL" [error]="error('instagramUrl')">
+          <input formControlName="instagramUrl" placeholder="https://..." />
+        </app-form-field>
+        <app-form-field class="span-2" label="About text">
+          <textarea formControlName="aboutText" rows="6"></textarea>
+        </app-form-field>
+        <app-form-field label="Students">
+          <input formControlName="studentsCount" inputmode="numeric" />
+        </app-form-field>
+        <app-form-field label="Courses">
+          <input formControlName="coursesCount" inputmode="numeric" />
+        </app-form-field>
+        <app-form-field label="Years of experience">
+          <input formControlName="yearsOfExperience" inputmode="numeric" />
+        </app-form-field>
+        <app-form-field label="Next session date">
+          <input type="datetime-local" formControlName="nextSessionDate" />
+        </app-form-field>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Saving...' : 'Save site settings' }}
+        </button>
+      </div>
+    </div>
+  </form>
+}

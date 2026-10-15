@@ -1,0 +1,26 @@
+<div class="backdrop" (click)="onBackdropClick($event)">
+  <div
+    #dialog
+    class="dialog"
+    [attr.data-size]="size()"
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+    [attr.aria-labelledby]="titleId"
+    (keydown)="trapTab($event)"
+  >
+    <header>
+      <h2 [id]="titleId">{{ title() }}</h2>
+      <button
+        type="button"
+        class="close"
+        aria-label="Close dialog"
+        (click)="close()"
+      >
+        &times;
+      </button>
+    </header>
+    <div class="body"><ng-content /></div>
+    <footer><ng-content select="[modal-footer]" /></footer>
+  </div>
+</div>

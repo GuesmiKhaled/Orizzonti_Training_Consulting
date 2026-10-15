@@ -1,0 +1,95 @@
+<section class="panel">
+  @if (title()) {
+    <header class="panel-header">{{ title() }}</header>
+  }
+
+  <div class="toolbar">
+    @if (searchable()) {
+      <input
+        type="search"
+        class="search"
+        [placeholder]="searchPlaceholder()"
+        [attr.aria-label]="searchPlaceholder()"
+        [value]="search()"
+        (input)="onSearch($event)"
+      />
+    }
+    <div class="toolbar-slot"><ng-content select="[table-toolbar]" /></div>
+  </div>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          @for (column of columns(); track column.key) {
+            <th scope="col" [attr.aria-sort]="column.sortable ? ariaSort(column) : null">
+              @if (column.sortable) {
+                <button type="button" class="sort" (click)="toggleSort(column)">
+                  {{ column.header }}
+                  @if (sortKey() === column.key) {
+                    <span aria-hidden="true">{{ sortDirection() === 'asc' ? '▲' : '▼' }}</span>
+                  }
+                </button>
+              } @else {
+                {{ column.header }}
+              }
+            </th>
+          }
+          @if (actions().length) {
+            <th scope="col">Actions</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of visibleRows(); track idOf(row, $index)) {
+          <tr>
+            @for (column of columns(); track column.key) {
+              <td>
+                @let custom = templateFor(column.key);
+                @if (custom) {
+                  <ng-container
+                    [ngTemplateOutlet]="custom"
+                    [ngTemplateOutletContext]="{ $implicit: row }"
+                  />
+                } @else {
+                  @if (column.tag; as makeTag) {
+                    @let tag = makeTag(row);
+                    <app-status-tag [label]="tag.label" [tone]="tag.tone" />
+                  } @else {
+                    {{ valueOf(row, column) }}
+                  }
+                }
+              </td>
+            }
+            @if (actions().length) {
+              <td class="row-actions">
+                @for (action of actions(); track action.id) {
+                  <button
+                    type="button"
+                    [class.danger]="action.tone === 'danger'"
+                    (click)="actionTriggered.emit({ action: action.id, row })"
+                  >
+                    {{ action.label }}
+                  </button>
+                }
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td class="state" [attr.colspan]="columns().length + (actions().length ? 1 : 0)">
+              {{ loading() ? 'Loading...' : emptyMessage() }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <app-table-pagination
+    [page]="page()"
+    [pageSize]="pageSize()"
+    [total]="totalCount()"
+    (pageChange)="goToPage($event)"
+  />
+</section>

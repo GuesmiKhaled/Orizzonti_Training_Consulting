@@ -1,10 +1,14 @@
 import 'dotenv/config';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { assertJwtSecretConfigured } from './auth/auth.constants';
+import { configureUploads } from './media/configure-uploads';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  assertJwtSecretConfigured();
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const corsOrigins = (
     process.env.CORS_ORIGINS ?? 'http://localhost:5007,http://localhost:5007'
@@ -19,6 +23,12 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
+
+  if (process.env.TRUST_PROXY) {
+    app.set('trust proxy', process.env.TRUST_PROXY === 'true' ? 1 : process.env.TRUST_PROXY);
+  }
+
+  configureUploads(app);
 
   app.useGlobalPipes(
     new ValidationPipe({

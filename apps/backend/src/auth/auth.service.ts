@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   OnModuleInit,
   UnauthorizedException,
@@ -11,18 +12,27 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Like, Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { getJwtSecret } from './auth.constants';
+import { MIN_PASSWORD_LENGTH, getJwtSecret } from './auth.constants';
 import { AdminUser } from './admin-user.entity';
 import { Permission } from './permission.entity';
 import { Role } from './role.entity';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 import { ListAdminUsersDto } from './dto/list-admin-users.dto';
 import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 
+/**
+ * Passwords that shipped as defaults in earlier versions. They are only used to
+ * detect an account that still has one, so it can be forced to change it.
+ */
+const KNOWN_DEFAULT_PASSWORDS: readonly string[] = ['admin123'];
+
 @Injectable()
 export class AuthService implements OnModuleInit {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @InjectRepository(AdminUser)
     private readonly adminUserRepository: Repository<AdminUser>,
@@ -116,8 +126,19 @@ export class AuthService implements OnModuleInit {
     const page = query.page ?? 0;
     const size = query.size ?? 20;
     const search = query.search?.trim();
+    const role = query.roleId ? { role: { id: query.roleId } } : {};
+    const term = search ? `%${search}%` : null;
+    const where = term
+      ? [
+          { username: Like(term), ...role },
+          { fullName: Like(term), ...role },
+          { email: Like(term), ...role },
+        ]
+      : query.roleId
+        ? role
+        : undefined;
     const [users, total] = await this.adminUserRepository.findAndCount({
-      where: search ? [{ username: Like(`%${search}%`) }] : undefined,
+      where,
       relations: ['role'],
       order: { username: 'ASC' },
       skip: page * size,
@@ -145,6 +166,10 @@ export class AuthService implements OnModuleInit {
       username,
       password: await bcrypt.hash(dto.password, 12),
       isActive: dto.isActive ?? true,
+      fullName: dto.fullName?.trim() || null,
+      email: dto.email?.trim() || null,
+      phone: dto.phone?.trim() || null,
+      mustChangePassword: true,
       role,
     });
     return this.toSafeUser(await this.adminUserRepository.save(user));
@@ -176,9 +201,16 @@ export class AuthService implements OnModuleInit {
       }
       user.username = username;
     }
-    if (dto.password) user.password = await bcrypt.hash(dto.password, 12);
+    if (dto.password) {
+      user.password = await bcrypt.hash(dto.password, 12);
+      // An admin resetting someone else's password knows it, so that user must replace it.
+      user.mustChangePassword = id !== requesterId;
+    }
     if (dto.isActive !== undefined) user.isActive = dto.isActive;
     if (dto.roleId !== undefined) user.role = nextRole;
+    if (dto.fullName !== undefined) user.fullName = dto.fullName?.trim() || null;
+    if (dto.email !== undefined) user.email = dto.email?.trim() || null;
+    if (dto.phone !== undefined) user.phone = dto.phone?.trim() || null;
 
     return this.toSafeUser(await this.adminUserRepository.save(user));
   }
@@ -351,7 +383,11 @@ export class AuthService implements OnModuleInit {
     return {
       id: user.id,
       username: user.username,
+      fullName: user.fullName ?? null,
+      email: user.email ?? null,
+      phone: user.phone ?? null,
       isActive: user.isActive,
+      mustChangePassword: user.mustChangePassword === true,
       roleId: user.role?.id ?? null,
       role: user.role?.name ?? null,
       permissions: user.role?.permissions?.map(({ name }) => name) ?? [],
@@ -370,26 +406,76 @@ export class AuthService implements OnModuleInit {
       relations: ['role'],
     });
     if (existingAdmin) {
+      let changed = false;
       if (!existingAdmin.role && superAdminRole) {
         existingAdmin.role = superAdminRole;
-        await this.adminUserRepository.save(existingAdmin);
+        changed = true;
       }
+      if (
+        !existingAdmin.mustChangePassword &&
+        (await this.usesKnownDefaultPassword(existingAdmin.password))
+      ) {
+        existingAdmin.mustChangePassword = true;
+        changed = true;
+        this.logger.warn(
+          'The "admin" account still uses a known default password and must change it at next login.',
+        );
+      }
+      if (changed) await this.adminUserRepository.save(existingAdmin);
       return;
     }
 
     if ((await this.adminUserRepository.count()) > 0) return;
 
-    const passwordHash = await bcrypt.hash(
-      process.env.DEFAULT_ADMIN_PASSWORD ?? 'admin123',
-      12,
-    );
+    const initialPassword = process.env.DEFAULT_ADMIN_PASSWORD;
+    if (!initialPassword || initialPassword.length < MIN_PASSWORD_LENGTH) {
+      this.logger.warn(
+        `No admin account exists. Set DEFAULT_ADMIN_PASSWORD (at least ${MIN_PASSWORD_LENGTH} characters) and restart to create the first one.`,
+      );
+      return;
+    }
+
     const admin = this.adminUserRepository.create({
       username: 'admin',
-      password: passwordHash,
+      password: await bcrypt.hash(initialPassword, 12),
+      mustChangePassword: true,
       role: superAdminRole ?? undefined,
     });
-
     await this.adminUserRepository.save(admin);
+    this.logger.log('Created the initial "admin" account; it must change its password at first login.');
+  }
+
+  async changePassword(userId: number, dto: ChangePasswordDto) {
+    const user = await this.adminUserRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user || !user.isActive) throw new UnauthorizedException();
+
+    if (!(await bcrypt.compare(dto.currentPassword, user.password))) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+    if (dto.newPassword === dto.currentPassword) {
+      throw new BadRequestException(
+        'The new password must be different from the current one',
+      );
+    }
+    if (dto.newPassword.toLowerCase().includes(user.username.toLowerCase())) {
+      throw new BadRequestException(
+        'The new password must not contain your username',
+      );
+    }
+
+    user.password = await bcrypt.hash(dto.newPassword, 12);
+    user.mustChangePassword = false;
+    await this.adminUserRepository.save(user);
+    return { success: true };
+  }
+
+  private async usesKnownDefaultPassword(hash: string): Promise<boolean> {
+    for (const candidate of KNOWN_DEFAULT_PASSWORDS) {
+      if (await bcrypt.compare(candidate, hash)) return true;
+    }
+    return false;
   }
 
   private async ensureRoleAndPermissionSeed() {
@@ -404,6 +490,7 @@ export class AuthService implements OnModuleInit {
       'manage_mail_settings',
       'view_dashboard',
       'manage_course_requests',
+      'manage_site_settings',
       'view_statistics',
     ];
 

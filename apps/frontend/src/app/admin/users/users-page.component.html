@@ -1,0 +1,47 @@
+<app-page-header title="Users" subtitle="Backoffice accounts and the roles they hold." />
+
+<app-data-table
+  title="Users"
+  mode="server"
+  searchPlaceholder="Search name, username, email"
+  [rows]="users()"
+  [total]="total()"
+  [pageSize]="pageSize"
+  [columns]="columns"
+  [actions]="actions"
+  [rowId]="rowId"
+  [loading]="loading()"
+  emptyMessage="No users found."
+  (queryChange)="onQuery($event)"
+  (actionTriggered)="onAction($event)"
+>
+  <select table-toolbar class="toolbar-filter" aria-label="Filter by role" (change)="onRoleFilter($event)">
+    <option value="">All roles</option>
+    @for (role of roles(); track role.id) {
+      <option [value]="role.id">{{ role.name }}</option>
+    }
+  </select>
+  <button table-toolbar type="button" class="btn btn-primary" (click)="editing.set('new')">
+    Add user
+  </button>
+</app-data-table>
+
+@if (editing(); as target) {
+  <app-user-form-modal
+    [user]="target === 'new' ? null : target"
+    [roles]="roles()"
+    (saved)="refresh()"
+    (closed)="editing.set(null)"
+  />
+}
+
+@if (deleting(); as user) {
+  <app-confirm-dialog
+    title="Delete user"
+    [message]="'Delete ' + user.username + '? This cannot be undone.'"
+    confirmLabel="Delete"
+    [danger]="true"
+    (confirmed)="confirmDelete(user)"
+    (cancelled)="deleting.set(null)"
+  />
+}

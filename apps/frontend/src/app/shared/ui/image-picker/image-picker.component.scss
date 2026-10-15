@@ -1,0 +1,59 @@
+.zone {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+  padding: 1rem;
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--adm-radius-card);
+  background: #f8fafc;
+  text-align: center;
+  transition: border-color 150ms ease, background-color 150ms ease;
+
+  &.dragging {
+    border-color: var(--adm-primary);
+    background: var(--adm-primary-bg);
+  }
+
+  &.disabled {
+    opacity: 0.6;
+  }
+}
+
+.preview {
+  max-width: 100%;
+  max-height: 180px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.prompt,
+.status {
+  margin: 0;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+.status.error {
+  color: var(--adm-danger);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.choose {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.file-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}

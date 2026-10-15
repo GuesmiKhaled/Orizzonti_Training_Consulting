@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
+import { UpdateCourseDto } from './dto/update-course.dto';
 
 @Injectable()
 export class CourseService {
@@ -38,7 +39,7 @@ export class CourseService {
     return this.courseRepository.save(course);
   }
 
-  async update(id: number, dto: Partial<CreateCourseDto>) {
+  async update(id: number, dto: UpdateCourseDto) {
     const course = await this.courseRepository.preload({ id, ...dto });
     if (!course) {
       throw new NotFoundException('Course not found');

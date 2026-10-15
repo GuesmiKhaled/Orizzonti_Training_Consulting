@@ -36,7 +36,7 @@
 ```json
 {
   "username": "admin",
-  "password": "admin123"
+  "password": "<your-password>"
 }
 ```
 
@@ -1211,3 +1211,32 @@ For API issues or questions:
 **Document Version**: 1.0  
 **Last Updated**: October 13, 2026  
 **Maintained By**: Devin AI
+
+## Languages: Phase 4 additions
+
+- `POST /languages/wizard` (`manage_languages`): creates a language with `levels[]`, each with optional `exams[]`, in one transaction. Body: `{ language: CreateLanguageDto, levels?: (CreateLanguageLevelDto & { exams?: CreateExamSessionDto[] })[] }`. Duplicate CEFR levels or invalid exam dates return 400 and nothing is saved.
+- `PATCH /languages/:id`, `PATCH .../levels/:levelId`, `PATCH .../exams/:sessionId` now validate against `PartialType` DTOs: unknown fields (for example `id`) return 400.
+- Exam responses from `GET /languages/:id/levels/:levelId/exams[/:sessionId]` include `level: { id, cefrLevel, ... }`.
+- `GET /languages` and `GET /languages/:id` now include `placesLeft`, `isBookable` and `bookingStatus` on the nested exam sessions.
+
+## Phase 5 additions
+
+- `POST /media/upload` (`manage_media`, `manage_blog` or `manage_courses`): multipart field `file`, up to 5 MB, JPEG/PNG/WebP/GIF checked by content. Returns `{ url }`. Files are served from `GET /uploads/<name>`.
+- `GET /site-settings` (public) and `PATCH /site-settings` (`manage_site_settings`): single-row site content. All fields are optional on PATCH; send `null` to clear one.
+- `GET /auth/users` accepts `roleId` and searches username, full name and email. User objects include `fullName`, `email`, `phone`; `POST`/`PATCH /auth/users` accept them (`null` clears on PATCH).
+- `GET /dashboard/stats` adds `adminUsersCount`, `requestsByCourse` (top 5) and `latestRequests` (applicant shown as "First L.").
+- Validated bodies: `POST /media`, `PATCH /media/:id`, `PATCH /blogs/:id`, `PATCH /courses/:id` and `PATCH /settings/mail` reject unknown fields (for example `id`) with 400.
+
+## Phase 6 additions
+
+- `POST /auth/change-password` (any signed-in account): body `{ currentPassword, newPassword }`, `newPassword` at least 12 characters. Returns `{ success: true }`. Wrong current password, reuse and a password containing the username return 400. It is rate limited to 5 per minute.
+- The login response and `GET /auth/profile` include `mustChangePassword`. While it is `true` every endpoint except `GET /auth/profile` and `POST /auth/change-password` returns `403 Password change required`.
+- `GET /blogs` and `GET /blogs/:id` return published posts only. `GET /blogs/manage` and `GET /blogs/manage/:id` (permission `manage_blog`) include drafts.
+- Rate limits return `429`: login 5/min, change-password 5/min, contact, course request and exam registration 5 per 10 min, other routes 600/min (per IP).
+
+## Phase 6 addendum
+
+- `GET /media` (public) now returns **active** slider images only, newest first, and feeds the home carousel. `GET /media/manage` (`manage_media`) returns every image including hidden ones.
+- Languages have an optional `imageUrl`: a path from the site image library (for example `/img/cat-1.jpg`). It is accepted on `POST /languages`, `PATCH /languages/:id` (`null` removes it) and inside `POST /languages/wizard`; anything else returns 400.
+- `GET /site-settings` / `PATCH /site-settings` gain `heroTitle` (max 150) and `heroSubtitle` (max 300); `null` clears them.
+- The Postman collection in `docs/postman` covers all 64 routes with saved examples for success and error responses.

@@ -11,10 +11,13 @@ services:
       DB_PORT: 1433
       DB_SYNCHRONIZE: "false"
       CORS_ORIGINS: http://localhost:8080
+      UPLOAD_DIR: /app/uploads
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
       - "${BACKEND_HOST_PORT:-5007}:5007"
+    volumes:
+      - uploads:/app/uploads
     restart: unless-stopped
 
   frontend:
@@ -28,3 +31,6 @@ services:
     ports:
       - "8080:80"
     restart: unless-stopped
+
+volumes:
+  uploads:

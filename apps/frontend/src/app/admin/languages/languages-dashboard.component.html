@@ -1,0 +1,67 @@
+<app-page-header
+  title="Languages"
+  subtitle="Each card opens the same 3-step wizard: language, levels, exam dates."
+>
+  <button actions type="button" class="btn btn-primary" (click)="open(null)">
+    Add language
+  </button>
+</app-page-header>
+
+@if (failed()) {
+  <p class="state error" role="alert">
+    Could not load languages.
+    <button type="button" class="link" (click)="load()">Retry</button>
+  </p>
+} @else if (loading()) {
+  <p class="state">Loading languages...</p>
+} @else {
+  <div class="cards">
+    @for (card of cards(); track card.id) {
+      <article class="card">
+        @if (card.imageUrl) {
+          <img class="thumb" [src]="card.imageUrl" alt="" loading="lazy" />
+        }
+        <div class="top">
+          <div>
+            <h2>{{ card.name }}</h2>
+            <p class="code">{{ card.code }}</p>
+          </div>
+          <app-status-tag
+            [label]="card.active ? 'Active' : 'Inactive'"
+            [tone]="card.active ? 'success' : 'neutral'"
+          />
+        </div>
+        <div class="stats">
+          <div class="stat levels">
+            <span>Levels</span><strong>{{ card.levelsCount }}</strong>
+          </div>
+          <div class="stat exams">
+            <span>Exams</span><strong>{{ card.examsCount }}</strong>
+          </div>
+        </div>
+        <p class="next">
+          Next exam:
+          {{ card.nextExam ? formatDate(card.nextExam) : 'None scheduled' }}
+        </p>
+        <div class="actions">
+          <button type="button" class="link" (click)="open(card.id)">Edit</button>
+          <button type="button" class="link" (click)="open(card.id, 1, true)">
+            + Level
+          </button>
+          <button type="button" class="link" (click)="open(card.id, 2)">+ Exam</button>
+        </div>
+      </article>
+    }
+    <button type="button" class="card add" (click)="open(null)">+ Add language</button>
+  </div>
+}
+
+@if (wizard(); as request) {
+  <app-language-wizard
+    [languageId]="request.languageId"
+    [initialStep]="request.step"
+    [addLevel]="request.addLevel"
+    (saved)="load()"
+    (closed)="wizard.set(null)"
+  />
+}

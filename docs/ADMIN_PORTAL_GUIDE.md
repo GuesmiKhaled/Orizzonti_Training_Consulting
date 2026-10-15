@@ -21,13 +21,14 @@
 ### Accessing the Admin Portal
 
 1. Navigate to `http://localhost:3000/login` (or your production URL)
-2. Enter your admin credentials:
-   - **Username**: `admin` (default)
-   - **Password**: `admin123` (default)
+2. Enter your admin credentials. There is no built-in password: the first `admin` account is created on the first backend start from the `DEFAULT_ADMIN_PASSWORD` environment variable (at least 12 characters, see `apps/backend/.env.example`).
 3. Click **Sign in**
 4. You will be redirected to the Admin Dashboard
 
 ### First Login
+
+- An account whose password was set by someone else (the seeded `admin`, any account created by an admin, or one whose password an admin reset) must choose its own password first. You are sent to **Choose a new password** and cannot use the admin area until you do: the server answers `403 Password change required` to every other request.
+- A new password needs at least 12 characters, must differ from the current one and must not contain your username.
 
 - Your profile information appears in the top-right corner
 - Your assigned role determines which sections you can access
@@ -604,3 +605,83 @@ For technical issues or feature requests:
 **Document Version**: 1.0  
 **Last Updated**: October 13, 2026  
 **Maintained By**: Devin AI
+
+## Frontend HTTP behaviour (Phase 1 foundations)
+
+- `authInterceptor` attaches `Authorization: Bearer <token>` (token key `orizzonti-admin-token`) only to requests to the API base URL. A 401 from the API clears the token and redirects to `/login`; a 401 from `POST /auth/login` is left to the login form.
+- `errorInterceptor` shows a toast for network errors, 5xx and 4xx (except 401). Callers that render their own inline error set `SKIP_ERROR_TOAST` in the request `HttpContext`.
+- `core/api/crud.service.ts` is the generic REST base (`list/get/create/update(PATCH)/remove`); entity services live in `core/api/entities/`. The legacy `OrizzontiApiService` is still used by the existing pages until they are migrated.
+- Admin design tokens are CSS variables (`--adm-*`) in `shared/styles/design-tokens.scss`. `base.scss` and `components.scss` are loaded globally, but their rules are nested under `.admin-theme` so they cannot restyle the public Bootstrap-based site.
+
+## Admin shell and routing (Phase 2)
+
+- `/admin` lazy-loads `src/app/admin/admin.routes.ts`: `AdminLayoutComponent` (sidebar, top bar, breadcrumbs) with one lazy child route per section. Each child has a `canMatch` `permissionGuard(...)`; users without the permission are sent to `/admin/forbidden`.
+- The sidebar is driven by `src/app/admin/nav.config.ts` and filtered by the signed-in user's permissions.
+- Sections not yet rebuilt show a placeholder with a link into the classic dashboard (`/admin/legacy?section=<name>`), which keeps working unchanged until every section is migrated.
+- The layout disables the public Bootstrap stylesheet (`#legacy-theme`) while the admin is open and restores it on leave.
+
+## Shared UI kit (Phase 3)
+
+Reusable standalone, OnPush components in `src/app/shared/ui/` (import from `shared/ui`). A live reference is at `/admin/ui-kit` (requires `manage_permissions`; not in the sidebar).
+
+| Component | Purpose |
+| --- | --- |
+| `app-data-table` | Search, sort, pagination, row actions, status-tag columns, `[table-toolbar]` slot, custom cells via `<ng-template appCell="key">`. `mode="client"` handles everything locally; `mode="server"` shows the given page, uses `total`, and the parent reacts to `queryChange`. |
+| `app-page-header`, `app-stat-card`, `app-status-tag`, `app-change-badge` | Headers (with `[actions]` slot), KPI cards, tone pills, New/Modified/Unchanged badges. |
+| `app-form-field` | Label, projected control, hint/error, amber `changed` state and `(was X)` hint. Control styles are the `.ui-field` rules in `components.scss`. |
+| `app-modal-shell`, `app-confirm-dialog` | Accessible dialog: focus moves in and is restored, Tab is trapped, Esc and backdrop close it, only the topmost stacked modal reacts to Esc. Render with `@if`. |
+| `app-stepper` | Numbered circles joined by a line (done / active / upcoming) with an optional per-step change count. |
+| `app-image-picker` | Form control (`formControl`) with drag and drop, type/size validation and preview. Pass `[uploader]` to upload; without it the value is a local data URL (preview only) until `POST /media/upload` exists (Phase 6). |
+
+## Languages (Phase 4)
+
+- `/admin/languages` shows one card per language (levels, exams, next exam). **Edit**, **+ Level** and **+ Exam** open the wizard in edit mode on the matching step; **Add language** opens it in create mode. `/admin/languages/levels` and `/admin/languages/exams` are tables across all languages; Edit opens the wizard, Delete asks first.
+- Create saves language, levels and exams in one transaction via `POST /languages/wizard`.
+- Edit sends only what changed, with `PATCH`, in dependency order (language, levels, exams). Each success becomes the new baseline, so after a failure a retry sends only what is left. Saved levels/exams are deleted from the Levels/Exams pages, not from the wizard.
+- Diff state lives in `LanguageWizardStore`: typed forms plus the last saved baseline; `diffValues` compares them. A new item counts as one change, a modified one as one per changed field.
+
+## Remaining sections (Phase 5)
+
+| Route | Page | Permission |
+| --- | --- | --- |
+| `/admin/overview` | Stat cards, requests per course, latest requests (names abbreviated) | `view_dashboard` |
+| `/admin/users` | Server-paged users table, search, role filter, add/edit modal | `manage_users` |
+| `/admin/users/roles` | Roles with grouped permissions; `super-admin` is shown as Locked | `manage_roles` |
+| `/admin/users/import` | Mass import: still a placeholder | `manage_users` |
+| `/admin/courses` | Courses table with level and start date, add/edit modal, image upload | `manage_courses` |
+| `/admin/blogs`, `/admin/blogs/new`, `/admin/blogs/:id` | Posts table and editor (publish toggle, cover upload) | `manage_blog` |
+| `/admin/media` | Slider image grid, add/edit modal with upload | `manage_media` |
+| `/admin/requests` | Course requests: review, accept, reject, delete | `manage_course_requests` |
+| `/admin/languages/registrations` | Exam registrations: filter, accept, reject, delete | `manage_course_requests` |
+| `/admin/settings/mail` | SMTP settings; the password is write-only | `manage_mail_settings` |
+| `/admin/settings/site` | Contact details, About text, highlights, next session date | `manage_site_settings` |
+
+- **New permission** `manage_site_settings` is created and given to `super-admin` when the backend starts. Restart the backend once, and other roles can be granted it on the roles page.
+- **Uploads**: `POST /media/upload` (field `file`, max 5 MB) accepts JPEG, PNG, WebP and GIF, identified by file content rather than name or MIME type. Files are stored under a random name in `UPLOAD_DIR` (default `./uploads`; a docker volume in `compose.yaml`) and served read-only from `/uploads`. `UPLOAD_PUBLIC_URL` overrides the origin used in the returned URL.
+- **Users** now have optional `fullName`, `email` and `phone`. The list masks phone numbers (`+216 ••• ••• 753`).
+- The public site does not read `GET /site-settings` yet; that is a later step.
+- The classic dashboard at `/admin/legacy` is kept until the new pages have been verified, then it can be deleted.
+
+## Security and operations (Phase 6)
+
+- **`JWT_SECRET` is required.** The backend refuses to start without it, or with a value shorter than 32 characters or a known placeholder. There is no fallback.
+- **`DEFAULT_ADMIN_PASSWORD`** is read only when the database has no accounts. If it is missing or shorter than 12 characters, no admin is created and a warning (never the password) is logged. An existing `admin` account that still uses the old default password is flagged to change it at its next login.
+- **Rate limits:** login and change-password allow 5 attempts per minute per IP; the public contact form, course request and exam registration allow 5 submissions per 10 minutes per IP; everything else 600 per minute. Behind a reverse proxy set `TRUST_PROXY=true` so the real client IP is used.
+- **Blogs:** the public `GET /blogs` and `GET /blogs/:id` return published posts only. The admin area uses `GET /blogs/manage` and `GET /blogs/manage/:id` (permission `manage_blog`).
+- **Site settings** are read by the public site: the header and footer contact details, social links, the About text (paragraphs separated by a blank line) and a highlights strip on the home page (students, courses, years, next session). Empty fields keep the original built-in text.
+- **Known limit:** a changed password does not invalidate access tokens already issued (they expire after 8 hours).
+
+## Tests
+
+- `cd apps/backend && npx jest` runs the API tests.
+- `cd apps/frontend && npx ng test --watch=false --browsers=ChromeHeadless` runs the unit and component specs, including the axe-core accessibility audits (`src/app/a11y.spec.ts`). Set `CHROME_BIN` if Chrome is not installed.
+- `cd apps/frontend && npm run e2e` runs the Playwright browser tests (`apps/frontend/e2e`). The API is mocked, so no backend or database is needed. It starts `ng serve` on port 4300 and uses Playwright's Chromium (`npx playwright install chromium`) or any Chromium-based browser through `E2E_BROWSER_PATH`.
+
+## Pictures, slider and a dynamic home page
+
+- **Language picture:** in **Languages > Add/Edit language**, step 1 has an **Image** field. *Choose image* opens a gallery of the pictures in the repository's `img/` folder (search by name, filter by folder). The choice is stored as a path such as `/img/italien/italian.jpg`, shows as a thumbnail on the language card, and replaces the placeholder photo on the home page subject cards. Only paths from the library are accepted by the API.
+- **New pictures in the library:** put the file in `img/`, then run `npm run images` in `apps/frontend` (it also runs automatically before `npm start`, `npm run build` and `npm test`, and in the Docker build). File names may use letters, digits, spaces, `-`, `_` and `.`; other names are skipped with a warning.
+- **Slider media drives the home carousel.** Every active image appears in the carousel, newest first; hidden images do not. With no active images the original five slides are shown. The carousel advances every 6 seconds, pauses on hover and keyboard focus, has a visible pause/play button, and does not move for visitors who prefer reduced motion.
+- **Home page text:** *Settings > Site settings* has a *Home page title* and *subtitle* for the hero. Empty fields keep the original text.
+- **Footer:** the "Our Courses" list shows your active languages (native name first) and links to each language page.
+- **Responsive:** public pages and the admin area are checked in a real browser at 360, 768 and 1280 px wide (no horizontal overflow, the admin sidebar becomes a drawer below 861 px, dialogs fit the screen). Wide tables scroll inside their own box.

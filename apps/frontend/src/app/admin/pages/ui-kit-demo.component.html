@@ -1,0 +1,89 @@
+<app-page-header title="UI kit" subtitle="Shared components used across the admin portal.">
+  <button actions type="button" class="btn btn-primary" (click)="modalOpen.set(true)">
+    Open modal
+  </button>
+</app-page-header>
+
+<section class="block stats">
+  <app-stat-card label="Courses" [value]="12" accent="dark" />
+  <app-stat-card label="Languages" [value]="5" accent="success" />
+  <app-stat-card label="Blog posts" [value]="18" accent="primary" />
+  <app-stat-card label="New requests" [value]="7" accent="danger" />
+  <app-stat-card label="Admin users" [value]="4" accent="warning" />
+</section>
+
+<section class="block">
+  <h2>Tags and change badges</h2>
+  <div class="row">
+    <app-status-tag label="Active" tone="success" />
+    <app-status-tag label="Pending" tone="warning" />
+    <app-status-tag label="Rejected" tone="danger" />
+    <app-status-tag label="Info" tone="info" />
+    <app-status-tag label="Locked" />
+    <app-change-badge state="new" />
+    <app-change-badge state="modified" />
+    <app-change-badge state="unchanged" />
+  </div>
+</section>
+
+<section class="block">
+  <h2>Stepper</h2>
+  <app-stepper [steps]="steps" [current]="step()" (stepSelected)="step.set($event)" />
+</section>
+
+<section class="block form">
+  <h2>Form fields</h2>
+  <app-form-field label="Course hours" [required]="true" hint="Total hours">
+    <input class="form-input" type="number" />
+  </app-form-field>
+  <app-form-field
+    label="Price"
+    [required]="true"
+    [changed]="true"
+    previousValue="$500.00"
+  >
+    <input class="form-input" value="550" />
+  </app-form-field>
+  <app-form-field label="Email" error="Enter a valid email address.">
+    <input class="form-input" value="nope" />
+  </app-form-field>
+  <app-image-picker [formControl]="image" />
+</section>
+
+<section class="block">
+  <app-data-table
+    title="Users"
+    searchPlaceholder="Search name or role"
+    [rows]="users()"
+    [columns]="columns"
+    [actions]="actions"
+    [rowId]="rowId"
+    [pageSize]="3"
+    (actionTriggered)="onAction($event)"
+  />
+</section>
+
+@if (modalOpen()) {
+  <app-modal-shell title="Example modal" (closed)="modalOpen.set(false)">
+    <app-form-field label="Name"><input class="form-input" /></app-form-field>
+    <ng-container modal-footer>
+      <button type="button" class="btn btn-secondary" (click)="modalOpen.set(false)">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-primary" (click)="modalOpen.set(false)">
+        Save
+      </button>
+    </ng-container>
+  </app-modal-shell>
+}
+
+@if (pendingDelete(); as target) {
+  <app-confirm-dialog
+    title="Delete user"
+    [message]="'Delete ' + target.name + '? This cannot be undone.'"
+    confirmLabel="Delete"
+    [danger]="true"
+    (confirmed)="confirmDelete()"
+    (cancelled)="pendingDelete.set(null)"
+  />
+}

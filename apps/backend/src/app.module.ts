@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -11,6 +12,8 @@ import { LanguageModule } from './language/language.module';
 import { SettingsModule } from './settings/settings.module';
 import { MediaModule } from './media/media.module';
 import { CourseRequestModule } from './course-request/course-request.module';
+import { SiteSettingsModule } from './site-settings/site-settings.module';
+import { SiteSettings } from './site-settings/site-settings.entity';
 import { AdminUser } from './auth/admin-user.entity';
 import { Permission } from './auth/permission.entity';
 import { Role } from './auth/role.entity';
@@ -25,6 +28,7 @@ import { SliderMedia } from './media/media.entity';
 import { CourseRequest } from './course-request/course-request.entity';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from './auth/guards/permissions.guard';
+import { GLOBAL_THROTTLE } from './throttling';
 
 const databaseConfig = {
   host: process.env.DB_HOST ?? 'localhost',
@@ -56,6 +60,7 @@ console.info(
         MailSettings,
         SliderMedia,
         CourseRequest,
+        SiteSettings,
       ],
       synchronize: process.env.DB_SYNCHRONIZE === 'true',
       logging: false,
@@ -64,12 +69,14 @@ console.info(
         trustServerCertificate: true,
       },
     }),
+    ThrottlerModule.forRoot([GLOBAL_THROTTLE]),
     TypeOrmModule.forFeature([
       Blog,
       Course,
       Language,
       SliderMedia,
       CourseRequest,
+      AdminUser,
     ]),
     AuthModule,
     ContactModule,
@@ -79,10 +86,12 @@ console.info(
     SettingsModule,
     MediaModule,
     CourseRequestModule,
+    SiteSettingsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
   ],

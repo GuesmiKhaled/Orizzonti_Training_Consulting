@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MailSettings } from './mail-settings.entity';
+import { UpdateMailSettingsDto } from './dto/update-mail-settings.dto';
 
 @Injectable()
 export class SettingsService {
@@ -14,7 +15,7 @@ export class SettingsService {
     return this.toSafeSettings(await this.getOrCreateMailSettings());
   }
 
-  async updateMailSettings(dto: Partial<MailSettings>) {
+  async updateMailSettings(dto: UpdateMailSettingsDto) {
     const settings = await this.getOrCreateMailSettings();
     const values = { ...dto };
     if (!values.password) delete values.password;

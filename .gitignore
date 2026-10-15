@@ -242,3 +242,10 @@ x86/
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# Uploaded images (local development)
+apps/backend/uploads/
+
+# Playwright
+apps/frontend/test-results/
+apps/frontend/playwright-report/

@@ -1,0 +1,45 @@
+<app-page-header
+  title="Mail settings"
+  subtitle="SMTP account used for contact messages and exam registration emails."
+/>
+
+@if (failed()) {
+  <p class="state error" role="alert">Could not load the mail settings.</p>
+} @else if (loading()) {
+  <p class="state">Loading mail settings...</p>
+} @else {
+  <form class="panel" [formGroup]="form" (ngSubmit)="save()">
+    <header class="panel-header">SMTP server</header>
+    <div class="panel-body">
+      <div class="grid">
+        <app-form-field label="SMTP host" [required]="true" [error]="error('host')">
+          <input formControlName="host" autocomplete="off" />
+        </app-form-field>
+        <app-form-field label="Port" [required]="true" [error]="error('port')">
+          <input formControlName="port" inputmode="numeric" />
+        </app-form-field>
+        <app-form-field label="Username">
+          <input formControlName="username" autocomplete="off" />
+        </app-form-field>
+        <app-form-field
+          label="Password"
+          [hint]="passwordConfigured() ? 'A password is saved. Leave empty to keep it.' : 'No password saved yet.'"
+        >
+          <input type="password" formControlName="password" autocomplete="new-password" />
+        </app-form-field>
+        <app-form-field label="From address" [required]="true" [error]="error('fromAddress')">
+          <input formControlName="fromAddress" autocomplete="off" />
+        </app-form-field>
+        <label class="check">
+          <input type="checkbox" formControlName="secure" />
+          Use a secure connection (TLS)
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Saving...' : 'Save mail settings' }}
+        </button>
+      </div>
+    </div>
+  </form>
+}

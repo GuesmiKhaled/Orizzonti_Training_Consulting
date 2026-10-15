@@ -1,0 +1,14 @@
+.cover {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 420px;
+}
+
+.cover-label {
+  color: #374151;
+  font-size: 0.8rem;
+}
+
+textarea {
+  resize: vertical;
+}

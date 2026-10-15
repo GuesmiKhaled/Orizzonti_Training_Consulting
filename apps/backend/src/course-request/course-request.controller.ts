@@ -8,6 +8,8 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
+import { PUBLIC_FORM_THROTTLE } from '../throttling';
 import { CourseRequestService } from './course-request.service';
 import { CreateCourseRequestDto } from './dto/create-course-request.dto';
 import { UpdateCourseRequestDto } from './dto/update-course-request.dto';
@@ -32,6 +34,7 @@ export class CourseRequestController {
 
   @Post()
   @Public()
+  @Throttle(PUBLIC_FORM_THROTTLE)
   create(@Body() dto: CreateCourseRequestDto) {
     return this.courseRequestService.create(dto);
   }

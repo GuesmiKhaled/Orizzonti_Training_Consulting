@@ -1,0 +1,143 @@
+:root {
+  --orizzonti-primary: #ff6600;
+  --orizzonti-dark: #44425a;
+  --orizzonti-secondary: #f2f1f8;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  font-family: "Poppins", sans-serif;
+}
+
+button,
+select,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid #ff6600;
+  outline-offset: 3px;
+}
+
+.site-logo {
+  display: block;
+  height: auto;
+}
+
+.site-logo.desktop-logo {
+  width: 88%;
+}
+
+.site-logo.mobile-logo {
+  width: 50%;
+  min-width: 135px;
+}
+
+.legacy-language-menu {
+  position: relative;
+  z-index: 20;
+  width: 150px;
+  background: #444;
+}
+
+.language-trigger,
+.legacy-language-menu li button {
+  display: block;
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  padding: 9px 10px;
+  background: #333;
+  color: #fff;
+  font:
+    11px Verdana,
+    sans-serif;
+  text-align: center;
+  cursor: pointer;
+}
+
+.legacy-language-menu li button {
+  background: #444;
+}
+
+.legacy-language-menu li button:hover,
+.legacy-language-menu li button.active {
+  color: #cff;
+  text-decoration: underline;
+}
+
+#subMenu {
+  position: absolute;
+  top: 34px;
+  left: 0;
+  width: 150px;
+  height: auto;
+  margin-top: 0;
+  z-index: 21;
+  background: #444;
+}
+
+#subMenu[hidden] {
+  display: none !important;
+}
+
+#subMenu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer .btn-square {
+  width: 38px;
+  height: 38px;
+  display: inline-grid;
+  place-items: center;
+}
+
+.site-navigation {
+  z-index: 10;
+}
+
+.site-navigation .navbar-collapse {
+  display: none;
+}
+
+.site-navigation .navbar-collapse.show {
+  display: block;
+}
+
+.site-footer a {
+  color: #fff;
+}
+
+.site-footer a:hover {
+  color: var(--orizzonti-primary);
+}
+
+.legacy-page {
+  min-height: 55vh;
+  padding: 4rem 0;
+}
+
+.legacy-page h1,
+.legacy-page h2,
+.legacy-page h3 {
+  color: var(--orizzonti-dark);
+}
+
+@media (min-width: 992px) {
+  .site-navigation .navbar-collapse {
+    display: flex;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .legacy-page {
+    padding: 2.5rem 0;
+  }
+}

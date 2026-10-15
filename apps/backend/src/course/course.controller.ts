@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
+import { UpdateCourseDto } from './dto/update-course.dto';
 import { Public } from '../auth/decorators/public.decorator';
 import { RequirePermission } from '../auth/decorators/require-permission.decorator';
 
@@ -45,7 +46,7 @@ export class CourseController {
   @RequirePermission('manage_courses')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: Partial<CreateCourseDto>,
+    @Body() dto: UpdateCourseDto,
   ) {
     return this.courseService.update(id, dto);
   }

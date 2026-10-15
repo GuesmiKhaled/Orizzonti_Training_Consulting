@@ -6,7 +6,7 @@ A website for an education center
 
 Prerequisites: Docker Desktop with Docker Compose enabled, and the configured SQL Server database reachable from the host on port 1433.
 
-1. Configure `apps/backend/.env` with database credentials and a long random `JWT_SECRET`.
+1. Configure `apps/backend/.env` (see `apps/backend/.env.example`) with database credentials, a long random `JWT_SECRET` (the API will not start without one) and, for the very first start, a `DEFAULT_ADMIN_PASSWORD` of at least 12 characters. The `admin` account created from it must choose a new password at its first login.
 2. Optionally set `BACKEND_HOST_PORT` in the root `.env` file to change the published backend port (default: `5007`). The frontend API URL follows this port automatically; set `API_BASE_URL` explicitly only when the browser-visible backend URL differs.
 3. In Docker Desktop, ensure the SQL Server instance accepts TCP connections from Docker Desktop and that `orizzontdb` exists.
 4. From the repository root, run `docker compose up --build`.

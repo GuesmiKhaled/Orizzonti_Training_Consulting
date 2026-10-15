@@ -1,0 +1,83 @@
+<app-modal-shell
+  [title]="title()"
+  size="lg"
+  [closeOnBackdrop]="false"
+  (closed)="requestClose()"
+>
+  @if (loading()) {
+    <p class="note">Loading language...</p>
+  } @else if (loadFailed()) {
+    <p class="note error" role="alert">Could not load this language.</p>
+  } @else {
+    <app-stepper
+      [steps]="steps()"
+      [current]="store.step()"
+      (stepSelected)="goTo($event)"
+    />
+    <p class="intro">
+      {{
+        isEdit()
+          ? 'Only the fields you change are saved.'
+          : 'Add the language, then its levels and exam dates. Everything is saved together at the end.'
+      }}
+    </p>
+
+    @switch (store.step()) {
+      @case (0) {
+        <app-language-step />
+      }
+      @case (1) {
+        <app-levels-step />
+      }
+      @default {
+        <app-exams-step />
+      }
+    }
+  }
+
+  <ng-container modal-footer>
+    <span class="summary">{{ footerText() }}</span>
+    @if (isEdit()) {
+      <button type="button" class="btn btn-ghost" [disabled]="saving()" (click)="requestClose()">
+        Discard
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="saving() || !store.canSave()"
+        (click)="save()"
+      >
+        {{ saving() ? 'Saving...' : saveLabel() }}
+      </button>
+    } @else {
+      @if (store.step() > 0) {
+        <button type="button" class="btn btn-ghost" [disabled]="saving()" (click)="back()">
+          Back
+        </button>
+      }
+      @if (store.step() < lastStep) {
+        <button type="button" class="btn btn-primary" (click)="next()">Next</button>
+      } @else {
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="saving()"
+          (click)="save()"
+        >
+          {{ saving() ? 'Saving...' : 'Create language' }}
+        </button>
+      }
+    }
+  </ng-container>
+</app-modal-shell>
+
+@if (confirmingDiscard()) {
+  <app-confirm-dialog
+    title="Discard changes?"
+    message="You have unsaved changes. They will be lost."
+    confirmLabel="Discard"
+    [danger]="true"
+    (confirmed)="discard()"
+    (cancelled)="confirmingDiscard.set(false)"
+  />
+}

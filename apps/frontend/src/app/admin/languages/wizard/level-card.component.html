@@ -1,0 +1,67 @@
+@let form = entry().form;
+<article class="card" [class.modified]="state() === 'modified'">
+  @if (!expanded()) {
+    <div class="head">
+      <strong>{{ summary() }}</strong>
+      <app-change-badge [state]="state()" />
+      <button type="button" class="link" (click)="open()">Edit</button>
+    </div>
+  } @else {
+    <div class="head">
+      <strong>
+        {{ form.controls.cefrLevel.value }} ·
+        {{ form.controls.cefrLevel.value | cefrLevelName }}
+      </strong>
+      <app-change-badge [state]="state()" />
+      @if (entry().baseline) {
+        <button type="button" class="link" (click)="reset()">Reset</button>
+      } @else {
+        <button
+          type="button"
+          class="link danger"
+          (click)="store.removeNewLevel(entry().key)"
+        >
+          Remove
+        </button>
+      }
+    </div>
+
+    <div class="grid">
+      <app-form-field
+        label="Level"
+        [required]="true"
+        [changed]="changed().has('cefrLevel')"
+        [previousValue]="was('cefrLevel')"
+        [error]="duplicate() ? 'This level already exists' : ''"
+      >
+        <select [formControl]="form.controls.cefrLevel">
+          @for (level of levels; track level) {
+            <option [value]="level">{{ level }} - {{ level | cefrLevelName }}</option>
+          }
+        </select>
+      </app-form-field>
+      <app-form-field
+        label="Course hours"
+        [required]="true"
+        [changed]="changed().has('courseHours')"
+        [previousValue]="was('courseHours')"
+        [error]="error('courseHours')"
+      >
+        <input [formControl]="form.controls.courseHours" inputmode="numeric" />
+      </app-form-field>
+      <app-form-field
+        label="Price"
+        [required]="true"
+        [changed]="changed().has('price')"
+        [previousValue]="was('price')"
+        [error]="error('price')"
+      >
+        <input [formControl]="form.controls.price" inputmode="decimal" />
+      </app-form-field>
+      <label class="check">
+        <input type="checkbox" [formControl]="form.controls.isActive" />
+        Active (shown on the public site)
+      </label>
+    </div>
+  }
+</article>

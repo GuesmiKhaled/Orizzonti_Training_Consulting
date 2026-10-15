@@ -26,4 +26,10 @@ export class ListAdminUsersDto {
   @IsString()
   @MaxLength(80)
   search?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  roleId?: number;
 }

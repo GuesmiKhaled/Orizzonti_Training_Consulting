@@ -1,0 +1,59 @@
+<app-page-header title="Overview" subtitle="A summary of the website content and incoming requests." />
+
+@if (stats(); as data) {
+  <section class="stats" aria-label="Key figures">
+    <app-stat-card label="Courses" [value]="data.coursesCount" accent="dark" />
+    <app-stat-card label="Languages" [value]="data.languagesCount" accent="success" />
+    <app-stat-card label="Blog posts" [value]="data.blogsCount" accent="primary" />
+    <app-stat-card label="New requests" [value]="data.newCourseRequestsCount" accent="danger" />
+    <app-stat-card label="Admin users" [value]="data.adminUsersCount ?? 0" accent="warning" />
+  </section>
+
+  <div class="columns">
+    <section class="panel">
+      <header class="panel-header">Course requests per course</header>
+      <div class="panel-body">
+        @for (bar of bars(); track bar.name) {
+          <div class="bar-row">
+            <span class="bar-label">{{ bar.name }}</span>
+            <div class="bar-track" aria-hidden="true">
+              <div class="bar" [style.width.%]="bar.percent"></div>
+            </div>
+            <strong>{{ bar.count }}</strong>
+          </div>
+        } @empty {
+          <p class="state">No requests yet.</p>
+        }
+      </div>
+    </section>
+
+    <section class="panel">
+      <header class="panel-header">Latest requests</header>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th scope="col">Name</th><th scope="col">Course</th><th scope="col">Status</th></tr>
+          </thead>
+          <tbody>
+            @for (request of data.latestRequests ?? []; track request.id) {
+              <tr>
+                <td>{{ request.applicant }}</td>
+                <td>{{ request.courseName }}</td>
+                <td><app-status-tag [label]="request.status" [tone]="tone(request.status)" /></td>
+              </tr>
+            } @empty {
+              <tr><td colspan="3" class="state empty">No requests yet.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+} @else if (failed()) {
+  <p class="state error" role="alert">
+    Could not load the dashboard.
+    <button type="button" class="link" (click)="load()">Retry</button>
+  </p>
+} @else {
+  <p class="state">Loading dashboard...</p>
+}

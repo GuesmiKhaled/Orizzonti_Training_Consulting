@@ -1,0 +1,731 @@
+// Component Styles for Orizzonti Admin Portal
+@use './design-tokens' as *;
+
+.admin-theme {
+// ============================================================================
+// BUTTONS
+// ============================================================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: $button-height;
+  padding: $button-padding-y $button-padding-x;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  border-radius: $button-radius;
+  transition: all $transition-fast;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+  gap: $space-2;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+
+  // Sizes
+  &.btn-sm {
+    height: $button-height-sm;
+    padding: 4px 12px;
+    font-size: $font-size-xs;
+  }
+
+  &.btn-lg {
+    height: $button-height-lg;
+    padding: 12px 24px;
+    font-size: $font-size-base;
+  }
+
+  // Variants
+  &.btn-primary {
+    background-color: $color-primary;
+    color: $color-white;
+
+    &:hover:not(:disabled) {
+      background-color: $color-primary-dark;
+    }
+
+    &:active:not(:disabled) {
+      background-color: $color-primary-dark;
+      transform: scale(0.98);
+    }
+  }
+
+  &.btn-secondary {
+    background-color: $color-secondary;
+    color: $color-white;
+
+    &:hover:not(:disabled) {
+      background-color: $color-secondary-dark;
+    }
+
+    &:active:not(:disabled) {
+      background-color: $color-secondary-dark;
+      transform: scale(0.98);
+    }
+  }
+
+  &.btn-success {
+    background-color: $color-success;
+    color: $color-white;
+
+    &:hover:not(:disabled) {
+      background-color: $color-success-dark;
+    }
+
+    &:active:not(:disabled) {
+      background-color: $color-success-dark;
+      transform: scale(0.98);
+    }
+  }
+
+  &.btn-danger {
+    background-color: $color-error;
+    color: $color-white;
+
+    &:hover:not(:disabled) {
+      background-color: $color-error-dark;
+    }
+
+    &:active:not(:disabled) {
+      background-color: $color-error-dark;
+      transform: scale(0.98);
+    }
+  }
+
+  &.btn-ghost {
+    background-color: transparent;
+    color: $color-primary;
+    border: 1px solid $color-gray-300;
+
+    &:hover:not(:disabled) {
+      background-color: $color-gray-50;
+      border-color: $color-gray-400;
+    }
+
+    &:active:not(:disabled) {
+      background-color: $color-gray-100;
+    }
+  }
+
+  &.btn-ghost-danger {
+    background-color: transparent;
+    color: $color-error;
+    border: 1px solid $color-error;
+
+    &:hover:not(:disabled) {
+      background-color: $color-error-light;
+    }
+
+    &:active:not(:disabled) {
+      background-color: $color-error-light;
+    }
+  }
+
+  // Loading state
+  &.btn-loading {
+    position: relative;
+    color: transparent;
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      top: 50%;
+      left: 50%;
+      margin-left: -8px;
+      margin-top: -8px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: $color-white;
+      animation: spin 0.6s linear infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ============================================================================
+// FORMS
+// ============================================================================
+
+.form-group {
+  margin-bottom: $space-6;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.form-label {
+  display: block;
+  font-weight: $font-weight-medium;
+  color: $color-gray-900;
+  margin-bottom: $space-2;
+  font-size: $font-size-sm;
+
+  .required {
+    color: $color-error;
+    margin-left: $space-1;
+  }
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: $space-2 $space-3;
+  border: 1px solid $input-border-color;
+  border-radius: $radius-md;
+  background-color: $input-bg-color;
+  color: $input-text-color;
+  font-size: $font-size-sm;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+
+  &::placeholder {
+    color: $input-text-color-placeholder;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #{$color-primary} 10%, transparent);
+  }
+
+  &:disabled {
+    background-color: $input-bg-color-disabled;
+    color: $color-gray-500;
+    cursor: not-allowed;
+  }
+
+  &.error {
+    border-color: $color-error;
+
+    &:focus {
+      box-shadow: 0 0 0 3px color-mix(in srgb, #{$color-error} 10%, transparent);
+    }
+  }
+}
+
+.form-textarea {
+  height: auto;
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right $space-2 center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: $space-8;
+}
+
+.form-error {
+  color: $color-error;
+  font-size: $font-size-xs;
+  margin-top: $space-1;
+  display: block;
+}
+
+.form-help {
+  color: $color-gray-600;
+  font-size: $font-size-xs;
+  margin-top: $space-1;
+  display: block;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: $space-6;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $space-6;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-6;
+
+  @media (max-width: $breakpoint-lg) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: $space-3;
+  margin-top: $space-8;
+  padding-top: $space-6;
+  border-top: 1px solid $color-gray-200;
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}
+
+// ============================================================================
+// CARDS
+// ============================================================================
+
+.card {
+  background-color: $card-bg;
+  border: 1px solid $card-border-color;
+  border-radius: $card-border-radius;
+  box-shadow: $card-shadow;
+  padding: $card-padding;
+  transition: box-shadow $transition-fast;
+
+  &:hover {
+    box-shadow: $shadow-md;
+  }
+
+  .card-header {
+    margin-bottom: $space-6;
+    padding-bottom: $space-4;
+    border-bottom: 1px solid $color-gray-200;
+
+    h2, h3 {
+      margin: 0;
+    }
+  }
+
+  .card-body {
+    margin-bottom: $space-6;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .card-footer {
+    padding-top: $space-4;
+    border-top: 1px solid $color-gray-200;
+  }
+}
+
+// ============================================================================
+// TABLES
+// ============================================================================
+
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid $table-border-color;
+  border-radius: $radius-lg;
+  background-color: $color-white;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+
+  thead {
+    background-color: $table-header-bg;
+    border-bottom: 1px solid $table-border-color;
+  }
+
+  th {
+    padding: $space-3 $space-4;
+    text-align: left;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    color: $color-gray-700;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: $space-3 $space-4;
+    border-bottom: 1px solid $table-border-color;
+    font-size: $font-size-sm;
+  }
+
+  tbody tr {
+    transition: background-color $transition-fast;
+
+    &:hover {
+      background-color: $table-row-hover-bg;
+    }
+
+    &:nth-child(even) {
+      background-color: $table-row-stripe-bg;
+    }
+  }
+
+  .table-actions {
+    display: flex;
+    gap: $space-2;
+    white-space: nowrap;
+
+    .btn {
+      height: 32px;
+      padding: 4px 12px;
+      font-size: $font-size-xs;
+    }
+  }
+}
+
+.table-empty {
+  padding: $space-12 $space-6;
+  text-align: center;
+  color: $color-gray-500;
+}
+
+// ============================================================================
+// ALERTS & MESSAGES
+// ============================================================================
+
+.alert {
+  padding: $space-4;
+  border-radius: $radius-md;
+  border-left: 4px solid;
+  margin-bottom: $space-4;
+
+  &.alert-success {
+    background-color: $color-success-light;
+    border-color: $color-success;
+    color: $color-success-dark;
+  }
+
+  &.alert-error {
+    background-color: $color-error-light;
+    border-color: $color-error;
+    color: $color-error-dark;
+  }
+
+  &.alert-warning {
+    background-color: $color-warning-light;
+    border-color: $color-warning;
+    color: $color-warning-dark;
+  }
+
+  &.alert-info {
+    background-color: $color-info-light;
+    border-color: $color-info;
+    color: $color-info-dark;
+  }
+}
+
+// ============================================================================
+// BADGES
+// ============================================================================
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 $space-2;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+
+  &.badge-success {
+    background-color: $color-success-light;
+    color: $color-success-dark;
+  }
+
+  &.badge-error {
+    background-color: $color-error-light;
+    color: $color-error-dark;
+  }
+
+  &.badge-warning {
+    background-color: $color-warning-light;
+    color: $color-warning-dark;
+  }
+
+  &.badge-info {
+    background-color: $color-info-light;
+    color: $color-info-dark;
+  }
+
+  &.badge-gray {
+    background-color: $color-gray-200;
+    color: $color-gray-700;
+  }
+}
+
+// ============================================================================
+// LOADING & EMPTY STATES
+// ============================================================================
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid color-mix(in srgb, #{$color-primary} 20%, transparent);
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+.empty-state {
+  padding: $space-12 $space-6;
+  text-align: center;
+  color: $color-gray-500;
+
+  svg {
+    width: 64px;
+    height: 64px;
+    margin-bottom: $space-4;
+    opacity: 0.5;
+  }
+
+  p {
+    margin-bottom: $space-4;
+  }
+}
+
+// ============================================================================
+// MODALS & DIALOGS
+// ============================================================================
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: $modal-backdrop-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-modal-backdrop;
+}
+
+.modal {
+  background-color: $modal-bg;
+  border-radius: $modal-border-radius;
+  box-shadow: $modal-shadow;
+  max-width: $modal-max-width;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: $z-modal;
+
+  .modal-header {
+    padding: $space-6;
+    border-bottom: 1px solid $color-gray-200;
+
+    h2 {
+      margin: 0;
+    }
+  }
+
+  .modal-body {
+    padding: $space-6;
+  }
+
+  .modal-footer {
+    padding: $space-6;
+    border-top: 1px solid $color-gray-200;
+    display: flex;
+    gap: $space-3;
+    justify-content: flex-end;
+
+    .btn {
+      min-width: 100px;
+    }
+  }
+}
+
+// ============================================================================
+// PAGINATION
+// ============================================================================
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  margin-top: $space-6;
+  padding-top: $space-6;
+  border-top: 1px solid $color-gray-200;
+
+  .pagination-info {
+    font-size: $font-size-sm;
+    color: $color-gray-600;
+    margin-right: auto;
+  }
+
+  .btn {
+    height: 36px;
+    padding: 0 $space-3;
+    font-size: $font-size-sm;
+  }
+}
+
+// ============================================================================
+// BREADCRUMBS
+// ============================================================================
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $font-size-sm;
+  margin-bottom: $space-4;
+
+  a {
+    color: $color-primary;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .breadcrumb-separator {
+    color: $color-gray-400;
+  }
+
+  .breadcrumb-current {
+    color: $color-gray-600;
+  }
+}
+
+// ============================================================================
+// TAGS & PILLS
+// ============================================================================
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 $space-3;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  background-color: $color-gray-200;
+  color: $color-gray-700;
+  gap: $space-1;
+
+  &.tag-primary {
+    background-color: $color-primary-bg;
+    color: $color-primary-dark;
+  }
+
+  &.tag-success {
+    background-color: $color-success-light;
+    color: $color-success-dark;
+  }
+
+  &.tag-error {
+    background-color: $color-error-light;
+    color: $color-error-dark;
+  }
+
+  .tag-close {
+    cursor: pointer;
+    margin-left: $space-1;
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+}
+
+// ============================================================================
+// UI KIT: FORM FIELD (app-form-field)
+// ============================================================================
+
+.ui-field {
+  display: grid;
+  gap: $space-1;
+  margin: 0;
+  color: $color-gray-700;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-normal;
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: $space-2 $space-3;
+    border: 1px solid $input-border-color;
+    border-radius: $radius-md;
+    background-color: $input-bg-color;
+    color: $input-text-color;
+    font-size: $font-size-sm;
+    transition: border-color $transition-fast, background-color $transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px color-mix(in srgb, #{$color-primary} 10%, transparent);
+    }
+  }
+
+  &__required {
+    margin-left: $space-1;
+    color: $color-error;
+  }
+
+  &__was {
+    margin-left: $space-1;
+    color: $color-gray-500;
+  }
+
+  &--changed {
+    input,
+    select,
+    textarea {
+      border-color: $color-warning;
+      background-color: $color-warning-light;
+    }
+  }
+
+  &--invalid {
+    input,
+    select,
+    textarea {
+      border-color: $color-error;
+    }
+  }
+
+}
+
+.ui-field__error,
+.ui-field__hint {
+  margin: $space-1 0 0;
+  font-size: $font-size-xs;
+}
+
+.ui-field__error {
+  color: $color-error;
+}
+
+.ui-field__hint {
+  color: $color-gray-500;
+}
+}

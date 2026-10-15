@@ -1,4 +1,11 @@
-import { IsBoolean, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateBlogDto {
   @IsNotEmpty()
@@ -19,6 +26,8 @@ export class CreateBlogDto {
   slug?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(255)
   imageUrl?: string;
 
   @IsOptional()

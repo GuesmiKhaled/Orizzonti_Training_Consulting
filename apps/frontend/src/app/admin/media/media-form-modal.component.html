@@ -1,0 +1,33 @@
+<app-modal-shell
+  [title]="item() ? 'Edit slider image' : 'Add slider image'"
+  [closeOnBackdrop]="false"
+  (closed)="closed.emit()"
+>
+  <form class="panel-body" [formGroup]="form" (ngSubmit)="save()" id="media-form">
+    <app-form-field label="Title" [required]="true" [error]="titleError()">
+      <input formControlName="title" />
+    </app-form-field>
+    <app-form-field label="Alt text" hint="Describes the image for screen readers">
+      <input formControlName="altText" />
+    </app-form-field>
+    <div>
+      <app-image-picker formControlName="imageUrl" [uploader]="uploader" />
+      @if (imageError(); as message) {
+        <p class="state error" role="alert">{{ message }}</p>
+      }
+    </div>
+    <label class="check">
+      <input type="checkbox" formControlName="isActive" />
+      Visible in the slider
+    </label>
+  </form>
+
+  <ng-container modal-footer>
+    <button type="button" class="btn btn-ghost" [disabled]="saving()" (click)="closed.emit()">
+      Cancel
+    </button>
+    <button type="submit" form="media-form" class="btn btn-primary" [disabled]="saving()">
+      {{ saving() ? 'Saving...' : item() ? 'Save image' : 'Add image' }}
+    </button>
+  </ng-container>
+</app-modal-shell>
