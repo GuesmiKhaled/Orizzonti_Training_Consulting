@@ -12,7 +12,7 @@ export class CreateMediaDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  title: string;
+  title!: string;
 
   /** An http(s) URL or a site-relative path such as /uploads/x.png. */
   @IsString()
@@ -20,7 +20,7 @@ export class CreateMediaDto {
   @Matches(/^(https?:\/\/|\/)\S+$/, {
     message: 'imageUrl must be an http(s) URL or an absolute path',
   })
-  imageUrl: string;
+  imageUrl!: string;
 
   @IsOptional()
   @IsString()
