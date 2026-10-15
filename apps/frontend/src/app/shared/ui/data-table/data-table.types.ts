@@ -13,6 +13,8 @@ export interface TableColumn<T> {
   readonly header: string;
   readonly sortable?: boolean;
   readonly value?: (row: T) => CellValue;
+  /** Value used for sorting when it differs from what is displayed (e.g. a timestamp). */
+  readonly sortValue?: (row: T) => CellValue;
   /** Renders the cell as a status pill (typed alternative to a custom template). */
   readonly tag?: (row: T) => TagCell;
 }
@@ -51,6 +53,13 @@ export function readCell<T extends object>(
     return raw;
   }
   return typeof raw === 'string' || typeof raw === 'number' ? raw : String(raw);
+}
+
+export function sortCell<T extends object>(
+  row: T,
+  column: TableColumn<T>,
+): CellValue {
+  return column.sortValue ? column.sortValue(row) : readCell(row, column);
 }
 
 export function compareCells(a: CellValue, b: CellValue): number {

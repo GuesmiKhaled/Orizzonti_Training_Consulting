@@ -111,6 +111,20 @@ describe('DataTableComponent', () => {
       expect(root.querySelector('th')?.getAttribute('aria-sort')).toBe('descending');
     });
 
+    it('sorts by sortValue when it differs from the displayed value', () => {
+      const byAge: TableColumn<Row> = {
+        key: 'label',
+        header: 'Label',
+        sortable: true,
+        value: (r) => `#${r.id}`,
+        sortValue: (r) => -r.id,
+      };
+      setup({ columns: [byAge] });
+      header('Label')?.click();
+      fixture.detectChanges();
+      expect(names()).toEqual(['#4', '#3', '#2', '#1']);
+    });
+
     it('does not offer sorting on non-sortable columns', () => {
       setup();
       expect(header('Role')).toBeUndefined();

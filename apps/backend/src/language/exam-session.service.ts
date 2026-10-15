@@ -9,6 +9,7 @@ import { ExamSession } from './exam-session.entity';
 import { LanguageLevel } from './language-level.entity';
 import { CreateExamSessionDto } from './dto/create-exam-session.dto';
 import { UpdateExamSessionDto } from './dto/update-exam-session.dto';
+import { assertExamDates, buildExamFields } from './exam-dates';
 
 @Injectable()
 export class ExamSessionService {
@@ -31,6 +32,8 @@ export class ExamSessionService {
 
     return this.examSessionRepository.find({
       where: { languageLevelId: levelId },
+      relations: { level: true },
+      loadEagerRelations: false,
       order: { examDate: 'ASC' },
     });
   }
@@ -47,6 +50,8 @@ export class ExamSessionService {
 
     const session = await this.examSessionRepository.findOne({
       where: { id: sessionId, languageLevelId: levelId },
+      relations: { level: true },
+      loadEagerRelations: false,
     });
 
     if (!session) {
@@ -66,34 +71,16 @@ export class ExamSessionService {
       throw new NotFoundException('Language level not found');
     }
 
-    // Validate dates
-    const examDate = new Date(dto.examDate);
-    const regStartDate = new Date(dto.registrationStartDate);
-    const regDeadline = new Date(dto.registrationDeadline);
-
-    if (regDeadline >= examDate) {
-      throw new BadRequestException(
-        'Registration deadline must be before exam date',
-      );
-    }
-
-    if (regStartDate >= regDeadline) {
-      throw new BadRequestException(
-        'Registration start date must be before registration deadline',
-      );
-    }
+    const fields = buildExamFields(dto);
+    assertExamDates(
+      fields.examDate,
+      fields.registrationStartDate,
+      fields.registrationDeadline,
+    );
 
     const session = this.examSessionRepository.create({
+      ...fields,
       languageLevelId: levelId,
-      examDate,
-      location: dto.location,
-      registrationStartDate: regStartDate,
-      registrationDeadline: regDeadline,
-      price: dto.price,
-      courseHours: dto.courseHours,
-      subscriptionUrl: dto.subscriptionUrl,
-      maxParticipants: dto.maxParticipants ?? null,
-      isActive: dto.isActive ?? true,
     });
 
     return this.examSessionRepository.save(session);

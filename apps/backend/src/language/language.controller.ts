@@ -14,6 +14,9 @@ import { ExamSessionService } from './exam-session.service';
 import { ExamRegistrationService } from './exam-registration.service';
 import { CreateExamRegistrationDto } from './dto/create-exam-registration.dto';
 import { CreateLanguageDto } from './dto/create-language.dto';
+import { UpdateLanguageDto } from './dto/update-language.dto';
+import { CreateLanguageWizardDto } from './dto/create-language-wizard.dto';
+import { LanguageWizardService } from './language-wizard.service';
 import { CreateLanguageLevelDto } from './dto/create-language-level.dto';
 import { UpdateLanguageLevelDto } from './dto/update-language-level.dto';
 import { CreateExamSessionDto } from './dto/create-exam-session.dto';
@@ -28,18 +31,29 @@ export class LanguageController {
     private readonly languageLevelService: LanguageLevelService,
     private readonly examSessionService: ExamSessionService,
     private readonly examRegistrationService: ExamRegistrationService,
+    private readonly languageWizardService: LanguageWizardService,
   ) {}
 
   @Get()
   @Public()
-  findAll() {
-    return this.languageService.findAll();
+  async findAll() {
+    const languages = await this.languageService.findAll();
+    await this.examRegistrationService.decorate(
+      languages.flatMap((language) =>
+        (language.levels ?? []).flatMap((level) => level.examSessions ?? []),
+      ),
+    );
+    return languages;
   }
 
   @Get(':id')
   @Public()
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.languageService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const language = await this.languageService.findOne(id);
+    await this.examRegistrationService.decorate(
+      (language.levels ?? []).flatMap((level) => level.examSessions ?? []),
+    );
+    return language;
   }
 
   @Post()
@@ -48,11 +62,17 @@ export class LanguageController {
     return this.languageService.create(dto);
   }
 
+  @Post('wizard')
+  @RequirePermission('manage_languages')
+  createWithStructure(@Body() dto: CreateLanguageWizardDto) {
+    return this.languageWizardService.create(dto);
+  }
+
   @Patch(':id')
   @RequirePermission('manage_languages')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: Partial<CreateLanguageDto>,
+    @Body() dto: UpdateLanguageDto,
   ) {
     return this.languageService.update(id, dto);
   }

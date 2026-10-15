@@ -1,0 +1,112 @@
+:host {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem 0.6rem;
+  border-radius: var(--adm-radius-card);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+
+  &.add {
+    place-items: center;
+    min-height: 190px;
+    border: 2px dashed #94a3b8;
+    background: transparent;
+    box-shadow: none;
+    color: var(--adm-primary);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+}
+
+.code {
+  margin: 0.1rem 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.stat {
+  display: grid;
+  padding-left: 0.6rem;
+  border-left: 3px solid var(--bar);
+  font-size: 0.8rem;
+
+  strong {
+    font-size: 1.25rem;
+  }
+
+  &.levels {
+    --bar: var(--adm-primary);
+  }
+
+  &.exams {
+    --bar: var(--adm-success);
+  }
+}
+
+.next {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1.25rem;
+  margin: 0 -1.1rem;
+  padding: 0.7rem 1.1rem;
+  border-top: 1px solid #eef1f6;
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--adm-primary);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.state {
+  margin: 0;
+  color: #64748b;
+
+  &.error {
+    color: var(--adm-danger);
+  }
+}

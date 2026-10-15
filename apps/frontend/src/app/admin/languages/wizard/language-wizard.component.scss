@@ -1,0 +1,20 @@
+.intro {
+  margin: 0.75rem 0 1rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.note {
+  margin: 0;
+  color: #64748b;
+
+  &.error {
+    color: var(--adm-danger);
+  }
+}
+
+.summary {
+  margin-right: auto;
+  color: #64748b;
+  font-size: 0.85rem;
+}

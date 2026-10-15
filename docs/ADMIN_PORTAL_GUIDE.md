@@ -631,3 +631,10 @@ Reusable standalone, OnPush components in `src/app/shared/ui/` (import from `sha
 | `app-modal-shell`, `app-confirm-dialog` | Accessible dialog: focus moves in and is restored, Tab is trapped, Esc and backdrop close it, only the topmost stacked modal reacts to Esc. Render with `@if`. |
 | `app-stepper` | Numbered circles joined by a line (done / active / upcoming) with an optional per-step change count. |
 | `app-image-picker` | Form control (`formControl`) with drag and drop, type/size validation and preview. Pass `[uploader]` to upload; without it the value is a local data URL (preview only) until `POST /media/upload` exists (Phase 6). |
+
+## Languages (Phase 4)
+
+- `/admin/languages` shows one card per language (levels, exams, next exam). **Edit**, **+ Level** and **+ Exam** open the wizard in edit mode on the matching step; **Add language** opens it in create mode. `/admin/languages/levels` and `/admin/languages/exams` are tables across all languages; Edit opens the wizard, Delete asks first.
+- Create saves language, levels and exams in one transaction via `POST /languages/wizard`.
+- Edit sends only what changed, with `PATCH`, in dependency order (language, levels, exams). Each success becomes the new baseline, so after a failure a retry sends only what is left. Saved levels/exams are deleted from the Levels/Exams pages, not from the wizard.
+- Diff state lives in `LanguageWizardStore`: typed forms plus the last saved baseline; `diffValues` compares them. A new item counts as one change, a modified one as one per changed field.

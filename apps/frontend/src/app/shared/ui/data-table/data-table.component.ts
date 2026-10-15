@@ -18,6 +18,7 @@ import {
   TableQuery,
   compareCells,
   readCell,
+  sortCell,
 } from './data-table.types';
 import { TablePaginationComponent } from './table-pagination.component';
 import { StatusTagComponent } from '../status-tag/status-tag.component';
@@ -80,7 +81,7 @@ export class DataTableComponent<T extends object> {
     }
     const factor = this.sortDirection() === 'asc' ? 1 : -1;
     return [...filtered].sort(
-      (a, b) => factor * compareCells(readCell(a, column), readCell(b, column)),
+      (a, b) => factor * compareCells(sortCell(a, column), sortCell(b, column)),
     );
   });
 

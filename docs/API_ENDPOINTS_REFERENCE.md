@@ -1211,3 +1211,10 @@ For API issues or questions:
 **Document Version**: 1.0  
 **Last Updated**: October 13, 2026  
 **Maintained By**: Devin AI
+
+## Languages: Phase 4 additions
+
+- `POST /languages/wizard` (`manage_languages`): creates a language with `levels[]`, each with optional `exams[]`, in one transaction. Body: `{ language: CreateLanguageDto, levels?: (CreateLanguageLevelDto & { exams?: CreateExamSessionDto[] })[] }`. Duplicate CEFR levels or invalid exam dates return 400 and nothing is saved.
+- `PATCH /languages/:id`, `PATCH .../levels/:levelId`, `PATCH .../exams/:sessionId` now validate against `PartialType` DTOs: unknown fields (for example `id`) return 400.
+- Exam responses from `GET /languages/:id/levels/:levelId/exams[/:sessionId]` include `level: { id, cefrLevel, ... }`.
+- `GET /languages` and `GET /languages/:id` now include `placesLeft`, `isBookable` and `bookingStatus` on the nested exam sessions.

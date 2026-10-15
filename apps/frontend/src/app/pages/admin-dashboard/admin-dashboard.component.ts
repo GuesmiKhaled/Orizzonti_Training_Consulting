@@ -784,7 +784,7 @@ import {
                       </thead>
                       <tbody>
                         <tr *ngFor="let exam of examSessions">
-                          <td>{{ exam.languageLevel?.cefrLevel }}</td>
+                          <td>{{ exam.level?.cefrLevel }}</td>
                           <td>{{ exam.examDate | date: 'short' }}</td>
                           <td>{{ exam.registrationDeadline | date: 'short' }}</td>
                           <td>
@@ -1814,12 +1814,13 @@ export class AdminDashboardComponent implements OnInit {
       return;
     }
 
-    const payload = this.languageForm.value;
+    const { id, ...body } = this.languageForm.value;
+    const payload = { id, ...body };
     this.isSubmitting = true;
 
-    const request = payload.id
-      ? this.apiService.updateLanguage(payload.id, payload)
-      : this.apiService.createLanguage(payload);
+    const request = id
+      ? this.apiService.updateLanguage(id, body)
+      : this.apiService.createLanguage(body);
 
     request.subscribe({
       next: (created) => {

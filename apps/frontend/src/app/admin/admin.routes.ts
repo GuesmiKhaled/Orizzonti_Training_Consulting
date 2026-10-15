@@ -1,6 +1,23 @@
+import { Type } from '@angular/core';
 import { Route, Routes } from '@angular/router';
 import { permissionGuard } from '../core/auth/auth.guards';
 import { AdminLayoutComponent } from './layout/admin-layout.component';
+
+/** A lazy, permission-guarded section with its own page component. */
+function page(
+  path: string,
+  breadcrumb: string,
+  permission: string,
+  load: () => Promise<Type<unknown>>,
+): Route {
+  return {
+    path,
+    ...(path === '' ? { pathMatch: 'full' as const } : {}),
+    canMatch: [permissionGuard(permission)],
+    loadComponent: load,
+    data: { breadcrumb },
+  };
+}
 
 const loadPlaceholder = () =>
   import('./pages/section-placeholder.component').then(
@@ -54,9 +71,17 @@ export const ADMIN_ROUTES: Routes = [
         section('', 'Courses dashboard', 'manage_courses', 'courses'),
       ]),
       group('languages', 'Languages', [
-        section('', 'Languages dashboard', 'manage_languages', 'languages'),
-        section('levels', 'Levels', 'manage_languages', 'languages'),
-        section('exams', 'Exams', 'manage_languages', 'languages'),
+        page('', 'Languages dashboard', 'manage_languages', () =>
+          import('./languages/languages-dashboard.component').then(
+            (m) => m.LanguagesDashboardComponent,
+          ),
+        ),
+        page('levels', 'Levels', 'manage_languages', () =>
+          import('./languages/levels-page.component').then((m) => m.LevelsPageComponent),
+        ),
+        page('exams', 'Exams', 'manage_languages', () =>
+          import('./languages/exams-page.component').then((m) => m.ExamsPageComponent),
+        ),
         section(
           'registrations',
           'Exam registrations',

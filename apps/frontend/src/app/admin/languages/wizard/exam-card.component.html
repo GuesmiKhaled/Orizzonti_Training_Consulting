@@ -1,0 +1,72 @@
+@let form = entry().form;
+<article class="card" [class.modified]="state() === 'modified'">
+  @if (!expanded()) {
+    <div class="head">
+      <strong>
+        @if (summary().date; as date) {
+          {{ date | date: 'd MMM y, HH:mm' }}
+        }
+        @if (summary().location) {
+          · {{ summary().location }}
+        }
+        @if (summary().places) {
+          · {{ summary().places }} places
+        }
+      </strong>
+      <app-change-badge [state]="state()" />
+      <button type="button" class="link" (click)="open()">Edit</button>
+    </div>
+  } @else {
+    <div class="head">
+      <strong>Exam session</strong>
+      <app-change-badge [state]="state()" />
+      @if (entry().baseline) {
+        <button type="button" class="link" (click)="reset()">Reset</button>
+      } @else {
+        <button type="button" class="link danger" (click)="store.removeNewExam(entry().key)">
+          Remove
+        </button>
+      }
+    </div>
+
+    <div class="grid">
+      <app-form-field label="Exam date" [required]="true" [changed]="changed().has('examDate')"
+        [previousValue]="was('examDate')" [error]="error('examDate')">
+        <input type="datetime-local" [formControl]="form.controls.examDate" />
+      </app-form-field>
+      <app-form-field label="Location" [changed]="changed().has('location')"
+        [previousValue]="was('location')">
+        <input [formControl]="form.controls.location" placeholder="Tunis" />
+      </app-form-field>
+      <app-form-field label="Registration opens" [required]="true"
+        [changed]="changed().has('registrationStartDate')"
+        [previousValue]="was('registrationStartDate')" [error]="error('registrationStartDate')">
+        <input type="datetime-local" [formControl]="form.controls.registrationStartDate" />
+      </app-form-field>
+      <app-form-field label="Registration deadline" [required]="true"
+        [changed]="changed().has('registrationDeadline')"
+        [previousValue]="was('registrationDeadline')" [error]="error('registrationDeadline')">
+        <input type="datetime-local" [formControl]="form.controls.registrationDeadline" />
+      </app-form-field>
+      <app-form-field label="Price (overrides level)" [changed]="changed().has('price')"
+        [previousValue]="was('price')">
+        <input [formControl]="form.controls.price" inputmode="decimal" />
+      </app-form-field>
+      <app-form-field label="Places (empty = unlimited)" [changed]="changed().has('maxParticipants')"
+        [previousValue]="was('maxParticipants')" [error]="error('maxParticipants')">
+        <input [formControl]="form.controls.maxParticipants" inputmode="numeric" />
+      </app-form-field>
+      <app-form-field label="Subscription URL (optional)" [changed]="changed().has('subscriptionUrl')"
+        [previousValue]="was('subscriptionUrl')" [error]="error('subscriptionUrl')">
+        <input [formControl]="form.controls.subscriptionUrl" placeholder="https://..." />
+      </app-form-field>
+      <label class="check">
+        <input type="checkbox" [formControl]="form.controls.isActive" />
+        Active (open for registration)
+      </label>
+    </div>
+    @if (groupError(); as message) {
+      <p class="form-error" role="alert">{{ message }}</p>
+    }
+  }
+</article>

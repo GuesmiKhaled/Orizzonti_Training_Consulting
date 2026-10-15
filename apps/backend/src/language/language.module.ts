@@ -9,6 +9,7 @@ import { LanguageLevelService } from './language-level.service';
 import { ExamSessionService } from './exam-session.service';
 import { ExamRegistration } from './exam-registration.entity';
 import { ExamRegistrationService } from './exam-registration.service';
+import { LanguageWizardService } from './language-wizard.service';
 import { ExamRegistrationController } from './exam-registration.controller';
 import { MailModule } from '../mail/mail.module';
 
@@ -28,6 +29,7 @@ import { MailModule } from '../mail/mail.module';
     LanguageLevelService,
     ExamSessionService,
     ExamRegistrationService,
+    LanguageWizardService,
   ],
   exports: [LanguageService, LanguageLevelService, ExamSessionService],
 })
