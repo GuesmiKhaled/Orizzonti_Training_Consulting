@@ -1,7 +1,7 @@
 .admin-workspace {
   min-height: 100vh;
   display: flex;
-  background: #f3f4f7;
+  background: var(--adm-bg);
   color: #3c4b64;
 }
 .admin-workspace .admin-sidebar {
@@ -13,8 +13,12 @@
   width: 252px;
   height: 100vh;
   padding: 1.25rem 0.8rem;
-  background: #212631;
-  color: #dbdfe6;
+  background: linear-gradient(
+    180deg,
+    var(--adm-sidebar-from),
+    var(--adm-sidebar-to)
+  );
+  color: #e6f1f5;
 }
 .admin-workspace .sidebar-brand {
   display: grid;
@@ -64,7 +68,8 @@
   color: #fff;
 }
 .admin-workspace .admin-sidebar nav button.active {
-  box-shadow: inset 3px 0 #3498db;
+  background: var(--adm-nav-active);
+  box-shadow: inset 3px 0 var(--adm-primary);
 }
 .admin-workspace .sidebar-divider {
   height: 1px;
@@ -121,7 +126,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #3498db;
+  background: var(--adm-primary);
   color: #fff;
   font-size: 0.8rem;
 }
@@ -178,7 +183,7 @@
   gap: 0.5rem;
   border-radius: 4px;
   padding: 1.3rem;
-  background: #3498db;
+  background: var(--adm-primary);
   color: #fff;
 }
 .admin-workspace .stat-item strong {
@@ -197,7 +202,7 @@
 }
 .admin-workspace .panel {
   border: 1px solid #d8dbe0;
-  border-radius: 6px;
+  border-radius: var(--adm-radius-card);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   padding: 1.25rem;
   background: #fff;
@@ -328,7 +333,7 @@
   border-radius: 4px;
 }
 .admin-workspace .role-list li.selected {
-  border-color: #3498db;
+  border-color: var(--adm-primary);
 }
 .admin-workspace .role-list li > button:first-child {
   display: grid;
@@ -429,19 +434,19 @@
   cursor: not-allowed;
 }
 .admin-workspace button:not(.ghost):not(.danger) {
-  background: #3498db;
+  background: var(--adm-primary);
   color: #fff;
 }
 .admin-workspace button:not(.ghost):not(.danger):hover:not(:disabled) {
-  background: #2b82bd;
+  background: var(--adm-primary-dark);
 }
 .admin-workspace .ghost {
   background: #ebedef;
   color: #3c4b64;
 }
 .admin-workspace .danger {
-  background: #fbe9e9;
-  color: #c62828;
+  background: var(--adm-danger-light);
+  color: var(--adm-danger);
 }
 .admin-workspace .list {
   display: grid;

@@ -1,6 +1,7 @@
 // Component Styles for Orizzonti Admin Portal
-@import './design-tokens.scss';
+@use './design-tokens' as *;
 
+.admin-theme {
 // ============================================================================
 // BUTTONS
 // ============================================================================
@@ -13,7 +14,7 @@
   padding: $button-padding-y $button-padding-x;
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
-  border-radius: $radius-md;
+  border-radius: $button-radius;
   transition: all $transition-fast;
   cursor: pointer;
   border: none;
@@ -201,7 +202,7 @@
   &:focus {
     outline: none;
     border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    box-shadow: 0 0 0 3px color-mix(in srgb, #{$color-primary} 10%, transparent);
   }
 
   &:disabled {
@@ -214,7 +215,7 @@
     border-color: $color-error;
 
     &:focus {
-      box-shadow: 0 0 0 3px rgba($color-error, 0.1);
+      box-shadow: 0 0 0 3px color-mix(in srgb, #{$color-error} 10%, transparent);
     }
   }
 }
@@ -484,7 +485,7 @@
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 2px solid rgba($color-primary, 0.2);
+  border: 2px solid color-mix(in srgb, #{$color-primary} 20%, transparent);
   border-top-color: $color-primary;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
@@ -652,4 +653,5 @@
       opacity: 0.7;
     }
   }
+}
 }

@@ -1,15 +1,46 @@
 // Design Tokens for Orizzonti Admin Portal
-// Modern, professional SaaS design system
+
+// ============================================================================
+// CSS CUSTOM PROPERTIES (runtime tokens)
+// ============================================================================
+
+:root {
+  --adm-sidebar-from: #17566e;
+  --adm-sidebar-to: #1b7fa3;
+  --adm-nav-active: #0f3f52;
+  --adm-panel-header: #1783b0;
+
+  --adm-primary: #0a5cbd;
+  --adm-primary-light: #3b82d6;
+  --adm-primary-dark: #084a99;
+  --adm-primary-bg: #e7f0fb;
+
+  --adm-danger: #dc2626;
+  --adm-danger-light: #fee2e2;
+  --adm-danger-dark: #b91c1c;
+
+  --adm-success: #16a34a;
+  --adm-success-light: #dcfce7;
+  --adm-success-dark: #15803d;
+
+  --adm-warning: #f59e0b;
+  --adm-warning-light: #fef3c7;
+  --adm-warning-dark: #d97706;
+
+  --adm-bg: #f1f4f9;
+  --adm-radius-card: 6px;
+  --adm-radius-pill: 999px;
+}
 
 // ============================================================================
 // COLORS
 // ============================================================================
 
 // Primary Brand Colors
-$color-primary: #2563eb; // Blue
-$color-primary-light: #3b82f6;
-$color-primary-dark: #1e40af;
-$color-primary-bg: #eff6ff;
+$color-primary: var(--adm-primary);
+$color-primary-light: var(--adm-primary-light);
+$color-primary-dark: var(--adm-primary-dark);
+$color-primary-bg: var(--adm-primary-bg);
 
 // Secondary Colors
 $color-secondary: #7c3aed; // Purple
@@ -17,17 +48,17 @@ $color-secondary-light: #a78bfa;
 $color-secondary-dark: #5b21b6;
 
 // Semantic Colors
-$color-success: #10b981; // Green
-$color-success-light: #d1fae5;
-$color-success-dark: #047857;
+$color-success: var(--adm-success);
+$color-success-light: var(--adm-success-light);
+$color-success-dark: var(--adm-success-dark);
 
-$color-warning: #f59e0b; // Amber
-$color-warning-light: #fef3c7;
-$color-warning-dark: #d97706;
+$color-warning: var(--adm-warning);
+$color-warning-light: var(--adm-warning-light);
+$color-warning-dark: var(--adm-warning-dark);
 
-$color-error: #ef4444; // Red
-$color-error-light: #fee2e2;
-$color-error-dark: #dc2626;
+$color-error: var(--adm-danger);
+$color-error-light: var(--adm-danger-light);
+$color-error-dark: var(--adm-danger-dark);
 
 $color-info: #06b6d4; // Cyan
 $color-info-light: #cffafe;
@@ -111,7 +142,7 @@ $radius-md: 0.5rem; // 8px
 $radius-lg: 0.75rem; // 12px
 $radius-xl: 1rem; // 16px
 $radius-2xl: 1.5rem; // 24px
-$radius-full: 9999px;
+$radius-full: var(--adm-radius-pill);
 
 // ============================================================================
 // SHADOWS
@@ -208,7 +239,7 @@ $card-bg: $color-white;
 $card-border-color: $color-gray-200;
 $card-shadow: $shadow-sm;
 $card-padding: $space-6;
-$card-border-radius: $radius-lg;
+$card-border-radius: var(--adm-radius-card);
 
 // ============================================================================
 // MODALS
@@ -219,3 +250,6 @@ $modal-bg: $color-white;
 $modal-border-radius: $radius-xl;
 $modal-shadow: $shadow-2xl;
 $modal-max-width: 600px;
+
+$page-bg: var(--adm-bg);
+$button-radius: var(--adm-radius-pill);

@@ -8,11 +8,18 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { filter } from 'rxjs';
+import { ToastContainerComponent } from './core/toast/toast-container.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    ToastContainerComponent,
+  ],
   template: `
     <header id="top" *ngIf="!isBackofficeArea">
       <div class="container-fluid d-none d-lg-block">
@@ -208,6 +215,7 @@ import { filter } from 'rxjs';
       </div>
     </header>
 
+    <app-toast-container />
     <main class="site-main">
       <router-outlet></router-outlet>
     </main>

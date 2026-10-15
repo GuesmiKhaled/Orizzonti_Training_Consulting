@@ -1,30 +1,31 @@
 // Base Styles for Orizzonti Admin Portal
-@import './design-tokens.scss';
+@use './design-tokens' as *;
 
 // ============================================================================
 // RESET & NORMALIZE
 // ============================================================================
 
-* {
+// Scoped to the admin shell (`.admin-theme`): the public site loads Bootstrap
+// from legacy-css and must not receive these resets.
+:where(.admin-theme),
+:where(.admin-theme) * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html {
+.admin-theme {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-body {
   font-family: $font-family-base;
   font-size: $font-size-base;
   line-height: $line-height-normal;
   color: $color-gray-900;
-  background-color: $color-gray-50;
+  background-color: $page-bg;
 }
 
+.admin-theme {
 // ============================================================================
 // TYPOGRAPHY
 // ============================================================================
@@ -164,7 +165,7 @@ select {
   &:focus {
     outline: none;
     border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    box-shadow: 0 0 0 3px color-mix(in srgb, #{$color-primary} 10%, transparent);
   }
 
   &:disabled {
@@ -177,7 +178,7 @@ select {
     border-color: $color-error;
 
     &:focus {
-      box-shadow: 0 0 0 3px rgba($color-error, 0.1);
+      box-shadow: 0 0 0 3px color-mix(in srgb, #{$color-error} 10%, transparent);
     }
   }
 }
@@ -345,4 +346,5 @@ tbody tr {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
 }

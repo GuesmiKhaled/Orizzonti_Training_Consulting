@@ -42,6 +42,8 @@
               }
             ],
             "styles": [
+              "src/app/shared/styles/base.scss",
+              "src/app/shared/styles/components.scss",
               "src/styles.css",
               "src/app/pages/admin-dashboard/admin-dashboard.css"
             ],
@@ -106,6 +108,8 @@
               }
             ],
             "styles": [
+              "src/app/shared/styles/base.scss",
+              "src/app/shared/styles/components.scss",
               "src/styles.css"
             ],
             "scripts": []

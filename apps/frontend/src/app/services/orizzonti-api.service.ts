@@ -1,7 +1,8 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { SKIP_ERROR_TOAST } from '../core/http/http-context.tokens';
 
 declare global {
   interface Window {
@@ -198,6 +199,10 @@ export class OrizzontiApiService {
     return new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
   }
 
+  private inlineErrors(): HttpContext {
+    return new HttpContext().set(SKIP_ERROR_TOAST, true);
+  }
+
   isAuthenticated(): boolean {
     return !!localStorage.getItem(this.tokenKey);
   }
@@ -208,12 +213,16 @@ export class OrizzontiApiService {
   }
 
   submitContact(payload: ContactRequest): Observable<ContactResponse> {
-    return this.http.post<ContactResponse>(`${this.baseUrl}/contact`, payload);
+    return this.http.post<ContactResponse>(`${this.baseUrl}/contact`, payload, {
+      context: this.inlineErrors(),
+    });
   }
 
   loginAdmin(payload: LoginRequest): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${this.baseUrl}/auth/login`, payload)
+      .post<AuthResponse>(`${this.baseUrl}/auth/login`, payload, {
+        context: this.inlineErrors(),
+      })
       .pipe(
         tap((response) => {
           localStorage.setItem(this.tokenKey, response.accessToken);
@@ -536,6 +545,7 @@ export class OrizzontiApiService {
     return this.http.post<{ id: number; status: string; message: string }>(
       `${this.baseUrl}/languages/${languageId}/levels/${levelId}/exams/${sessionId}/register`,
       payload,
+      { context: this.inlineErrors() },
     );
   }
 

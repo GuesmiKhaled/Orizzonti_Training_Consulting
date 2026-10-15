@@ -604,3 +604,10 @@ For technical issues or feature requests:
 **Document Version**: 1.0  
 **Last Updated**: October 13, 2026  
 **Maintained By**: Devin AI
+
+## Frontend HTTP behaviour (Phase 1 foundations)
+
+- `authInterceptor` attaches `Authorization: Bearer <token>` (token key `orizzonti-admin-token`) only to requests to the API base URL. A 401 from the API clears the token and redirects to `/login`; a 401 from `POST /auth/login` is left to the login form.
+- `errorInterceptor` shows a toast for network errors, 5xx and 4xx (except 401). Callers that render their own inline error set `SKIP_ERROR_TOAST` in the request `HttpContext`.
+- `core/api/crud.service.ts` is the generic REST base (`list/get/create/update(PATCH)/remove`); entity services live in `core/api/entities/`. The legacy `OrizzontiApiService` is still used by the existing pages until they are migrated.
+- Admin design tokens are CSS variables (`--adm-*`) in `shared/styles/design-tokens.scss`. `base.scss` and `components.scss` are loaded globally, but their rules are nested under `.admin-theme` so they cannot restyle the public Bootstrap-based site.
