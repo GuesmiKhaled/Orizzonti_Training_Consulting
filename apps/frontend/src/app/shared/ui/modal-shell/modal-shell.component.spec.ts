@@ -1,3 +1,4 @@
+/// <reference types="jasmine" />
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalShellComponent } from './modal-shell.component';
