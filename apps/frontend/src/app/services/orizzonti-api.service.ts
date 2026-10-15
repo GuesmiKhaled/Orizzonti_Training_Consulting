@@ -1,4 +1,4 @@
-import { HttpClient, HttpContext, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -34,6 +34,7 @@ export interface AuthUser {
   email?: string | null;
   phone?: string | null;
   isActive?: boolean;
+  mustChangePassword?: boolean;
   roleId?: number | null;
   role?: string;
   permissions?: string[];
@@ -217,26 +218,11 @@ export class OrizzontiApiService {
     window.__ORIZZONTI_CONFIG__?.apiBaseUrl ?? 'http://localhost:5007'
   ).replace(/\/+$/, '');
   private readonly tokenKey = 'orizzonti-admin-token';
-  private readonly profileKey = 'orizzonti-admin-profile';
 
   constructor(private readonly http: HttpClient) {}
 
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem(this.tokenKey);
-    return new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
-  }
-
   private inlineErrors(): HttpContext {
     return new HttpContext().set(SKIP_ERROR_TOAST, true);
-  }
-
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem(this.tokenKey);
-  }
-
-  logout(): void {
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.profileKey);
   }
 
   submitContact(payload: ContactRequest): Observable<ContactResponse> {
@@ -253,196 +239,20 @@ export class OrizzontiApiService {
       .pipe(
         tap((response) => {
           localStorage.setItem(this.tokenKey, response.accessToken);
-          localStorage.setItem(this.profileKey, JSON.stringify(response.user));
         }),
       );
-  }
-
-  getProfile(): Observable<AuthUser> {
-    return this.http.get<AuthUser>(`${this.baseUrl}/auth/profile`, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
-  getAdminUsers(page = 0, size = 20, search = ''): Observable<AdminUserPage> {
-    return this.http.get<AdminUserPage>(`${this.baseUrl}/auth/users`, {
-      headers: this.getAuthHeaders(),
-      params: { page, size, search },
-    });
-  }
-
-  createAdminUser(payload: {
-    username: string;
-    password: string;
-    roleId: number;
-    isActive?: boolean;
-  }): Observable<AuthUser> {
-    return this.http.post<AuthUser>(`${this.baseUrl}/auth/users`, payload, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
-  updateAdminUser(
-    id: number,
-    payload: Partial<{
-      username: string;
-      password: string;
-      roleId: number;
-      isActive: boolean;
-    }>,
-  ): Observable<AuthUser> {
-    return this.http.patch<AuthUser>(
-      `${this.baseUrl}/auth/users/${id}`,
-      payload,
-      {
-        headers: this.getAuthHeaders(),
-      },
-    );
-  }
-
-  deleteAdminUser(id: number): Observable<{ deleted: boolean; id: number }> {
-    return this.http.delete<{ deleted: boolean; id: number }>(
-      `${this.baseUrl}/auth/users/${id}`,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  getAdminRoles(): Observable<AdminRole[]> {
-    return this.http.get<AdminRole[]>(`${this.baseUrl}/auth/roles`, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
-  getAdminPermissions(): Observable<AdminPermission[]> {
-    return this.http.get<AdminPermission[]>(
-      `${this.baseUrl}/auth/permissions`,
-      {
-        headers: this.getAuthHeaders(),
-      },
-    );
-  }
-
-  createAdminRole(payload: {
-    name: string;
-    description?: string;
-    permissionIds: number[];
-  }): Observable<AdminRole> {
-    return this.http.post<AdminRole>(`${this.baseUrl}/auth/roles`, payload, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
-  updateAdminRole(
-    id: number,
-    payload: Partial<{
-      name: string;
-      description: string;
-      permissionIds: number[];
-    }>,
-  ): Observable<AdminRole> {
-    return this.http.patch<AdminRole>(
-      `${this.baseUrl}/auth/roles/${id}`,
-      payload,
-      {
-        headers: this.getAuthHeaders(),
-      },
-    );
-  }
-
-  deleteAdminRole(id: number): Observable<{ deleted: boolean; id: number }> {
-    return this.http.delete<{ deleted: boolean; id: number }>(
-      `${this.baseUrl}/auth/roles/${id}`,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  getDashboardStats(): Observable<DashboardStats> {
-    return this.http.get<DashboardStats>(`${this.baseUrl}/dashboard/stats`, {
-      headers: this.getAuthHeaders(),
-    });
   }
 
   getBlogs(): Observable<BlogItem[]> {
     return this.http.get<BlogItem[]>(`${this.baseUrl}/blogs`);
   }
 
-  createBlog(payload: Partial<BlogItem>): Observable<BlogItem> {
-    return this.http.post<BlogItem>(`${this.baseUrl}/blogs`, payload, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
-  updateBlog(id: number, payload: Partial<BlogItem>): Observable<BlogItem> {
-    return this.http.patch<BlogItem>(`${this.baseUrl}/blogs/${id}`, payload, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
-  deleteBlog(id: number): Observable<{ deleted: boolean; id: number }> {
-    return this.http.delete<{ deleted: boolean; id: number }>(
-      `${this.baseUrl}/blogs/${id}`,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  getCourses(): Observable<CourseItem[]> {
-    return this.http.get<CourseItem[]>(`${this.baseUrl}/courses`);
-  }
-
   getFeaturedCourses(): Observable<CourseItem[]> {
     return this.http.get<CourseItem[]>(`${this.baseUrl}/courses/featured`);
   }
 
-  createCourse(payload: Partial<CourseItem>): Observable<CourseItem> {
-    return this.http.post<CourseItem>(`${this.baseUrl}/courses`, payload, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
-  updateCourse(
-    id: number,
-    payload: Partial<CourseItem>,
-  ): Observable<CourseItem> {
-    return this.http.patch<CourseItem>(
-      `${this.baseUrl}/courses/${id}`,
-      payload,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  deleteCourse(id: number): Observable<{ deleted: boolean; id: number }> {
-    return this.http.delete<{ deleted: boolean; id: number }>(
-      `${this.baseUrl}/courses/${id}`,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
   getLanguages(): Observable<LanguageItem[]> {
     return this.http.get<LanguageItem[]>(`${this.baseUrl}/languages`);
-  }
-
-  createLanguage(payload: Partial<LanguageItem>): Observable<LanguageItem> {
-    return this.http.post<LanguageItem>(`${this.baseUrl}/languages`, payload, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
-  updateLanguage(
-    id: number,
-    payload: Partial<LanguageItem>,
-  ): Observable<LanguageItem> {
-    return this.http.patch<LanguageItem>(
-      `${this.baseUrl}/languages/${id}`,
-      payload,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  deleteLanguage(id: number): Observable<{ deleted: boolean; id: number }> {
-    return this.http.delete<{ deleted: boolean; id: number }>(
-      `${this.baseUrl}/languages/${id}`,
-      { headers: this.getAuthHeaders() },
-    );
   }
 
   // Language Levels
@@ -452,117 +262,7 @@ export class OrizzontiApiService {
     );
   }
 
-  getLanguageLevel(
-    languageId: number,
-    levelId: number,
-  ): Observable<LanguageLevel> {
-    return this.http.get<LanguageLevel>(
-      `${this.baseUrl}/languages/${languageId}/levels/${levelId}`,
-    );
-  }
-
-  createLanguageLevel(
-    languageId: number,
-    payload: Partial<LanguageLevel>,
-  ): Observable<LanguageLevel> {
-    
-    return this.http.post<LanguageLevel>(
-      `${this.baseUrl}/languages/${languageId}/levels`,
-      payload,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  updateLanguageLevel(
-    languageId: number,
-    levelId: number,
-    payload: Partial<LanguageLevel>,
-  ): Observable<LanguageLevel> {
-    return this.http.patch<LanguageLevel>(
-      `${this.baseUrl}/languages/${languageId}/levels/${levelId}`,
-      payload,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  deleteLanguageLevel(
-    languageId: number,
-    levelId: number,
-  ): Observable<{ deleted: boolean; id: number }> {
-    return this.http.delete<{ deleted: boolean; id: number }>(
-      `${this.baseUrl}/languages/${languageId}/levels/${levelId}`,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
   // Exam Sessions
-  getExamSessions(languageId: number, levelId: number): Observable<ExamSession[]> {
-    return this.http.get<ExamSession[]>(
-      `${this.baseUrl}/languages/${languageId}/levels/${levelId}/exams`,
-    );
-  }
-
-  getExamSession(
-    languageId: number,
-    levelId: number,
-    sessionId: number,
-  ): Observable<ExamSession> {
-    return this.http.get<ExamSession>(
-      `${this.baseUrl}/languages/${languageId}/levels/${levelId}/exams/${sessionId}`,
-    );
-  }
-
-  createExamSession(
-    languageId: number,
-    levelId: number,
-    payload: Partial<ExamSession>,
-  ): Observable<ExamSession> {
-    return this.http.post<ExamSession>(
-      `${this.baseUrl}/languages/${languageId}/levels/${levelId}/exams`,
-      payload,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  updateExamSession(
-    languageId: number,
-    levelId: number,
-    sessionId: number,
-    payload: Partial<ExamSession>,
-  ): Observable<ExamSession> {
-    return this.http.patch<ExamSession>(
-      `${this.baseUrl}/languages/${languageId}/levels/${levelId}/exams/${sessionId}`,
-      payload,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  deleteExamSession(
-    languageId: number,
-    levelId: number,
-    sessionId: number,
-  ): Observable<{ deleted: boolean; id: number }> {
-    return this.http.delete<{ deleted: boolean; id: number }>(
-      `${this.baseUrl}/languages/${languageId}/levels/${levelId}/exams/${sessionId}`,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  checkBookingEligibility(
-    languageId: number,
-    levelId: number,
-    sessionId: number,
-  ): Observable<{ isBookable: boolean; status: string; bookingUrl?: string }> {
-    return this.http.post<{
-      isBookable: boolean;
-      status: string;
-      bookingUrl?: string;
-    }>(
-      `${this.baseUrl}/languages/${languageId}/levels/${levelId}/exams/${sessionId}/subscribe`,
-      {},
-    );
-  }
-
   registerForExam(
     languageId: number,
     levelId: number,
@@ -576,96 +276,4 @@ export class OrizzontiApiService {
     );
   }
 
-  getExamRegistrations(status = ''): Observable<ExamRegistrationItem[]> {
-    return this.http.get<ExamRegistrationItem[]>(
-      `${this.baseUrl}/exam-registrations`,
-      { headers: this.getAuthHeaders(), params: status ? { status } : {} },
-    );
-  }
-
-  updateExamRegistrationStatus(
-    id: number,
-    status: ExamRegistrationItem['status'],
-  ): Observable<ExamRegistrationItem> {
-    return this.http.patch<ExamRegistrationItem>(
-      `${this.baseUrl}/exam-registrations/${id}`,
-      { status },
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  deleteExamRegistration(
-    id: number,
-  ): Observable<{ deleted: boolean; id: number }> {
-    return this.http.delete<{ deleted: boolean; id: number }>(
-      `${this.baseUrl}/exam-registrations/${id}`,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  getMedia(): Observable<MediaItem[]> {
-    return this.http.get<MediaItem[]>(`${this.baseUrl}/media`);
-  }
-
-  createMedia(payload: Partial<MediaItem>): Observable<MediaItem> {
-    return this.http.post<MediaItem>(`${this.baseUrl}/media`, payload, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
-  updateMedia(id: number, payload: Partial<MediaItem>): Observable<MediaItem> {
-    return this.http.patch<MediaItem>(`${this.baseUrl}/media/${id}`, payload, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
-  deleteMedia(id: number): Observable<{ deleted: boolean; id: number }> {
-    return this.http.delete<{ deleted: boolean; id: number }>(
-      `${this.baseUrl}/media/${id}`,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  getMailSettings(): Observable<MailSettings> {
-    return this.http.get<MailSettings>(`${this.baseUrl}/settings/mail`, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
-  saveMailSettings(payload: Partial<MailSettings>): Observable<MailSettings> {
-    return this.http.patch<MailSettings>(
-      `${this.baseUrl}/settings/mail`,
-      payload,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  getCourseRequests(): Observable<CourseRequestItem[]> {
-    return this.http.get<CourseRequestItem[]>(
-      `${this.baseUrl}/course-requests`,
-      {
-        headers: this.getAuthHeaders(),
-      },
-    );
-  }
-
-  updateCourseRequestStatus(
-    id: number,
-    status: CourseRequestItem['status'],
-  ): Observable<CourseRequestItem> {
-    return this.http.patch<CourseRequestItem>(
-      `${this.baseUrl}/course-requests/${id}`,
-      { status },
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  deleteCourseRequest(
-    id: number,
-  ): Observable<{ deleted: boolean; id: number }> {
-    return this.http.delete<{ deleted: boolean; id: number }>(
-      `${this.baseUrl}/course-requests/${id}`,
-      { headers: this.getAuthHeaders() },
-    );
-  }
 }

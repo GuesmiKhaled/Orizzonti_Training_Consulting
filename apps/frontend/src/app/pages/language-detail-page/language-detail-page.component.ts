@@ -8,6 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { CefrLevelNamePipe } from '../../pipes/cefr-level-name.pipe';
+import { ModalShellComponent } from '../../shared/ui';
 import {
   OrizzontiApiService,
   LanguageItem,
@@ -18,7 +19,13 @@ import {
 @Component({
   selector: 'app-language-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, CefrLevelNamePipe],
+  imports: [
+    CommonModule,
+    RouterLink,
+    ReactiveFormsModule,
+    CefrLevelNamePipe,
+    ModalShellComponent,
+  ],
   templateUrl: './language-detail-page.component.html',
   styleUrls: ['./language-detail-page.component.css'],
 })

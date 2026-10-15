@@ -54,7 +54,7 @@ import { LanguageWizardStore } from './language-wizard.store';
     }
     .empty {
       margin: 0;
-      color: #64748b;
+      color: #475569;
     }
     .add {
       justify-self: start;

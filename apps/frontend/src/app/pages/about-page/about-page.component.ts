@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { SiteContentService } from '../../core/site/site-content.service';
 
 @Component({
   selector: 'app-about-page',
@@ -29,13 +30,19 @@ import { RouterLink } from '@angular/router';
               About Us
             </p>
             <h2>Orizzonti Training &amp; Consulting</h2>
-            <p>
-              <strong>Orizzonti Training &amp; Consulting</strong> provides
-              Italian language classes and communication skills to students who
-              need certification in Italian. Our center has an approved
-              certificate in the Italian language by CERT.IT SIS in Tunisia. We
-              also provide courses in other languages.
-            </p>
+            @if (site.aboutParagraphs(); as paragraphs) {
+              @for (paragraph of paragraphs; track $index) {
+                <p>{{ paragraph }}</p>
+              }
+            } @else {
+              <p>
+                <strong>Orizzonti Training &amp; Consulting</strong> provides
+                Italian language classes and communication skills to students
+                who need certification in Italian. Our center has an approved
+                certificate in the Italian language by CERT.IT SIS in Tunisia.
+                We also provide courses in other languages.
+              </p>
+            }
             <a routerLink="/courses" class="btn btn-primary py-2 px-4"
               >Explore subjects</a
             >
@@ -58,4 +65,6 @@ import { RouterLink } from '@angular/router';
     `,
   ],
 })
-export class AboutPageComponent {}
+export class AboutPageComponent {
+  protected readonly site = inject(SiteContentService);
+}

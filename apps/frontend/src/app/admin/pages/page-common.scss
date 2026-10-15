@@ -13,7 +13,7 @@
 
 .panel-header {
   padding: 0.9rem 1.25rem;
-  background: var(--adm-panel-header);
+  background: var(--adm-panel-header-strong);
   color: #fff;
   font-size: 1.05rem;
   font-weight: 500;
@@ -54,7 +54,7 @@
 
 .state {
   margin: 0;
-  color: #64748b;
+  color: #475569;
 
   &.error {
     color: var(--adm-danger);

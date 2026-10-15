@@ -7,7 +7,10 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthService } from '../auth.service';
-import { REQUIRED_PERMISSION_KEY } from '../auth.constants';
+import {
+  ALLOW_PENDING_PASSWORD_CHANGE_KEY,
+  REQUIRED_PERMISSION_KEY,
+} from '../auth.constants';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -26,6 +29,14 @@ export class PermissionsGuard implements CanActivate {
     }
 
     request.user = user;
+
+    const allowsPendingChange = this.reflector.getAllAndOverride<boolean>(
+      ALLOW_PENDING_PASSWORD_CHANGE_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (user.mustChangePassword === true && allowsPendingChange !== true) {
+      throw new ForbiddenException('Password change required');
+    }
     const requiredPermission = this.reflector.getAllAndOverride<
       string | string[]
     >(REQUIRED_PERMISSION_KEY, [context.getHandler(), context.getClass()]);

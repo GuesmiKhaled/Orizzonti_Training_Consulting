@@ -20,14 +20,26 @@ export class BlogController {
 
   @Get()
   @Public()
-  findAll() {
+  findPublished() {
+    return this.blogService.findPublished();
+  }
+
+  @Get('manage')
+  @RequirePermission('manage_blog')
+  findAllForAdmin() {
     return this.blogService.findAll();
+  }
+
+  @Get('manage/:id')
+  @RequirePermission('manage_blog')
+  findOneForAdmin(@Param('id', ParseIntPipe) id: number) {
+    return this.blogService.findOne(id);
   }
 
   @Get(':id')
   @Public()
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.blogService.findOne(id);
+    return this.blogService.findPublishedOne(id);
   }
 
   @Post()

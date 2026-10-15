@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { SiteContentService } from '../../core/site/site-content.service';
 import {
   BlogItem,
   CourseItem,
@@ -72,13 +73,19 @@ import {
             <h2 class="section-title mb-4">
               Orizzonti Training &amp; Consulting
             </h2>
-            <p>
-              <strong>Orizzonti Training &amp; Consulting</strong> provides
-              Italian language classes and communication skills to students who
-              need Italian certification. The center has an Italian language
-              certificate approved by CERT.IT SIS in Tunisia. We also provide
-              courses in other languages.
-            </p>
+            @if (site.aboutParagraphs(); as paragraphs) {
+              @for (paragraph of paragraphs; track $index) {
+                <p>{{ paragraph }}</p>
+              }
+            } @else {
+              <p>
+                <strong>Orizzonti Training &amp; Consulting</strong> provides
+                Italian language classes and communication skills to students
+                who need Italian certification. The center has an Italian
+                language certificate approved by CERT.IT SIS in Tunisia. We
+                also provide courses in other languages.
+              </p>
+            }
             <a routerLink="/about" class="text-primary font-weight-semi-bold"
               >Discover Orizzonti
               <i class="fa fa-angle-right ml-1" aria-hidden="true"></i
@@ -87,6 +94,24 @@ import {
         </div>
       </div>
     </section>
+
+    @if (site.highlights().length) {
+      <section
+        class="container-fluid bg-secondary py-4"
+        aria-label="Orizzonti in numbers"
+      >
+        <div class="container">
+          <div class="row text-center">
+            @for (item of site.highlights(); track item.label) {
+              <div class="col-6 col-md mb-3 mb-md-0">
+                <p class="h3 text-primary mb-1">{{ item.value }}</p>
+                <p class="mb-0">{{ item.label }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
 
     <section class="container-fluid bg-secondary py-5">
       <div class="container pt-3 pb-2">
@@ -415,6 +440,7 @@ import {
   ],
 })
 export class HomePageComponent implements OnInit {
+  protected readonly site = inject(SiteContentService);
   activeSlide = 0;
   loading = true;
 

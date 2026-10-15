@@ -7,7 +7,7 @@ import { BlogPageComponent } from './pages/blog-page/blog-page.component';
 import { BlogDetailPageComponent } from './pages/blog-detail-page/blog-detail-page.component';
 import { LanguageDetailPageComponent } from './pages/language-detail-page/language-detail-page.component';
 import { AdminLoginPageComponent } from './pages/admin-login-page/admin-login-page.component';
-import { authGuard } from './core/auth/auth.guards';
+import { authGuard, signedInGuard } from './core/auth/auth.guards';
 
 export const routes: Routes = [
   { path: '', component: HomePageComponent },
@@ -18,6 +18,14 @@ export const routes: Routes = [
   { path: 'blog', component: BlogPageComponent },
   { path: 'blog/:slug', component: BlogDetailPageComponent },
   { path: 'login', component: AdminLoginPageComponent },
+  {
+    path: 'change-password',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/change-password-page/change-password-page.component').then(
+        (m) => m.ChangePasswordPageComponent,
+      ),
+  },
   {
     path: 'admin',
     canActivate: [authGuard],

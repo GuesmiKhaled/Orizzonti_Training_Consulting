@@ -245,3 +245,7 @@ x86/
 
 # Uploaded images (local development)
 apps/backend/uploads/
+
+# Playwright
+apps/frontend/test-results/
+apps/frontend/playwright-report/

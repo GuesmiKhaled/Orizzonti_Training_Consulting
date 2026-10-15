@@ -36,7 +36,7 @@
 ```json
 {
   "username": "admin",
-  "password": "admin123"
+  "password": "<your-password>"
 }
 ```
 
@@ -1226,3 +1226,10 @@ For API issues or questions:
 - `GET /auth/users` accepts `roleId` and searches username, full name and email. User objects include `fullName`, `email`, `phone`; `POST`/`PATCH /auth/users` accept them (`null` clears on PATCH).
 - `GET /dashboard/stats` adds `adminUsersCount`, `requestsByCourse` (top 5) and `latestRequests` (applicant shown as "First L.").
 - Validated bodies: `POST /media`, `PATCH /media/:id`, `PATCH /blogs/:id`, `PATCH /courses/:id` and `PATCH /settings/mail` reject unknown fields (for example `id`) with 400.
+
+## Phase 6 additions
+
+- `POST /auth/change-password` (any signed-in account): body `{ currentPassword, newPassword }`, `newPassword` at least 12 characters. Returns `{ success: true }`. Wrong current password, reuse and a password containing the username return 400. It is rate limited to 5 per minute.
+- The login response and `GET /auth/profile` include `mustChangePassword`. While it is `true` every endpoint except `GET /auth/profile` and `POST /auth/change-password` returns `403 Password change required`.
+- `GET /blogs` and `GET /blogs/:id` return published posts only. `GET /blogs/manage` and `GET /blogs/manage/:id` (permission `manage_blog`) include drafts.
+- Rate limits return `429`: login 5/min, change-password 5/min, contact, course request and exam registration 5 per 10 min, other routes 600/min (per IP).

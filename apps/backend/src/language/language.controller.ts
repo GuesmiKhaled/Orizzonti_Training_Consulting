@@ -8,6 +8,8 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
+import { PUBLIC_FORM_THROTTLE } from '../throttling';
 import { LanguageService } from './language.service';
 import { LanguageLevelService } from './language-level.service';
 import { ExamSessionService } from './exam-session.service';
@@ -193,6 +195,7 @@ export class LanguageController {
 
   @Post(':id/levels/:levelId/exams/:sessionId/register')
   @Public()
+  @Throttle(PUBLIC_FORM_THROTTLE)
   registerForExam(
     @Param('id', ParseIntPipe) id: number,
     @Param('levelId', ParseIntPipe) levelId: number,

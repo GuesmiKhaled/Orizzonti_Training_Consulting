@@ -30,7 +30,7 @@ import {
       justify-content: flex-end;
       gap: 0.75rem;
       padding: 0.75rem 1rem;
-      color: #64748b;
+      color: #475569;
       font-size: 0.8rem;
     }
     button {

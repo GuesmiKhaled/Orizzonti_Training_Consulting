@@ -21,13 +21,14 @@
 ### Accessing the Admin Portal
 
 1. Navigate to `http://localhost:3000/login` (or your production URL)
-2. Enter your admin credentials:
-   - **Username**: `admin` (default)
-   - **Password**: `admin123` (default)
+2. Enter your admin credentials. There is no built-in password: the first `admin` account is created on the first backend start from the `DEFAULT_ADMIN_PASSWORD` environment variable (at least 12 characters, see `apps/backend/.env.example`).
 3. Click **Sign in**
 4. You will be redirected to the Admin Dashboard
 
 ### First Login
+
+- An account whose password was set by someone else (the seeded `admin`, any account created by an admin, or one whose password an admin reset) must choose its own password first. You are sent to **Choose a new password** and cannot use the admin area until you do: the server answers `403 Password change required` to every other request.
+- A new password needs at least 12 characters, must differ from the current one and must not contain your username.
 
 - Your profile information appears in the top-right corner
 - Your assigned role determines which sections you can access
@@ -660,3 +661,18 @@ Reusable standalone, OnPush components in `src/app/shared/ui/` (import from `sha
 - **Users** now have optional `fullName`, `email` and `phone`. The list masks phone numbers (`+216 ••• ••• 753`).
 - The public site does not read `GET /site-settings` yet; that is a later step.
 - The classic dashboard at `/admin/legacy` is kept until the new pages have been verified, then it can be deleted.
+
+## Security and operations (Phase 6)
+
+- **`JWT_SECRET` is required.** The backend refuses to start without it, or with a value shorter than 32 characters or a known placeholder. There is no fallback.
+- **`DEFAULT_ADMIN_PASSWORD`** is read only when the database has no accounts. If it is missing or shorter than 12 characters, no admin is created and a warning (never the password) is logged. An existing `admin` account that still uses the old default password is flagged to change it at its next login.
+- **Rate limits:** login and change-password allow 5 attempts per minute per IP; the public contact form, course request and exam registration allow 5 submissions per 10 minutes per IP; everything else 600 per minute. Behind a reverse proxy set `TRUST_PROXY=true` so the real client IP is used.
+- **Blogs:** the public `GET /blogs` and `GET /blogs/:id` return published posts only. The admin area uses `GET /blogs/manage` and `GET /blogs/manage/:id` (permission `manage_blog`).
+- **Site settings** are read by the public site: the header and footer contact details, social links, the About text (paragraphs separated by a blank line) and a highlights strip on the home page (students, courses, years, next session). Empty fields keep the original built-in text.
+- **Known limit:** a changed password does not invalidate access tokens already issued (they expire after 8 hours).
+
+## Tests
+
+- `cd apps/backend && npx jest` runs the API tests.
+- `cd apps/frontend && npx ng test --watch=false --browsers=ChromeHeadless` runs the unit and component specs, including the axe-core accessibility audits (`src/app/a11y.spec.ts`). Set `CHROME_BIN` if Chrome is not installed.
+- `cd apps/frontend && npm run e2e` runs the Playwright browser tests (`apps/frontend/e2e`). The API is mocked, so no backend or database is needed. It starts `ng serve` on port 4300 and uses Playwright's Chromium (`npx playwright install chromium`) or any Chromium-based browser through `E2E_BROWSER_PATH`.

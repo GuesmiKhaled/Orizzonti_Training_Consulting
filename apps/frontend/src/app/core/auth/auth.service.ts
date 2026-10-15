@@ -1,9 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of, tap } from 'rxjs';
 import { AuthUser } from '../../services/orizzonti-api.service';
 import { API_BASE_URL } from '../api/api.config';
+import { SKIP_ERROR_TOAST } from '../http/http-context.tokens';
 import { TokenStorage } from './token-storage.service';
 
 @Injectable({ providedIn: 'root' })
@@ -44,6 +45,23 @@ export class AuthService {
         this.state.set(profile);
       }),
     );
+  }
+
+  /**
+   * Sets a new password. The page shows the server's message itself, so no toast.
+   * The cached profile is dropped so the cleared "must change" flag is re-read.
+   */
+  changePassword(
+    currentPassword: string,
+    newPassword: string,
+  ): Observable<{ success: boolean }> {
+    return this.http
+      .post<{ success: boolean }>(
+        `${this.baseUrl}/auth/change-password`,
+        { currentPassword, newPassword },
+        { context: new HttpContext().set(SKIP_ERROR_TOAST, true) },
+      )
+      .pipe(tap(() => this.reset()));
   }
 
   logout(): void {

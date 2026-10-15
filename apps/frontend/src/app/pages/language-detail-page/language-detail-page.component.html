@@ -122,34 +122,26 @@
   </div>
 </section>
 
-<div
-  *ngIf="registering"
-  class="registration-backdrop"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="registrationTitle"
-  (click)="closeRegistration()"
->
-  <div class="registration-dialog" (click)="$event.stopPropagation()">
-    <h4 id="registrationTitle">
-      Exam registration - {{ registering.level.cefrLevel }}
-    </h4>
+@if (registering) {
+  <app-modal-shell
+    [title]="'Exam registration - ' + registering.level.cefrLevel"
+    (closed)="closeRegistration()"
+  >
     <p class="text-muted">
       Exam date: {{ registering.session.examDate | date: 'dd.MM.yyyy' }}
-      <span *ngIf="registering.session.location">
-        - {{ registering.session.location }}</span
-      >
+      @if (registering.session.location) {
+        <span> - {{ registering.session.location }}</span>
+      }
     </p>
 
-    <div *ngIf="registerSuccess; else registrationForm">
+    @if (registerSuccess) {
       <div class="alert alert-success" role="status">{{ registerSuccess }}</div>
-      <button type="button" class="btn btn-primary" (click)="closeRegistration()">
-        Close
-      </button>
-    </div>
-
-    <ng-template #registrationForm>
-      <form [formGroup]="registerForm" (ngSubmit)="submitRegistration()">
+    } @else {
+      <form
+        id="registrationForm"
+        [formGroup]="registerForm"
+        (ngSubmit)="submitRegistration()"
+      >
         <div class="form-group">
           <label for="regName">Full name *</label>
           <input id="regName" class="form-control" formControlName="fullName" />
@@ -162,11 +154,9 @@
             class="form-control"
             formControlName="email"
           />
-          <small
-            class="text-danger"
-            *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid"
-            >Enter a valid email address.</small
-          >
+          @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
+            <small class="text-danger" role="alert">Enter a valid email address.</small>
+          }
         </div>
         <div class="form-group">
           <label for="regPhone">Phone</label>
@@ -181,25 +171,33 @@
             formControlName="message"
           ></textarea>
         </div>
-        <div *ngIf="registerError" class="alert alert-danger" role="alert">
-          {{ registerError }}
-        </div>
-        <p class="text-muted small">
+        @if (registerError) {
+          <div class="alert alert-danger" role="alert">{{ registerError }}</div>
+        }
+        <p class="text-muted small mb-0">
           Your request will be reviewed by our team before it is confirmed.
         </p>
-        <div class="registration-actions">
-          <button
-            type="submit"
-            class="btn btn-primary"
-            [disabled]="registerForm.invalid || isSubmitting"
-          >
-            {{ isSubmitting ? 'Sending...' : 'Send request' }}
-          </button>
-          <button type="button" class="btn btn-secondary" (click)="closeRegistration()">
-            Cancel
-          </button>
-        </div>
       </form>
-    </ng-template>
-  </div>
-</div>
+    }
+
+    <ng-container modal-footer>
+      @if (registerSuccess) {
+        <button type="button" class="btn btn-primary" (click)="closeRegistration()">
+          Close
+        </button>
+      } @else {
+        <button type="button" class="btn btn-secondary" (click)="closeRegistration()">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          form="registrationForm"
+          class="btn btn-primary"
+          [disabled]="registerForm.invalid || isSubmitting"
+        >
+          {{ isSubmitting ? 'Sending...' : 'Send request' }}
+        </button>
+      }
+    </ng-container>
+  </app-modal-shell>
+}

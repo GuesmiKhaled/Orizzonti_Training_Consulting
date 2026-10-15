@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -27,6 +28,7 @@ import { SliderMedia } from './media/media.entity';
 import { CourseRequest } from './course-request/course-request.entity';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from './auth/guards/permissions.guard';
+import { GLOBAL_THROTTLE } from './throttling';
 
 const databaseConfig = {
   host: process.env.DB_HOST ?? 'localhost',
@@ -67,6 +69,7 @@ console.info(
         trustServerCertificate: true,
       },
     }),
+    ThrottlerModule.forRoot([GLOBAL_THROTTLE]),
     TypeOrmModule.forFeature([
       Blog,
       Course,
@@ -88,6 +91,7 @@ console.info(
   controllers: [AppController],
   providers: [
     AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
   ],

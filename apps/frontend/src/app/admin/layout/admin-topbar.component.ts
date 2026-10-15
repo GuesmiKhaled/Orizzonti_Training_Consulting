@@ -13,7 +13,6 @@ import {
     <button
       type="button"
       class="menu-button"
-      aria-label="Toggle navigation"
       (click)="menuToggled.emit()"
     >
       Menu

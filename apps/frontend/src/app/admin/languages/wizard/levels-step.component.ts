@@ -37,7 +37,7 @@ import { CEFR_LEVELS } from './language-wizard.types';
     }
     .empty {
       margin: 0;
-      color: #64748b;
+      color: #475569;
     }
     .add {
       justify-self: start;

@@ -123,10 +123,12 @@ export class AdminLoginPageComponent {
     this.isError = false;
 
     this.apiService.loginAdmin(this.form.value).subscribe({
-      next: () => {
+      next: (response) => {
         this.message = 'Login successful.';
         this.isSubmitting = false;
-        this.router.navigateByUrl('/admin');
+        this.router.navigateByUrl(
+          response.user.mustChangePassword ? '/change-password' : '/admin',
+        );
       },
       error: () => {
         this.isError = true;

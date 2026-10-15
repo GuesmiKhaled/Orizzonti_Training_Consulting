@@ -23,7 +23,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     }
     p {
       margin: 0;
-      color: #64748b;
+      color: #475569;
     }
   `,
 })

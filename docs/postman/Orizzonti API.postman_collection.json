@@ -14,7 +14,7 @@
   "variable": [
     { "key": "apiBaseUrl", "value": "http://localhost:5007" },
     { "key": "adminUser", "value": "admin" },
-    { "key": "adminPassword", "value": "admin123" },
+    { "key": "adminPassword", "value": "" },
     { "key": "accessToken", "value": "" },
     { "key": "blogId", "value": "" },
     { "key": "courseId", "value": "" },

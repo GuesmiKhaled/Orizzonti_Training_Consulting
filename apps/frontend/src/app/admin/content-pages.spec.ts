@@ -53,7 +53,7 @@ describe('BlogsPageComponent', () => {
 
   const open = () => {
     const fixture = mount(BlogsPageComponent);
-    expectCall(http, 'GET', '/blogs').flush(BLOGS);
+    expectCall(http, 'GET', '/blogs/manage').flush(BLOGS);
     fixture.detectChanges();
     return fixture;
   };
@@ -88,7 +88,7 @@ describe('BlogsPageComponent', () => {
     const deletion = expectCall(http, 'DELETE', '/blogs/1');
     expect(deletion.request.method).toBe('DELETE');
     deletion.flush({ deleted: true, id: 1 });
-    expectCall(http, 'GET', '/blogs').flush([BLOGS[1]]);
+    expectCall(http, 'GET', '/blogs/manage').flush([BLOGS[1]]);
     fixture.detectChanges();
     expect(root.querySelectorAll('tbody tr').length).toBe(1);
   });
@@ -154,7 +154,7 @@ describe('BlogEditorPageComponent', () => {
 
   it('loads a post and saves changes, clearing a removed cover with null', () => {
     const { fixture, root, navigate } = setup('7');
-    expectCall(http, 'GET', '/blogs/7').flush({
+    expectCall(http, 'GET', '/blogs/manage/7').flush({
       id: 7,
       title: 'Old title',
       slug: 'old-title',
@@ -182,7 +182,7 @@ describe('BlogEditorPageComponent', () => {
 
   it('reports a post that cannot be loaded', () => {
     const { fixture, root } = setup('7');
-    expectCall(http, 'GET', '/blogs/7').flush({}, { status: 404, statusText: 'Not Found' });
+    expectCall(http, 'GET', '/blogs/manage/7').flush({}, { status: 404, statusText: 'Not Found' });
     fixture.detectChanges();
     expect(root.querySelector('[role="alert"]')?.textContent).toContain('Could not load');
   });

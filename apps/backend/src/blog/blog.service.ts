@@ -12,8 +12,26 @@ export class BlogService {
     private readonly blogRepository: Repository<Blog>,
   ) {}
 
+  /** Everything, including drafts: for the admin area only. */
   findAll() {
     return this.blogRepository.find({ order: { createdAt: 'DESC' } });
+  }
+
+  findPublished() {
+    return this.blogRepository.find({
+      where: { isPublished: true },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findPublishedOne(id: number) {
+    const blog = await this.blogRepository.findOne({
+      where: { id, isPublished: true },
+    });
+    if (!blog) {
+      throw new NotFoundException('Blog not found');
+    }
+    return blog;
   }
 
   async findOne(id: number) {

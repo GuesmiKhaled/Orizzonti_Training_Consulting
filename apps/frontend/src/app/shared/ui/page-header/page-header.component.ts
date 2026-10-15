@@ -27,7 +27,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     }
     p {
       margin: 0.2rem 0 0;
-      color: #64748b;
+      color: #475569;
       font-size: 0.85rem;
     }
     .actions {

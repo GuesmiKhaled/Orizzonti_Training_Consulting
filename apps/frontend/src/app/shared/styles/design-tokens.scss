@@ -9,6 +9,8 @@
   --adm-sidebar-to: #1b7fa3;
   --adm-nav-active: #0f3f52;
   --adm-panel-header: #1783b0;
+  /* Panel header fill under white text: #1783b0 is 4.28:1, this is 5.6:1 (WCAG AA needs 4.5). */
+  --adm-panel-header-strong: #136f95;
 
   --adm-primary: #0a5cbd;
   --adm-primary-light: #3b82d6;

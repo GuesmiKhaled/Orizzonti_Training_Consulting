@@ -3,9 +3,11 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { assertJwtSecretConfigured } from './auth/auth.constants';
 import { configureUploads } from './media/configure-uploads';
 
 async function bootstrap() {
+  assertJwtSecretConfigured();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const corsOrigins = (
@@ -21,6 +23,10 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
+
+  if (process.env.TRUST_PROXY) {
+    app.set('trust proxy', process.env.TRUST_PROXY === 'true' ? 1 : process.env.TRUST_PROXY);
+  }
 
   configureUploads(app);
 

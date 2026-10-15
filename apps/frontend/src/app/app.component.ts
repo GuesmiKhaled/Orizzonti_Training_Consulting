@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   NavigationEnd,
   Router,
@@ -8,6 +8,7 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { filter } from 'rxjs';
+import { SiteContentService } from './core/site/site-content.service';
 import { ToastContainerComponent } from './core/toast/toast-container.component';
 
 @Component({
@@ -53,7 +54,7 @@ import { ToastContainerComponent } from './core/toast/toast-container.component'
               ></i>
               <div class="text-left">
                 <h6 class="font-weight-semi-bold mb-1">Email Us</h6>
-                <small>info&#64;orizzonti.tn</small>
+                <small>{{ site.email() }}</small>
               </div>
             </div>
           </div>
@@ -65,7 +66,7 @@ import { ToastContainerComponent } from './core/toast/toast-container.component'
               ></i>
               <div class="text-left">
                 <h6 class="font-weight-semi-bold mb-1">Call Us</h6>
-                <small>+216 24 422 753 · +216 36 239 750</small>
+                <small>{{ site.headerPhone() }}</small>
               </div>
             </div>
           </div>
@@ -230,22 +231,21 @@ import { ToastContainerComponent } from './core/toast/toast-container.component'
             <div class="col-md-7 mb-4">
               <h5 class="text-primary text-uppercase mb-4">Get In Touch</h5>
               <p>
-                <i class="fa fa-map-marker-alt mr-2" aria-hidden="true"></i>6
-                rue Lucie Faure en plein centre ville en face du Jardin Le
-                Passage.
+                <i class="fa fa-map-marker-alt mr-2" aria-hidden="true"></i
+                >{{ site.address() }}
               </p>
               <p>
-                <i class="fa fa-phone-alt mr-2" aria-hidden="true"></i>+216 24
-                422 753
+                <i class="fa fa-phone-alt mr-2" aria-hidden="true"></i
+                >{{ site.phone() }}
               </p>
               <p>
                 <i class="fa fa-envelope mr-2" aria-hidden="true"></i
-                >info&#64;orizzonti.tn
+                >{{ site.email() }}
               </p>
               <div class="d-flex justify-content-start mt-4 social-links">
                 <a
                   class="btn btn-outline-light btn-square mr-2"
-                  href="https://www.facebook.com/orizzonti.tn"
+                  [href]="site.facebookUrl()"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Orizzonti on Facebook"
@@ -253,7 +253,7 @@ import { ToastContainerComponent } from './core/toast/toast-container.component'
                 ></a>
                 <a
                   class="btn btn-outline-light btn-square"
-                  href="https://www.instagram.com/Orizzonti_tn"
+                  [href]="site.instagramUrl()"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Orizzonti on Instagram"
@@ -326,6 +326,7 @@ import { ToastContainerComponent } from './core/toast/toast-container.component'
   ],
 })
 export class AppComponent {
+  protected readonly site = inject(SiteContentService);
   title = 'Orizzonti Training & Consulting';
   isBackofficeArea = false;
   isMenuOpen = false;
@@ -334,7 +335,10 @@ export class AppComponent {
 
   constructor(router: Router) {
     const updateArea = (url: string) => {
-      this.isBackofficeArea = url === '/login' || url.startsWith('/admin');
+      this.isBackofficeArea =
+        url === '/login' ||
+        url === '/change-password' ||
+        url.startsWith('/admin');
     };
     updateArea(router.url);
     router.events

@@ -31,13 +31,6 @@ const placeholder = () =>
 
 export const ADMIN_ROUTES: Routes = [
   {
-    path: 'legacy',
-    loadComponent: () =>
-      import('../pages/admin-dashboard/admin-dashboard.component').then(
-        (m) => m.AdminDashboardComponent,
-      ),
-  },
-  {
     path: '',
     component: AdminLayoutComponent,
     children: [

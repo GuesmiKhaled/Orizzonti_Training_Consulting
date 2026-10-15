@@ -44,8 +44,7 @@
             "styles": [
               "src/app/shared/styles/base.scss",
               "src/app/shared/styles/components.scss",
-              "src/styles.css",
-              "src/app/pages/admin-dashboard/admin-dashboard.css"
+              "src/styles.css"
             ],
             "scripts": []
           },

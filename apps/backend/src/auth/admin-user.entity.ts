@@ -32,6 +32,9 @@ export class AdminUser {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ default: false })
+  mustChangePassword: boolean;
+
   @Column({ nullable: true })
   roleId?: number;
 

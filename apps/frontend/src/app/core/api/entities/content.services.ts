@@ -13,6 +13,16 @@ export class BlogsService extends CrudService<BlogItem> {
   protected path(): string {
     return 'blogs';
   }
+
+  /** All posts including drafts. The public GET /blogs only returns published ones. */
+  override list(): Observable<BlogItem[]> {
+    return this.http.get<BlogItem[]>(`${this.baseUrl}/blogs/manage`);
+  }
+
+  /** A post for editing, drafts included. */
+  override get(id: number): Observable<BlogItem> {
+    return this.http.get<BlogItem>(`${this.baseUrl}/blogs/manage/${id}`);
+  }
 }
 
 @Injectable({ providedIn: 'root' })
