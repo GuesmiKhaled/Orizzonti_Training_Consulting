@@ -12,6 +12,12 @@ export class SiteSettings {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'nvarchar', length: 150, nullable: true })
+  heroTitle: string | null;
+
+  @Column({ type: 'nvarchar', length: 300, nullable: true })
+  heroSubtitle: string | null;
+
   @Column({ type: 'nvarchar', length: 200, nullable: true })
   contactEmail: string | null;
 

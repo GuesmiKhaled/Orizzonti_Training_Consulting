@@ -4,7 +4,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { SiteSettings } from '../../services/orizzonti-api.service';
+import { LanguageItem, SiteSettings } from '../../services/orizzonti-api.service';
 import { API_BASE_URL } from '../api/api.config';
 import { SKIP_ERROR_TOAST } from '../http/http-context.tokens';
 import { SITE_DEFAULTS, SiteContentService } from './site-content.service';
@@ -42,14 +42,19 @@ describe('SiteContentService', () => {
 
   afterEach(() => http.verify());
 
-  const load = (settings: SiteSettings) =>
+  const load = (settings: SiteSettings, languages: LanguageItem[] = []) => {
     http.expectOne(`${BASE}/site-settings`).flush(settings);
+    http.expectOne(`${BASE}/languages`).flush(languages);
+  };
 
-  it('requests the public settings once, without an error toast', () => {
+  it('requests the public settings and languages once, without an error toast', () => {
     const req = http.expectOne(`${BASE}/site-settings`);
     expect(req.request.method).toBe('GET');
     expect(req.request.context.get(SKIP_ERROR_TOAST)).toBeTrue();
     req.flush(EMPTY);
+    const languages = http.expectOne(`${BASE}/languages`);
+    expect(languages.request.context.get(SKIP_ERROR_TOAST)).toBeTrue();
+    languages.flush([]);
   });
 
   it('shows the built-in contact details while nothing is set', () => {
@@ -67,6 +72,8 @@ describe('SiteContentService', () => {
     http
       .expectOne(`${BASE}/site-settings`)
       .flush({}, { status: 500, statusText: 'Error' });
+    http.expectOne(`${BASE}/languages`).flush({}, { status: 500, statusText: 'Error' });
+    expect(service.footerLanguages()).toEqual([]);
     expect(service.email()).toBe(SITE_DEFAULTS.email);
     expect(service.highlights()).toEqual([]);
   });
@@ -108,6 +115,30 @@ describe('SiteContentService', () => {
     expect(items[0].value).toBe('2,500');
     expect(items[1].value).toBe('0');
     expect(items[2].value).toContain('2026');
+  });
+
+  it('uses the built-in hero text until the admin saves their own', () => {
+    load(EMPTY);
+    expect(service.heroTitle()).toBe(SITE_DEFAULTS.heroTitle);
+    expect(service.heroSubtitle()).toBe(SITE_DEFAULTS.heroSubtitle);
+  });
+
+  it('shows the saved hero title and subtitle', () => {
+    load({ ...EMPTY, heroTitle: ' Learn with us ', heroSubtitle: 'Classes in Tunis.' });
+    expect(service.heroTitle()).toBe('Learn with us');
+    expect(service.heroSubtitle()).toBe('Classes in Tunis.');
+  });
+
+  it('lists active languages for the footer, native name first', () => {
+    load(EMPTY, [
+      { id: 1, name: 'Italian', nativeName: 'Italiano', isActive: true },
+      { id: 2, name: 'Arabic', nativeName: ' ', isActive: true },
+      { id: 3, name: 'Hidden', isActive: false },
+    ]);
+    expect(service.footerLanguages()).toEqual([
+      { id: 1, label: 'Italiano' },
+      { id: 2, label: 'Arabic' },
+    ]);
   });
 
   it('ignores an invalid session date', () => {

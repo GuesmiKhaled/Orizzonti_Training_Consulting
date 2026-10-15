@@ -16,6 +16,7 @@ export interface LanguageSummary {
   readonly name: string;
   readonly code: string;
   readonly nativeName: string;
+  readonly imageUrl: string | null;
   readonly active: boolean;
   readonly levelsCount: number;
   readonly examsCount: number;
@@ -38,6 +39,7 @@ export function summarize(
     name: language.name,
     code: language.code ?? '',
     nativeName: language.nativeName ?? '',
+    imageUrl: language.imageUrl ?? null,
     active: language.isActive !== false,
     levelsCount: levels.length,
     examsCount: exams.length,

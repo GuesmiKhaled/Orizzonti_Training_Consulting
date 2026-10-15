@@ -266,22 +266,19 @@ import { ToastContainerComponent } from './core/toast/toast-container.component'
         <div class="col-lg-5 mb-4">
           <h5 class="text-primary text-uppercase mb-4">Our Courses</h5>
           <div class="d-flex flex-column justify-content-start">
-            <a class="text-white mb-2" routerLink="/courses"
-              ><i class="fa fa-angle-right mr-2" aria-hidden="true"></i
-              >Italiano</a
-            >
-            <a class="text-white mb-2" routerLink="/courses"
-              ><i class="fa fa-angle-right mr-2" aria-hidden="true"></i
-              >العربّية</a
-            >
-            <a class="text-white mb-2" routerLink="/courses"
-              ><i class="fa fa-angle-right mr-2" aria-hidden="true"></i
-              >English</a
-            >
-            <a class="text-white mb-2" routerLink="/courses"
-              ><i class="fa fa-angle-right mr-2" aria-hidden="true"></i
-              >Français</a
-            >
+            @for (language of site.footerLanguages(); track language.id) {
+              <a class="text-white mb-2" [routerLink]="['/languages', language.id]"
+                ><i class="fa fa-angle-right mr-2" aria-hidden="true"></i
+                >{{ language.label }}</a
+              >
+            } @empty {
+              @for (label of defaultLanguageLinks; track label) {
+                <a class="text-white mb-2" routerLink="/courses"
+                  ><i class="fa fa-angle-right mr-2" aria-hidden="true"></i
+                  >{{ label }}</a
+                >
+              }
+            }
           </div>
         </div>
       </div>
@@ -327,6 +324,7 @@ import { ToastContainerComponent } from './core/toast/toast-container.component'
 })
 export class AppComponent {
   protected readonly site = inject(SiteContentService);
+  protected readonly defaultLanguageLinks = ['Italiano', 'العربّية', 'English', 'Français'];
   title = 'Orizzonti Training & Consulting';
   isBackofficeArea = false;
   isMenuOpen = false;

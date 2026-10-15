@@ -41,6 +41,11 @@ export class MediaService extends CrudService<MediaItem> {
   protected path(): string {
     return 'media';
   }
+
+  /** All slider images including hidden ones. The public GET /media only returns active ones. */
+  override list(): Observable<MediaItem[]> {
+    return this.http.get<MediaItem[]>(`${this.baseUrl}/media/manage`);
+  }
 }
 
 /** The API supports list, update and remove; creation is public via the contact flow. */

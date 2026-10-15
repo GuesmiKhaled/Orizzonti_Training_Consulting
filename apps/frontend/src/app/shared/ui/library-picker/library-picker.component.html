@@ -1,0 +1,57 @@
+<div class="current">
+  <div class="preview">
+    @if (value()) {
+      <img [src]="value()" alt="Selected image" />
+    } @else {
+      <span class="none">No image chosen</span>
+    }
+  </div>
+  <div class="actions">
+    <button type="button" class="btn btn-secondary" (click)="open()">
+      {{ value() ? 'Change image' : 'Choose image' }}
+    </button>
+    @if (value()) {
+      <button type="button" class="remove" (click)="clear()">Remove image</button>
+    }
+  </div>
+</div>
+
+@if (opened()) {
+  <app-modal-shell title="Choose an image" size="lg" (closed)="opened.set(false)">
+    <div class="filters">
+      <label>
+        <span>Search</span>
+        <input type="search" [value]="search()" (input)="onSearch($event)" placeholder="File name" />
+      </label>
+      <label>
+        <span>Folder</span>
+        <select (change)="onFolder($event)">
+          <option value="">All</option>
+          @for (name of folders; track name) {
+            <option [value]="name">{{ name }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <ul class="grid" aria-label="Images">
+      @for (image of visible(); track image.path) {
+        <li>
+          <button
+            type="button"
+            class="tile"
+            [class.selected]="value() === image.path"
+            [attr.aria-pressed]="value() === image.path"
+            [title]="image.path"
+            (click)="choose(image.path)"
+          >
+            <img [src]="image.path" alt="" loading="lazy" />
+            <span>{{ image.name }}</span>
+          </button>
+        </li>
+      } @empty {
+        <li class="empty">No image matches your search.</li>
+      }
+    </ul>
+  </app-modal-shell>
+}

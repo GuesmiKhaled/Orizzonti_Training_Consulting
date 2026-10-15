@@ -8,6 +8,7 @@ export { FormFieldComponent } from './form-field/form-field.component';
 export { ImagePickerComponent } from './image-picker/image-picker.component';
 export type { ImageUploader } from './image-picker/image-picker.component';
 export { validateImageFile } from './image-picker/validate-image';
+export { LibraryPickerComponent } from './library-picker/library-picker.component';
 export { ModalShellComponent } from './modal-shell/modal-shell.component';
 export { PageHeaderComponent } from './page-header/page-header.component';
 export { StatCardComponent } from './stat-card/stat-card.component';

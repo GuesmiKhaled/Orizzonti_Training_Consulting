@@ -29,6 +29,7 @@ export function languageToValues(language: LanguageItem): LanguageValues {
     name: language.name,
     code: language.code ?? '',
     nativeName: language.nativeName ?? '',
+    imageUrl: language.imageUrl ?? '',
     isActive: language.isActive !== false,
   };
 }
@@ -107,12 +108,14 @@ export function languageCreatePayload(values: LanguageValues): {
   name: string;
   code?: string;
   nativeName?: string;
+  imageUrl?: string;
   isActive: boolean;
 } {
   return {
     name: values.name.trim(),
     code: orUndefined(values.code),
     nativeName: orUndefined(values.nativeName),
+    imageUrl: orUndefined(values.imageUrl),
     isActive: values.isActive,
   };
 }
@@ -140,6 +143,7 @@ function patchFrom<T extends object>(
 const NULLABLE_TEXT = new Set([
   'code',
   'nativeName',
+  'imageUrl',
   'courseHours',
   'price',
   'location',

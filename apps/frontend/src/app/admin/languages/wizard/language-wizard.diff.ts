@@ -4,6 +4,7 @@ const LABELS: Readonly<Record<string, string>> = {
   name: 'name',
   code: 'code',
   nativeName: 'native name',
+  imageUrl: 'image',
   isActive: 'status',
   cefrLevel: 'level',
   courseHours: 'hours',

@@ -5,7 +5,7 @@ import {
   inject,
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { FormFieldComponent } from '../../../shared/ui';
+import { FormFieldComponent, LibraryPickerComponent } from '../../../shared/ui';
 import { changedFieldNames, previousOf } from './language-wizard.diff';
 import { errorOf } from './language-wizard.forms';
 import { LanguageWizardStore } from './language-wizard.store';
@@ -13,7 +13,7 @@ import { LanguageWizardStore } from './language-wizard.store';
 @Component({
   selector: 'app-language-step',
   standalone: true,
-  imports: [ReactiveFormsModule, FormFieldComponent],
+  imports: [ReactiveFormsModule, FormFieldComponent, LibraryPickerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="grid">
@@ -44,6 +44,18 @@ import { LanguageWizardStore } from './language-wizard.store';
         <input type="checkbox" [formControl]="form.controls.isActive" />
         Active (shown on the public site)
       </label>
+      <div class="image" [class.changed]="changed().has('imageUrl')">
+        <span class="image-label">
+          Image
+          @if (was('imageUrl') !== null) {
+            <span class="was">(was {{ wasImage() }})</span>
+          }
+        </span>
+        <app-library-picker
+          [value]="form.controls.imageUrl.value"
+          (valueChange)="setImage($event)"
+        />
+      </div>
     </div>
   `,
   styles: `
@@ -60,6 +72,24 @@ import { LanguageWizardStore } from './language-wizard.store';
     }
     .check input {
       width: auto;
+    }
+    .image {
+      display: grid;
+      grid-column: 1 / -1;
+      gap: 0.4rem;
+      padding: 0.5rem;
+      border: 1px solid transparent;
+      border-radius: 6px;
+    }
+    .image.changed {
+      border-color: var(--adm-warning);
+    }
+    .image-label {
+      color: #374151;
+      font-size: 0.8rem;
+    }
+    .was {
+      color: #92400e;
     }
     @media (max-width: 600px) {
       .grid {
@@ -78,6 +108,16 @@ export class LanguageStepComponent {
 
   protected was(field: string): string | null {
     return previousOf(this.store.languageChange(), field);
+  }
+
+  protected wasImage(): string {
+    const previous = previousOf(this.store.languageChange(), 'imageUrl');
+    return previous ? (previous.split('/').pop() ?? previous) : 'none';
+  }
+
+  protected setImage(path: string): void {
+    this.form.controls.imageUrl.setValue(path);
+    this.form.controls.imageUrl.markAsDirty();
   }
 
   protected nameError(): string {

@@ -18,6 +18,9 @@
   <div class="cards">
     @for (card of cards(); track card.id) {
       <article class="card">
+        @if (card.imageUrl) {
+          <img class="thumb" [src]="card.imageUrl" alt="" loading="lazy" />
+        }
         <div class="top">
           <div>
             <h2>{{ card.name }}</h2>

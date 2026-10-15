@@ -3,9 +3,14 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "images": "node scripts/generate-image-library.mjs",
+    "images:check": "node scripts/generate-image-library.mjs --check",
+    "prestart": "npm run images",
     "start": "ng serve",
+    "prebuild": "npm run images",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
+    "pretest": "npm run images",
     "test": "ng test",
     "e2e": "playwright test"
   },

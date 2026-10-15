@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SiteContentService } from '../../core/site/site-content.service';
 import {
@@ -9,26 +9,43 @@ import {
   OrizzontiApiService,
 } from '../../services/orizzonti-api.service';
 
+const AUTOPLAY_MS = 6000;
+
+const DEFAULT_SLIDES: { src: string; alt: string }[] = [
+  { src: '/img/carousel-1.jpg', alt: 'Orizzonti training classroom' },
+  { src: '/img/carousel-2.jpg', alt: 'Students learning together' },
+  { src: '/img/arabe_bg.png', alt: 'Arabic language learning' },
+  { src: '/img/french_bg.png', alt: 'French language learning' },
+  { src: '/img/orizontiLanguages.jpg', alt: 'Language courses at Orizzonti' },
+];
+
 @Component({
   selector: 'app-home-page',
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <section class="hero-carousel" aria-label="Orizzonti highlights">
+    <section
+      class="hero-carousel"
+      aria-label="Orizzonti highlights"
+      aria-roledescription="carousel"
+      [attr.aria-live]="autoplayActive ? 'off' : 'polite'"
+      (mouseenter)="holdAutoplay()"
+      (mouseleave)="releaseAutoplay()"
+      (focusin)="holdAutoplay()"
+      (focusout)="releaseAutoplay()"
+    >
       <img [src]="slides[activeSlide].src" [alt]="slides[activeSlide].alt" />
       <div class="hero-shade"></div>
       <div class="hero-caption">
         <p class="text-uppercase mb-3">Training &amp; Consulting</p>
-        <h1>Orizzonti</h1>
-        <p>
-          Italian language classes, communication skills, and courses in other
-          languages.
-        </p>
+        <h1>{{ site.heroTitle() }}</h1>
+        <p>{{ site.heroSubtitle() }}</p>
         <a routerLink="/courses" class="btn btn-primary py-2 px-4"
           >Explore courses</a
         >
       </div>
       <button
+        *ngIf="slides.length > 1"
         type="button"
         class="carousel-control previous"
         aria-label="Previous slide"
@@ -37,6 +54,7 @@ import {
         <i class="fa fa-chevron-left" aria-hidden="true"></i>
       </button>
       <button
+        *ngIf="slides.length > 1"
         type="button"
         class="carousel-control next"
         aria-label="Next slide"
@@ -44,7 +62,25 @@ import {
       >
         <i class="fa fa-chevron-right" aria-hidden="true"></i>
       </button>
-      <div class="slide-indicators" aria-label="Choose slide">
+      <button
+        *ngIf="slides.length > 1 && !reducedMotion"
+        type="button"
+        class="carousel-toggle"
+        [attr.aria-label]="autoplayEnabled ? 'Pause slideshow' : 'Play slideshow'"
+        (click)="toggleAutoplay()"
+      >
+        <i
+          class="fa"
+          [class.fa-pause]="autoplayEnabled"
+          [class.fa-play]="!autoplayEnabled"
+          aria-hidden="true"
+        ></i>
+      </button>
+      <div
+        *ngIf="slides.length > 1"
+        class="slide-indicators"
+        aria-label="Choose slide"
+      >
         <button
           *ngFor="let slide of slides; let index = index"
           type="button"
@@ -132,7 +168,7 @@ import {
             >
               <img
                 class="img-fluid subject-image"
-                [src]="subjectImages[i % subjectImages.length]"
+                [src]="subject.imageUrl || subjectImages[i % subjectImages.length]"
                 [alt]="subject.name"
               />
               <span class="subject-caption"
@@ -314,6 +350,19 @@ import {
       .carousel-control.next {
         right: 20px;
       }
+      .carousel-toggle {
+        position: absolute;
+        z-index: 2;
+        right: 20px;
+        bottom: 12px;
+        width: 36px;
+        height: 36px;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        color: #44425a;
+        cursor: pointer;
+      }
       .slide-indicators {
         position: absolute;
         z-index: 2;
@@ -439,18 +488,20 @@ import {
     `,
   ],
 })
-export class HomePageComponent implements OnInit {
+export class HomePageComponent implements OnInit, OnDestroy {
   protected readonly site = inject(SiteContentService);
   activeSlide = 0;
   loading = true;
 
-  readonly slides = [
-    { src: '/img/carousel-1.jpg', alt: 'Orizzonti training classroom' },
-    { src: '/img/carousel-2.jpg', alt: 'Students learning together' },
-    { src: '/img/arabe_bg.png', alt: 'Arabic language learning' },
-    { src: '/img/french_bg.png', alt: 'French language learning' },
-    { src: '/img/orizontiLanguages.jpg', alt: 'Language courses at Orizzonti' },
-  ];
+  /** Replaced by the active slider media from the admin area when there is any. */
+  slides: { src: string; alt: string }[] = [...DEFAULT_SLIDES];
+
+  autoplayEnabled = true;
+  readonly reducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+  private held = false;
+  private timer: ReturnType<typeof setInterval> | null = null;
 
   readonly subjectImages = [
     '/img/cat-1.jpg',
@@ -466,7 +517,31 @@ export class HomePageComponent implements OnInit {
 
   constructor(private readonly api: OrizzontiApiService) {}
 
+  get autoplayActive(): boolean {
+    return (
+      this.autoplayEnabled &&
+      !this.held &&
+      !this.reducedMotion &&
+      this.slides.length > 1
+    );
+  }
+
   ngOnInit(): void {
+    this.api.getSliderMedia().subscribe({
+      next: (items) => {
+        const slides = items
+          .filter((item) => item.isActive !== false && item.imageUrl)
+          .map((item) => ({ src: item.imageUrl, alt: item.altText || item.title }));
+        if (slides.length) {
+          this.slides = slides;
+          this.activeSlide = 0;
+        }
+        this.syncAutoplay();
+      },
+      error: () => this.syncAutoplay(),
+    });
+    this.syncAutoplay();
+
     let pending = 3;
     const done = () => {
       if (--pending === 0) {
@@ -494,6 +569,40 @@ export class HomePageComponent implements OnInit {
       },
       error: done,
     });
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoplay();
+  }
+
+  toggleAutoplay(): void {
+    this.autoplayEnabled = !this.autoplayEnabled;
+    this.syncAutoplay();
+  }
+
+  /** Hover and keyboard focus pause the slideshow. */
+  holdAutoplay(): void {
+    this.held = true;
+    this.syncAutoplay();
+  }
+
+  releaseAutoplay(): void {
+    this.held = false;
+    this.syncAutoplay();
+  }
+
+  private syncAutoplay(): void {
+    this.stopAutoplay();
+    if (this.autoplayActive) {
+      this.timer = setInterval(() => this.showNextSlide(), AUTOPLAY_MS);
+    }
+  }
+
+  private stopAutoplay(): void {
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
   }
 
   showPreviousSlide(): void {

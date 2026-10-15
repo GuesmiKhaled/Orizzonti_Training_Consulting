@@ -11,8 +11,19 @@ export class MediaService {
     private readonly mediaRepository: Repository<SliderMedia>,
   ) {}
 
+  /** Everything, including hidden images: for the admin area. Newest first. */
   findAll() {
-    return this.mediaRepository.find({ order: { createdAt: 'DESC' } });
+    return this.mediaRepository.find({
+      order: { createdAt: 'DESC', id: 'DESC' },
+    });
+  }
+
+  /** What the public carousel shows: active images, newest first. */
+  findActive() {
+    return this.mediaRepository.find({
+      where: { isActive: true },
+      order: { createdAt: 'DESC', id: 'DESC' },
+    });
   }
 
   create(dto: CreateMediaDto) {

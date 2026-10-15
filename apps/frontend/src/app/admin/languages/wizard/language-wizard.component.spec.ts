@@ -211,6 +211,54 @@ describe('LanguageWizardComponent', () => {
       expect(closed).toBe(1);
     });
 
+    it('lets the admin pick a language image from the library and saves it', () => {
+      loadEdit();
+      root.querySelector<HTMLButtonElement>('app-library-picker .actions .btn')?.click();
+      fixture.detectChanges();
+      const tile = Array.from(root.querySelectorAll<HTMLButtonElement>('.tile')).find(
+        (t) => t.title === '/img/eng/english.jpg',
+      );
+      tile?.click();
+      fixture.detectChanges();
+
+      expect(root.querySelector('app-library-picker .preview img')?.getAttribute('src')).toBe(
+        '/img/eng/english.jpg',
+      );
+      expect(root.querySelector('.summary')?.textContent).toContain('1 unsaved change: language image');
+      button('Save 1 change')?.click();
+      const req = http.expectOne(`${BASE}/languages/7`);
+      expect(req.request.body).toEqual({ imageUrl: '/img/eng/english.jpg' });
+      req.flush({});
+    });
+
+    it('removes a saved language image by sending null', () => {
+      mount({ languageId: 7 });
+      http.expectOne(`${BASE}/languages/7`).flush({ ...LANGUAGE, imageUrl: '/img/cat-1.jpg' });
+      fixture.detectChanges();
+      expect(root.querySelector('app-library-picker .preview img')?.getAttribute('src')).toBe('/img/cat-1.jpg');
+      root.querySelector<HTMLButtonElement>('app-library-picker .remove')?.click();
+      fixture.detectChanges();
+      expect(root.textContent).toContain('(was cat-1.jpg)');
+      button('Save 1 change')?.click();
+      const req = http.expectOne(`${BASE}/languages/7`);
+      expect(req.request.body).toEqual({ imageUrl: null });
+      req.flush({});
+    });
+
+    it('sends the chosen image when creating a language', () => {
+      mount();
+      store().languageForm.controls.name.setValue('Italian');
+      store().languageForm.controls.imageUrl.setValue('/img/italien/italian.jpg');
+      store().step.set(2);
+      fixture.detectChanges();
+      button('Create language')?.click();
+      const req = http.expectOne(`${BASE}/languages/wizard`);
+      expect(req.request.body.language).toEqual(
+        jasmine.objectContaining({ name: 'Italian', imageUrl: '/img/italien/italian.jpg' }),
+      );
+      req.flush({ id: 9, name: 'Italian' });
+    });
+
     it('confirms before discarding unsaved changes', () => {
       loadEdit();
       store().languageForm.controls.name.setValue('Other');

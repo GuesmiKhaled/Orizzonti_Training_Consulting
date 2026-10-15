@@ -272,7 +272,7 @@ describe('slider media admin', () => {
 
   it('shows image cards with their visibility', () => {
     const fixture = mount(MediaPageComponent);
-    expectCall(http, 'GET', '/media').flush(MEDIA);
+    expectCall(http, 'GET', '/media/manage').flush(MEDIA);
     fixture.detectChanges();
     const cards = rootOf(fixture).querySelectorAll('article.card');
     expect(cards.length).toBe(2);
@@ -283,7 +283,7 @@ describe('slider media admin', () => {
 
   it('shows an empty state', () => {
     const fixture = mount(MediaPageComponent);
-    expectCall(http, 'GET', '/media').flush([]);
+    expectCall(http, 'GET', '/media/manage').flush([]);
     fixture.detectChanges();
     expect(rootOf(fixture).textContent).toContain('No slider images yet');
   });

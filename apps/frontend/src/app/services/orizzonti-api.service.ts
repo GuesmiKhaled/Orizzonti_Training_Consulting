@@ -88,6 +88,7 @@ export interface CourseItem {
 }
 
 export interface LanguageItem {
+  imageUrl?: string | null;
   id?: number;
   name: string;
   code?: string;
@@ -188,6 +189,8 @@ export interface DashboardStats {
 
 export interface SiteSettings {
   id?: number;
+  heroTitle?: string | null;
+  heroSubtitle?: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
   contactAddress: string | null;
@@ -249,6 +252,13 @@ export class OrizzontiApiService {
 
   getFeaturedCourses(): Observable<CourseItem[]> {
     return this.http.get<CourseItem[]>(`${this.baseUrl}/courses/featured`);
+  }
+
+  /** Active slider images for the home carousel, newest first. */
+  getSliderMedia(): Observable<MediaItem[]> {
+    return this.http.get<MediaItem[]>(`${this.baseUrl}/media`, {
+      context: this.inlineErrors(),
+    });
   }
 
   getLanguages(): Observable<LanguageItem[]> {

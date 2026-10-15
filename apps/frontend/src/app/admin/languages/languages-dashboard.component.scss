@@ -1,5 +1,6 @@
 :host {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.25rem;
 }
 
@@ -32,6 +33,15 @@
       background: rgba(255, 255, 255, 0.6);
     }
   }
+}
+
+.thumb {
+  display: block;
+  width: calc(100% + 2.2rem);
+  margin: -1rem -1.1rem 0;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
+  background: #eef1f6;
 }
 
 .top {

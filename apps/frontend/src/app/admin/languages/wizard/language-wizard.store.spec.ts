@@ -99,6 +99,7 @@ describe('LanguageWizardStore', () => {
         name: 'French',
         code: 'FRA',
         nativeName: undefined,
+        imageUrl: undefined,
         isActive: true,
       });
       expect(payload.levels.length).toBe(1);
@@ -150,6 +151,15 @@ describe('LanguageWizardStore', () => {
       expect(store.totalChanges()).toBe(2);
       expect(store.stepChangeCounts()).toEqual([0, 2, 0]);
       expect(store.summary()).toBe('A2 price, B1 added');
+    });
+
+    it('tracks the language image like any other field', () => {
+      store.languageForm.controls.imageUrl.setValue('/img/eng/english.jpg');
+      expect(store.stepChangeCounts()).toEqual([1, 0, 0]);
+      expect(store.summary()).toBe('language image');
+      expect(store.languagePatchPayload()).toEqual({ imageUrl: '/img/eng/english.jpg' });
+      store.resetLanguage();
+      expect(store.totalChanges()).toBe(0);
     });
 
     it('resets a modified level back to its baseline', () => {

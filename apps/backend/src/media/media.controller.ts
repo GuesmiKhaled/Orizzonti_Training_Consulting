@@ -30,7 +30,13 @@ export class MediaController {
 
   @Get()
   @Public()
-  findAll() {
+  findActive() {
+    return this.mediaService.findActive();
+  }
+
+  @Get('manage')
+  @RequirePermission('manage_media')
+  findAllForAdmin() {
     return this.mediaService.findAll();
   }
 

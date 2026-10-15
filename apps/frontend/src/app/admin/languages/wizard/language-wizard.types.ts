@@ -5,6 +5,8 @@ export interface LanguageValues {
   name: string;
   code: string;
   nativeName: string;
+  /** Site-relative path from the image library, or '' for none. */
+  imageUrl: string;
   isActive: boolean;
 }
 

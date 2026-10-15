@@ -11,3 +11,7 @@
 - Frontend unit/component/a11y: `cd apps/frontend && npx ng test --watch=false --browsers=ChromeHeadless` (set `CHROME_BIN`, e.g. to Brave, when Chrome is not installed), then `npx ng build`.
 - Browser e2e (API mocked, no DB writes): `cd apps/frontend && E2E_BROWSER_PATH=<chromium-based browser> npm run e2e`.
 - The backend refuses to start without a strong `JWT_SECRET`; never add a fallback.
+
+## Image library and Postman
+- `apps/frontend/src/app/shared/image-library/image-library.generated.ts` is generated from `img/` by `npm run images` (runs before start, build and test). Do not edit it by hand; commit it after adding pictures.
+- `docs/postman/Orizzonti API.postman_collection.json` lists every controller route (64). When a route is added or changed, update the collection and its examples.

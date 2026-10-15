@@ -676,3 +676,12 @@ Reusable standalone, OnPush components in `src/app/shared/ui/` (import from `sha
 - `cd apps/backend && npx jest` runs the API tests.
 - `cd apps/frontend && npx ng test --watch=false --browsers=ChromeHeadless` runs the unit and component specs, including the axe-core accessibility audits (`src/app/a11y.spec.ts`). Set `CHROME_BIN` if Chrome is not installed.
 - `cd apps/frontend && npm run e2e` runs the Playwright browser tests (`apps/frontend/e2e`). The API is mocked, so no backend or database is needed. It starts `ng serve` on port 4300 and uses Playwright's Chromium (`npx playwright install chromium`) or any Chromium-based browser through `E2E_BROWSER_PATH`.
+
+## Pictures, slider and a dynamic home page
+
+- **Language picture:** in **Languages > Add/Edit language**, step 1 has an **Image** field. *Choose image* opens a gallery of the pictures in the repository's `img/` folder (search by name, filter by folder). The choice is stored as a path such as `/img/italien/italian.jpg`, shows as a thumbnail on the language card, and replaces the placeholder photo on the home page subject cards. Only paths from the library are accepted by the API.
+- **New pictures in the library:** put the file in `img/`, then run `npm run images` in `apps/frontend` (it also runs automatically before `npm start`, `npm run build` and `npm test`, and in the Docker build). File names may use letters, digits, spaces, `-`, `_` and `.`; other names are skipped with a warning.
+- **Slider media drives the home carousel.** Every active image appears in the carousel, newest first; hidden images do not. With no active images the original five slides are shown. The carousel advances every 6 seconds, pauses on hover and keyboard focus, has a visible pause/play button, and does not move for visitors who prefer reduced motion.
+- **Home page text:** *Settings > Site settings* has a *Home page title* and *subtitle* for the hero. Empty fields keep the original text.
+- **Footer:** the "Our Courses" list shows your active languages (native name first) and links to each language page.
+- **Responsive:** public pages and the admin area are checked in a real browser at 360, 768 and 1280 px wide (no horizontal overflow, the admin sidebar becomes a drawer below 861 px, dialogs fit the screen). Wide tables scroll inside their own box.

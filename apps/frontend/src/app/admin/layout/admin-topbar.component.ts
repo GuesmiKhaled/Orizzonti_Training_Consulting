@@ -45,10 +45,17 @@ import {
       cursor: pointer;
     }
     .user {
+      margin-left: auto;
       display: flex;
       align-items: center;
       gap: 1rem;
       font-size: 0.85rem;
+    }
+    /* The sidebar is always visible on wide screens, so the toggle is only for the drawer. */
+    @media (min-width: 861px) {
+      .menu-button {
+        display: none;
+      }
     }
   `,
 })

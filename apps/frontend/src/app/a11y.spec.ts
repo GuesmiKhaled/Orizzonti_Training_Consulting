@@ -82,7 +82,7 @@ const DATA: Record<string, unknown> = {
   '/languages/1': LANGUAGE,
   '/blogs/manage': [{ id: 1, title: 'Nursing in Italy', slug: 'nursing', isPublished: true, createdAt: '2026-10-01T10:00:00Z' }],
   '/courses': [{ id: 3, name: 'Italian', level: 'B1', price: '500', startDate: '2026-11-02' }],
-  '/media': [{ id: 4, title: 'Hero', imageUrl: PIXEL, altText: 'Classroom', isActive: true }],
+  '/media/manage': [{ id: 4, title: 'Hero', imageUrl: PIXEL, altText: 'Classroom', isActive: true }],
   '/course-requests': [{ id: 1, fullName: 'Sana Ben Ali', email: 's@x.tn', courseName: 'Italian', status: 'new', createdAt: '2026-10-10T10:00:00Z' }],
   '/exam-registrations': [{ id: 11, fullName: 'Leila M', email: 'l@x.tn', status: 'pending', createdAt: '2026-10-12T10:00:00Z', examSessionId: 9, examDate: '2026-12-10T09:00:00Z', cefrLevel: 'B1', languageName: 'English' }],
   '/settings/mail': { host: 'smtp.x.tn', port: 587, username: 'u', fromAddress: 'f@x.tn', secure: true, passwordConfigured: true },

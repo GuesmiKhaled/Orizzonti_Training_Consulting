@@ -67,6 +67,30 @@ test.describe('languages: add and edit', () => {
     ]);
   });
 
+  test('chooses a picture for the language from the image library', async ({ page }) => {
+    await page.goto('/admin/languages');
+    await page.getByRole('button', { name: 'Add language', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'Add language' });
+    await dialog.getByRole('textbox', { name: 'Name', exact: true }).fill('Italian');
+
+    await dialog.getByRole('button', { name: 'Choose image' }).click();
+    const gallery = page.getByRole('dialog', { name: 'Choose an image' });
+    await gallery.getByRole('searchbox', { name: 'Search' }).fill('italian');
+    await gallery.getByRole('button', { name: 'italian.jpg' }).first().click();
+    await expect(gallery).toBeHidden();
+    await expect(dialog.getByRole('img', { name: 'Selected image' })).toHaveAttribute('src', /^\/img\/.*italian\.jpg$/);
+
+    await dialog.getByRole('button', { name: 'Next' }).click();
+    await dialog.getByRole('button', { name: 'Next' }).click();
+    await dialog.getByRole('button', { name: 'Create language' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Italian created.' })).toBeVisible();
+
+    const body = state.writes[0].body as { language: { imageUrl: string } };
+    expect(body.language.imageUrl).toMatch(/^\/img\/.*italian\.jpg$/);
+    // The dashboard card now shows the chosen picture.
+    await expect(page.getByRole('article').filter({ hasText: 'Italian' }).locator('img.thumb')).toBeVisible();
+  });
+
   test('refuses an exam whose registration closes after the exam date', async ({ page }) => {
     await page.goto('/admin/languages');
     await page.getByRole('button', { name: 'Add language', exact: true }).click();

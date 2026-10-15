@@ -12,6 +12,20 @@
     <header class="panel-header">Website content</header>
     <div class="panel-body">
       <div class="grid">
+        <app-form-field
+          class="span-2"
+          label="Home page title"
+          hint="Large heading over the home page slider. Empty keeps 'Orizzonti'."
+        >
+          <input formControlName="heroTitle" maxlength="150" />
+        </app-form-field>
+        <app-form-field
+          class="span-2"
+          label="Home page subtitle"
+          hint="One sentence under the title. Empty keeps the original text."
+        >
+          <textarea formControlName="heroSubtitle" rows="2" maxlength="300"></textarea>
+        </app-form-field>
         <app-form-field label="Contact email" [error]="error('contactEmail')">
           <input type="email" formControlName="contactEmail" />
         </app-form-field>

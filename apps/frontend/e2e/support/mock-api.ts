@@ -24,6 +24,7 @@ export interface Language {
   name: string;
   code: string;
   nativeName: string;
+  imageUrl?: string;
   isActive: boolean;
   levels: Level[];
 }
@@ -37,6 +38,8 @@ export interface MockState {
     permissions: string[];
     mustChangePassword: boolean;
   };
+  /** Per-test answers for read-only paths, taking precedence over the defaults. */
+  catalog: Record<string, unknown>;
   /** Every non-GET call the app made, in order. */
   writes: RecordedRequest[];
   /** Requests nobody mocked; tests assert this stays empty. */
@@ -69,14 +72,67 @@ export function newState(overrides: Partial<MockState> = {}): MockState {
       id: 1,
       username: 'admin',
       role: 'super-admin',
-      permissions: ['view_dashboard', 'manage_languages'],
+      permissions: [
+        'view_dashboard', 'manage_languages', 'manage_users', 'manage_roles', 'manage_blog', 'manage_courses',
+        'manage_media', 'manage_course_requests', 'manage_mail_settings', 'manage_site_settings',
+      ],
       mustChangePassword: false,
     },
+    catalog: {},
     writes: [],
     unmocked: [],
     ...overrides,
   };
 }
+
+/** Read-only answers for the pages that only list data. */
+const CATALOG: Record<string, unknown> = {
+  '/blogs': [
+    { id: 1, title: 'Nursing in Italy', slug: 'nursing-in-italy', excerpt: 'Contracts for nurses.', content: 'Full article text.', isPublished: true, createdAt: '2026-10-01T10:00:00Z' },
+  ],
+  '/blogs/manage': [
+    { id: 1, title: 'Nursing in Italy', slug: 'nursing-in-italy', isPublished: true, createdAt: '2026-10-01T10:00:00Z' },
+    { id: 2, title: 'A draft that is still being written', slug: 'draft', isPublished: false, createdAt: '2026-10-02T10:00:00Z' },
+  ],
+  '/courses': [
+    { id: 3, name: 'Italian for beginners', level: 'A1', price: '500', startDate: '2026-11-02', description: 'Start speaking Italian.' },
+  ],
+  '/courses/featured': [
+    { id: 3, name: 'Italian for beginners', level: 'A1', price: '500', description: 'Start speaking Italian.' },
+  ],
+  '/media': [
+    { id: 2, title: 'Classroom', imageUrl: '/img/carousel-1.jpg', altText: 'Our classroom', isActive: true },
+    { id: 1, title: 'Students', imageUrl: '/img/carousel-2.jpg', altText: 'Students learning', isActive: true },
+  ],
+  '/media/manage': [
+    { id: 2, title: 'Classroom', imageUrl: '/img/carousel-1.jpg', altText: 'Our classroom', isActive: true },
+    { id: 1, title: 'Hidden banner', imageUrl: '/img/carousel-2.jpg', isActive: false },
+  ],
+  '/course-requests': [
+    { id: 1, fullName: 'Sana Ben Ali', email: 'sana.benali@example.com', phone: '+216 20 000 000', courseName: 'Italian for beginners', message: 'I would like to know the schedule and the price of the evening classes.', status: 'new', createdAt: '2026-10-10T10:00:00Z' },
+  ],
+  '/exam-registrations': [
+    { id: 11, fullName: 'Leila Mansour', email: 'leila.mansour@example.com', phone: '+216 21 111 111', status: 'pending', createdAt: '2026-10-12T10:00:00Z', examSessionId: 9, examDate: '2026-12-10T09:00:00Z', cefrLevel: 'A1', languageName: 'English' },
+  ],
+  '/auth/users': {
+    items: [
+      { id: 1, username: 'admin', fullName: 'Guesmi Khaled', email: 'info@orizzonti.tn', phone: '+216 24 422 753', role: 'super-admin', roleId: 1, isActive: true },
+    ],
+    total: 1,
+    page: 0,
+    size: 10,
+  },
+  '/auth/roles': [
+    { id: 1, name: 'super-admin', description: 'Full access', permissions: [{ id: 1, name: 'manage_users' }] },
+    { id: 2, name: 'content-manager', description: 'Writes content', permissions: [{ id: 2, name: 'manage_blog' }] },
+  ],
+  '/auth/permissions': [
+    { id: 1, name: 'manage_users' },
+    { id: 2, name: 'manage_blog' },
+    { id: 3, name: 'manage_languages' },
+  ],
+  '/settings/mail': { host: 'smtp.example.com', port: 587, username: 'info@orizzonti.tn', fromAddress: 'info@orizzonti.tn', secure: true, passwordConfigured: true },
+};
 
 const CORS = {
   'access-control-allow-origin': ORIGIN,
@@ -111,6 +167,9 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
       state.writes.push({ method, path, body });
     }
 
+    if (method === 'GET' && path in state.catalog) {
+      return json(route, state.catalog[path]);
+    }
     if (method === 'GET' && path === '/site-settings') {
       return json(route, {});
     }
@@ -123,6 +182,13 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
         courseRequestsCount: 0, newCourseRequestsCount: 0, adminUsersCount: 1,
         requestsByCourse: [], latestRequests: [],
       });
+    }
+    if (method === 'GET' && path in CATALOG) {
+      return json(route, CATALOG[path]);
+    }
+    const levelsOf = /^\/languages\/(\d+)\/levels$/.exec(path)?.[1];
+    if (method === 'GET' && levelsOf) {
+      return json(route, state.languages.find((l) => l.id === Number(levelsOf))?.levels ?? []);
     }
     if (method === 'GET' && path === '/languages') {
       return json(route, state.languages);

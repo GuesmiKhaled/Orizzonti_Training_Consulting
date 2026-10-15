@@ -16,6 +16,16 @@ const URL_OPTIONS = { protocols: ['http', 'https'], require_protocol: true };
 /** Every field is optional; send null to clear a value. */
 export class UpdateSiteSettingsDto {
   @IsOptional()
+  @IsString()
+  @MaxLength(150)
+  heroTitle?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  heroSubtitle?: string | null;
+
+  @IsOptional()
   @IsEmail()
   @MaxLength(200)
   contactEmail?: string | null;

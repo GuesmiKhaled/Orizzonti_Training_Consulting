@@ -67,12 +67,20 @@ describe('patch payloads', () => {
   });
 
   it('never nulls the required language name', () => {
-    const base = { name: 'English', code: 'ENG', nativeName: '', isActive: true };
+    const base = { name: 'English', code: 'ENG', nativeName: '', imageUrl: '', isActive: true };
     const next = { ...base, name: ' British English ', code: '' };
     expect(languagePatch(diffValues(base, next), next)).toEqual({
       name: 'British English',
       code: null,
     });
+  });
+
+  it('sends a chosen language image, and null when it is removed', () => {
+    const base = { name: 'English', code: '', nativeName: '', imageUrl: '/img/cat-1.jpg', isActive: true };
+    const changed = { ...base, imageUrl: '/img/eng/english.jpg' };
+    expect(languagePatch(diffValues(base, changed), changed)).toEqual({ imageUrl: '/img/eng/english.jpg' });
+    const removed = { ...base, imageUrl: '' };
+    expect(languagePatch(diffValues(base, removed), removed)).toEqual({ imageUrl: null });
   });
 
   it('converts exam dates to ISO and places to numbers or null', () => {

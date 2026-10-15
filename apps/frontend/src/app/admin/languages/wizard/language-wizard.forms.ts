@@ -17,6 +17,7 @@ export type LanguageForm = FormGroup<{
   name: FormControl<string>;
   code: FormControl<string>;
   nativeName: FormControl<string>;
+  imageUrl: FormControl<string>;
   isActive: FormControl<boolean>;
 }>;
 
@@ -48,6 +49,7 @@ export const EMPTY_LANGUAGE: LanguageValues = {
   name: '',
   code: '',
   nativeName: '',
+  imageUrl: '',
   isActive: true,
 };
 
@@ -75,6 +77,7 @@ export function createLanguageForm(values: LanguageValues = EMPTY_LANGUAGE): Lan
     name: text(values.name, [Validators.required, Validators.maxLength(100)]),
     code: text(values.code, [Validators.maxLength(20)]),
     nativeName: text(values.nativeName, [Validators.maxLength(100)]),
+    imageUrl: text(values.imageUrl, [Validators.maxLength(255)]),
     isActive: flag(values.isActive),
   });
 }

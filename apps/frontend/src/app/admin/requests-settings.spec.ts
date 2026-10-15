@@ -273,6 +273,8 @@ describe('SiteSettingsPageComponent', () => {
 
   it('converts form values to the API shape: blanks become null, counts numbers, dates ISO', () => {
     const body = toSiteSettingsBody({
+      heroTitle: ' Welcome ',
+      heroSubtitle: '',
       contactEmail: ' info@orizzonti.tn ',
       contactPhone: '',
       contactAddress: '',
@@ -285,6 +287,8 @@ describe('SiteSettingsPageComponent', () => {
       nextSessionDate: '2026-11-01T09:00',
     });
     expect(body).toEqual({
+      heroTitle: 'Welcome',
+      heroSubtitle: null,
       contactEmail: 'info@orizzonti.tn',
       contactPhone: null,
       contactAddress: null,
@@ -315,6 +319,7 @@ describe('SiteSettingsPageComponent', () => {
     expect(req.request.body.contactEmail).toBe('info@orizzonti.tn');
     expect(req.request.body.studentsCount).toBe(300);
     expect(req.request.body.aboutText).toBeNull();
+    expect(req.request.body.heroTitle).toBeNull();
     req.flush(EMPTY);
   });
 

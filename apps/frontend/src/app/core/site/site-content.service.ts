@@ -1,11 +1,14 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { SiteSettings } from '../../services/orizzonti-api.service';
+import { LanguageItem, SiteSettings } from '../../services/orizzonti-api.service';
 import { API_BASE_URL } from '../api/api.config';
 import { SKIP_ERROR_TOAST } from '../http/http-context.tokens';
 
 /** Shown whenever the admin has not filled a field in (or the API is unreachable). */
 export const SITE_DEFAULTS = {
+  heroTitle: 'Orizzonti',
+  heroSubtitle:
+    'Italian language classes, communication skills, and courses in other languages.',
   email: 'info@orizzonti.tn',
   headerPhone: '+216 24 422 753 · +216 36 239 750',
   phone: '+216 24 422 753',
@@ -33,6 +36,22 @@ export class SiteContentService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
   private readonly settings = signal<SiteSettings | null>(null);
+  private readonly languages = signal<readonly LanguageItem[]>([]);
+
+  readonly heroTitle = computed(() => text(this.settings()?.heroTitle) ?? SITE_DEFAULTS.heroTitle);
+  readonly heroSubtitle = computed(
+    () => text(this.settings()?.heroSubtitle) ?? SITE_DEFAULTS.heroSubtitle,
+  );
+
+  /** Active languages for the footer list; empty until loaded (the footer then keeps its built-in list). */
+  readonly footerLanguages = computed(() =>
+    this.languages()
+      .filter((language) => language.isActive !== false && language.id !== undefined)
+      .map((language) => ({
+        id: language.id as number,
+        label: language.nativeName?.trim() || language.name,
+      })),
+  );
 
   readonly email = computed(() => text(this.settings()?.contactEmail) ?? SITE_DEFAULTS.email);
   readonly headerPhone = computed(
@@ -88,13 +107,14 @@ export class SiteContentService {
   }
 
   private load(): void {
-    this.http
-      .get<SiteSettings>(`${this.baseUrl}/site-settings`, {
-        context: new HttpContext().set(SKIP_ERROR_TOAST, true),
-      })
-      .subscribe({
-        next: (settings) => this.settings.set(settings),
-        error: () => this.settings.set(null),
-      });
+    const context = new HttpContext().set(SKIP_ERROR_TOAST, true);
+    this.http.get<SiteSettings>(`${this.baseUrl}/site-settings`, { context }).subscribe({
+      next: (settings) => this.settings.set(settings),
+      error: () => this.settings.set(null),
+    });
+    this.http.get<LanguageItem[]>(`${this.baseUrl}/languages`, { context }).subscribe({
+      next: (languages) => this.languages.set(languages),
+      error: () => this.languages.set([]),
+    });
   }
 }

@@ -41,6 +41,7 @@ import { LanguageWizardStore } from './language-wizard.store';
   styles: `
     :host {
       display: grid;
+      grid-template-columns: minmax(0, 1fr);
       gap: 1.25rem;
     }
     .group {

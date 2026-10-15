@@ -24,6 +24,7 @@
 
 .content {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   align-content: start;
   padding: 1.25rem 1.5rem 2rem;
@@ -38,17 +39,23 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* Closed: off-screen AND hidden, so keyboard and screen-reader users cannot reach its links. */
   .sidebar {
     position: fixed;
     z-index: 30;
     left: 0;
     width: 240px;
     transform: translateX(-100%);
-    transition: transform 160ms ease;
+    visibility: hidden;
+    transition:
+      transform 160ms ease,
+      visibility 0s linear 160ms;
   }
 
   .sidebar-open .sidebar {
     transform: translateX(0);
+    visibility: visible;
+    transition-delay: 0s;
   }
 
   .sidebar-open .backdrop {

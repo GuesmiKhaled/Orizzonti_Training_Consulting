@@ -29,6 +29,8 @@ export const orNull = (value: string): string | null => value.trim() || null;
 export const toCount = (value: string): number | null => (value.trim() ? Number(value) : null);
 
 export function toSiteSettingsBody(v: {
+  heroTitle: string;
+  heroSubtitle: string;
   contactEmail: string;
   contactPhone: string;
   contactAddress: string;
@@ -41,6 +43,8 @@ export function toSiteSettingsBody(v: {
   nextSessionDate: string;
 }): SiteSettings {
   return {
+    heroTitle: orNull(v.heroTitle),
+    heroSubtitle: orNull(v.heroSubtitle),
     contactEmail: orNull(v.contactEmail),
     contactPhone: orNull(v.contactPhone),
     contactAddress: orNull(v.contactAddress),
@@ -71,6 +75,8 @@ export class SiteSettingsPageComponent implements OnInit {
   protected readonly saving = signal(false);
 
   protected readonly form = new FormGroup({
+    heroTitle: text(Validators.maxLength(150)),
+    heroSubtitle: text(Validators.maxLength(300)),
     contactEmail: text(Validators.email, Validators.maxLength(200)),
     contactPhone: text(Validators.pattern(/^[+\d\s().-]*$/), Validators.maxLength(100)),
     contactAddress: text(Validators.maxLength(300)),
@@ -127,6 +133,8 @@ export class SiteSettingsPageComponent implements OnInit {
   private apply(s: SiteSettings): void {
     const num = (value: number | null): string => (value === null ? '' : String(value));
     this.form.reset({
+      heroTitle: s.heroTitle ?? '',
+      heroSubtitle: s.heroSubtitle ?? '',
       contactEmail: s.contactEmail ?? '',
       contactPhone: s.contactPhone ?? '',
       contactAddress: s.contactAddress ?? '',

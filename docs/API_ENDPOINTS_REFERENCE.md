@@ -1233,3 +1233,10 @@ For API issues or questions:
 - The login response and `GET /auth/profile` include `mustChangePassword`. While it is `true` every endpoint except `GET /auth/profile` and `POST /auth/change-password` returns `403 Password change required`.
 - `GET /blogs` and `GET /blogs/:id` return published posts only. `GET /blogs/manage` and `GET /blogs/manage/:id` (permission `manage_blog`) include drafts.
 - Rate limits return `429`: login 5/min, change-password 5/min, contact, course request and exam registration 5 per 10 min, other routes 600/min (per IP).
+
+## Phase 6 addendum
+
+- `GET /media` (public) now returns **active** slider images only, newest first, and feeds the home carousel. `GET /media/manage` (`manage_media`) returns every image including hidden ones.
+- Languages have an optional `imageUrl`: a path from the site image library (for example `/img/cat-1.jpg`). It is accepted on `POST /languages`, `PATCH /languages/:id` (`null` removes it) and inside `POST /languages/wizard`; anything else returns 400.
+- `GET /site-settings` / `PATCH /site-settings` gain `heroTitle` (max 150) and `heroSubtitle` (max 300); `null` clears them.
+- The Postman collection in `docs/postman` covers all 64 routes with saved examples for success and error responses.

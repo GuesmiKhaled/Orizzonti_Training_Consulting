@@ -68,6 +68,7 @@ import { LanguageWizardComponent } from './wizard/language-wizard.component';
   styles: `
     :host {
       display: grid;
+      grid-template-columns: minmax(0, 1fr);
       gap: 1rem;
     }
   `,
