@@ -1,0 +1,47 @@
+<a class="brand" routerLink="/admin" aria-label="Orizzonti backoffice home">
+  ORIZZONTI
+</a>
+
+<nav aria-label="Backoffice sections">
+  @for (item of items(); track item.label) {
+    @if (item.children; as children) {
+      <section class="group">
+        <p class="group-title">
+          <i class="fa" [class]="item.icon" aria-hidden="true"></i>
+          {{ item.label }}
+        </p>
+        <ul>
+          @for (child of children; track child.label) {
+            <li>
+              <a
+                class="sub-link"
+                [routerLink]="child.route"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                (click)="navigated.emit()"
+              >
+                {{ child.label }}
+              </a>
+            </li>
+          }
+        </ul>
+      </section>
+    } @else {
+      <a
+        class="top-link"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="navigated.emit()"
+      >
+        <i class="fa" [class]="item.icon" aria-hidden="true"></i>
+        {{ item.label }}
+      </a>
+    }
+  }
+</nav>
+
+<a class="classic-link" routerLink="/admin/legacy" (click)="navigated.emit()">
+  <i class="fa fa-history" aria-hidden="true"></i>
+  Classic dashboard
+</a>

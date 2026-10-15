@@ -19,6 +19,7 @@
     <script src="runtime-config.js"></script>
     <script>
       const legacyTheme = document.createElement("link");
+      legacyTheme.id = "legacy-theme";
       legacyTheme.rel = "stylesheet";
       legacyTheme.href = "/legacy-css/style.css";
       document.head.appendChild(legacyTheme);

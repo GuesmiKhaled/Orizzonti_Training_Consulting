@@ -7,8 +7,7 @@ import { BlogPageComponent } from './pages/blog-page/blog-page.component';
 import { BlogDetailPageComponent } from './pages/blog-detail-page/blog-detail-page.component';
 import { LanguageDetailPageComponent } from './pages/language-detail-page/language-detail-page.component';
 import { AdminLoginPageComponent } from './pages/admin-login-page/admin-login-page.component';
-import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
-import { AdminGuard } from './guards/admin.guard';
+import { authGuard } from './core/auth/auth.guards';
 
 export const routes: Routes = [
   { path: '', component: HomePageComponent },
@@ -21,8 +20,9 @@ export const routes: Routes = [
   { path: 'login', component: AdminLoginPageComponent },
   {
     path: 'admin',
-    component: AdminDashboardComponent,
-    canActivate: [AdminGuard],
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },
   { path: '**', redirectTo: '' },
 ];

@@ -1,0 +1,28 @@
+<div class="shell" [class.sidebar-open]="sidebarOpen()">
+  <app-admin-sidebar
+    class="sidebar"
+    [items]="nav()"
+    (navigated)="closeSidebar()"
+  />
+
+  @if (sidebarOpen()) {
+    <button
+      type="button"
+      class="backdrop"
+      aria-label="Close navigation"
+      (click)="closeSidebar()"
+    ></button>
+  }
+
+  <div class="main">
+    <app-admin-topbar
+      [userLabel]="userLabel()"
+      (menuToggled)="toggleSidebar()"
+      (loggedOut)="logout()"
+    />
+    <main class="content">
+      <app-admin-breadcrumbs />
+      <router-outlet />
+    </main>
+  </div>
+</div>

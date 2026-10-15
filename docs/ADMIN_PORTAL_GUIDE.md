@@ -611,3 +611,10 @@ For technical issues or feature requests:
 - `errorInterceptor` shows a toast for network errors, 5xx and 4xx (except 401). Callers that render their own inline error set `SKIP_ERROR_TOAST` in the request `HttpContext`.
 - `core/api/crud.service.ts` is the generic REST base (`list/get/create/update(PATCH)/remove`); entity services live in `core/api/entities/`. The legacy `OrizzontiApiService` is still used by the existing pages until they are migrated.
 - Admin design tokens are CSS variables (`--adm-*`) in `shared/styles/design-tokens.scss`. `base.scss` and `components.scss` are loaded globally, but their rules are nested under `.admin-theme` so they cannot restyle the public Bootstrap-based site.
+
+## Admin shell and routing (Phase 2)
+
+- `/admin` lazy-loads `src/app/admin/admin.routes.ts`: `AdminLayoutComponent` (sidebar, top bar, breadcrumbs) with one lazy child route per section. Each child has a `canMatch` `permissionGuard(...)`; users without the permission are sent to `/admin/forbidden`.
+- The sidebar is driven by `src/app/admin/nav.config.ts` and filtered by the signed-in user's permissions.
+- Sections not yet rebuilt show a placeholder with a link into the classic dashboard (`/admin/legacy?section=<name>`), which keeps working unchanged until every section is migrated.
+- The layout disables the public Bootstrap stylesheet (`#legacy-theme`) while the admin is open and restores it on leave.

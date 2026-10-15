@@ -1298,7 +1298,12 @@ export class AdminDashboardComponent implements OnInit {
           'exam-registrations',
           'mail',
         ].find((section) => this.hasSectionPermission(section));
-        this.activeSection = firstSection ?? 'overview';
+        const requested: unknown = this.router.parseUrl(this.router.url)
+          .queryParams['section'];
+        this.activeSection =
+          typeof requested === 'string' && this.hasSectionPermission(requested)
+            ? requested
+            : (firstSection ?? 'overview');
         this.loadSection();
       },
       error: () => {
