@@ -654,4 +654,78 @@
     }
   }
 }
+
+// ============================================================================
+// UI KIT: FORM FIELD (app-form-field)
+// ============================================================================
+
+.ui-field {
+  display: grid;
+  gap: $space-1;
+  margin: 0;
+  color: $color-gray-700;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-normal;
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: $space-2 $space-3;
+    border: 1px solid $input-border-color;
+    border-radius: $radius-md;
+    background-color: $input-bg-color;
+    color: $input-text-color;
+    font-size: $font-size-sm;
+    transition: border-color $transition-fast, background-color $transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px color-mix(in srgb, #{$color-primary} 10%, transparent);
+    }
+  }
+
+  &__required {
+    margin-left: $space-1;
+    color: $color-error;
+  }
+
+  &__was {
+    margin-left: $space-1;
+    color: $color-gray-500;
+  }
+
+  &--changed {
+    input,
+    select,
+    textarea {
+      border-color: $color-warning;
+      background-color: $color-warning-light;
+    }
+  }
+
+  &--invalid {
+    input,
+    select,
+    textarea {
+      border-color: $color-error;
+    }
+  }
+
+}
+
+.ui-field__error,
+.ui-field__hint {
+  margin: $space-1 0 0;
+  font-size: $font-size-xs;
+}
+
+.ui-field__error {
+  color: $color-error;
+}
+
+.ui-field__hint {
+  color: $color-gray-500;
+}
 }

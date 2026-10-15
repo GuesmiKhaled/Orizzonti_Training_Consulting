@@ -1,0 +1,72 @@
+.steps {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.75rem;
+
+  &.last {
+    flex: 0 0 auto;
+  }
+}
+
+.step-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1f2937;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.circle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #374151;
+  color: #fff;
+  font-weight: 600;
+}
+
+[data-state='done'] .circle {
+  background: var(--adm-success);
+}
+
+[data-state='active'] .circle {
+  background: var(--adm-primary);
+}
+
+.changes {
+  min-width: 1.4rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--adm-radius-pill);
+  background: var(--adm-warning-light);
+  color: #b45309;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.line {
+  flex: 1;
+  height: 1px;
+  background: #9ca3af;
+}

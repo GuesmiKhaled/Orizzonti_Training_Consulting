@@ -618,3 +618,16 @@ For technical issues or feature requests:
 - The sidebar is driven by `src/app/admin/nav.config.ts` and filtered by the signed-in user's permissions.
 - Sections not yet rebuilt show a placeholder with a link into the classic dashboard (`/admin/legacy?section=<name>`), which keeps working unchanged until every section is migrated.
 - The layout disables the public Bootstrap stylesheet (`#legacy-theme`) while the admin is open and restores it on leave.
+
+## Shared UI kit (Phase 3)
+
+Reusable standalone, OnPush components in `src/app/shared/ui/` (import from `shared/ui`). A live reference is at `/admin/ui-kit` (requires `manage_permissions`; not in the sidebar).
+
+| Component | Purpose |
+| --- | --- |
+| `app-data-table` | Search, sort, pagination, row actions, status-tag columns, `[table-toolbar]` slot, custom cells via `<ng-template appCell="key">`. `mode="client"` handles everything locally; `mode="server"` shows the given page, uses `total`, and the parent reacts to `queryChange`. |
+| `app-page-header`, `app-stat-card`, `app-status-tag`, `app-change-badge` | Headers (with `[actions]` slot), KPI cards, tone pills, New/Modified/Unchanged badges. |
+| `app-form-field` | Label, projected control, hint/error, amber `changed` state and `(was X)` hint. Control styles are the `.ui-field` rules in `components.scss`. |
+| `app-modal-shell`, `app-confirm-dialog` | Accessible dialog: focus moves in and is restored, Tab is trapped, Esc and backdrop close it, only the topmost stacked modal reacts to Esc. Render with `@if`. |
+| `app-stepper` | Numbered circles joined by a line (done / active / upcoming) with an optional per-step change count. |
+| `app-image-picker` | Form control (`formControl`) with drag and drop, type/size validation and preview. Pass `[uploader]` to upload; without it the value is a local data URL (preview only) until `POST /media/upload` exists (Phase 6). |

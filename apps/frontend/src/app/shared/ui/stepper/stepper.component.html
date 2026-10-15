@@ -1,0 +1,30 @@
+<ol class="steps" aria-label="Progress">
+  @for (step of steps(); track $index; let i = $index; let last = $last) {
+    <li
+      class="step"
+      [class.last]="last"
+      [attr.data-state]="
+        i < current() ? 'done' : i === current() ? 'active' : 'upcoming'
+      "
+    >
+      <button
+        type="button"
+        class="step-button"
+        [disabled]="!clickable()"
+        [attr.aria-current]="i === current() ? 'step' : null"
+        (click)="stepSelected.emit(i)"
+      >
+        <span class="circle">{{ i + 1 }}</span>
+        <span class="label">{{ step.label }}</span>
+        @if (step.changes) {
+          <span class="changes" [attr.aria-label]="step.changes + ' changes'">
+            {{ step.changes }}
+          </span>
+        }
+      </button>
+      @if (!last) {
+        <span class="line" aria-hidden="true"></span>
+      }
+    </li>
+  }
+</ol>

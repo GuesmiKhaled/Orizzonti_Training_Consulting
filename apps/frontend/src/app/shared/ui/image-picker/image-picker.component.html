@@ -1,0 +1,40 @@
+<div
+  class="zone"
+  [class.dragging]="dragging()"
+  [class.disabled]="disabled()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="dragging.set(false)"
+  (drop)="onDrop($event)"
+>
+  @if (value(); as url) {
+    <img class="preview" [src]="url" alt="Selected image preview" />
+  } @else {
+    <p class="prompt">Drag and drop an image here</p>
+  }
+
+  <div class="actions">
+    <label class="choose btn btn-secondary btn-sm">
+      <input
+        #file
+        class="file-input"
+        type="file"
+        [accept]="accept().join(',')"
+        [disabled]="disabled() || uploading()"
+        (change)="onFilesChosen($event)"
+      />
+      {{ value() ? 'Replace image' : 'Choose image' }}
+    </label>
+    @if (value() && !disabled()) {
+      <button type="button" class="btn btn-ghost-danger btn-sm" (click)="remove()">
+        Remove
+      </button>
+    }
+  </div>
+
+  @if (uploading()) {
+    <p class="status" role="status">Uploading...</p>
+  }
+  @if (error(); as message) {
+    <p class="status error" role="alert">{{ message }}</p>
+  }
+</div>

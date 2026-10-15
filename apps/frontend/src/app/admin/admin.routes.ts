@@ -72,6 +72,15 @@ export const ADMIN_ROUTES: Routes = [
         section('mail', 'Mail settings', 'manage_mail_settings', 'mail'),
       ]),
       {
+        path: 'ui-kit',
+        canMatch: [permissionGuard('manage_permissions')],
+        data: { breadcrumb: 'UI kit' },
+        loadComponent: () =>
+          import('./pages/ui-kit-demo.component').then(
+            (m) => m.UiKitDemoComponent,
+          ),
+      },
+      {
         path: 'forbidden',
         data: { breadcrumb: 'Access denied' },
         loadComponent: () =>
