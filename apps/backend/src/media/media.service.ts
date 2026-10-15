@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SliderMedia } from './media.entity';
+import { CreateMediaDto, UpdateMediaDto } from './dto/create-media.dto';
 
 @Injectable()
 export class MediaService {
@@ -14,11 +15,11 @@ export class MediaService {
     return this.mediaRepository.find({ order: { createdAt: 'DESC' } });
   }
 
-  create(dto: Partial<SliderMedia>) {
+  create(dto: CreateMediaDto) {
     return this.mediaRepository.save(this.mediaRepository.create(dto));
   }
 
-  async update(id: number, dto: Partial<SliderMedia>) {
+  async update(id: number, dto: UpdateMediaDto) {
     const media = await this.mediaRepository.preload({ id, ...dto });
     if (!media) {
       throw new NotFoundException('Slider media not found');

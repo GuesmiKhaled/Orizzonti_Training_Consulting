@@ -1699,7 +1699,8 @@ export class AdminDashboardComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    this.apiService.saveMailSettings(this.mailForm.value).subscribe({
+    const { id: _ignoredId, ...mailBody } = this.mailForm.value;
+    this.apiService.saveMailSettings(mailBody).subscribe({
       next: () => {
         this.setStatus('Mail settings saved successfully.');
         this.isSubmitting = false;
@@ -1717,11 +1718,12 @@ export class AdminDashboardComponent implements OnInit {
     }
 
     const payload = this.blogForm.value;
+    const { id: _ignoredId, ...body } = payload;
     this.isSubmitting = true;
 
     const request = payload.id
-      ? this.apiService.updateBlog(payload.id, payload)
-      : this.apiService.createBlog(payload);
+      ? this.apiService.updateBlog(payload.id, body)
+      : this.apiService.createBlog(body);
 
     request.subscribe({
       next: (created) => {
@@ -1766,11 +1768,12 @@ export class AdminDashboardComponent implements OnInit {
     }
 
     const payload = this.courseForm.value;
+    const { id: _ignoredId, ...body } = payload;
     this.isSubmitting = true;
 
     const request = payload.id
-      ? this.apiService.updateCourse(payload.id, payload)
-      : this.apiService.createCourse(payload);
+      ? this.apiService.updateCourse(payload.id, body)
+      : this.apiService.createCourse(body);
 
     request.subscribe({
       next: (created) => {
@@ -2083,11 +2086,12 @@ export class AdminDashboardComponent implements OnInit {
     }
 
     const payload = this.mediaForm.value;
+    const { id: _ignoredId, ...body } = payload;
     this.isSubmitting = true;
 
     const request = payload.id
-      ? this.apiService.updateMedia(payload.id, payload)
-      : this.apiService.createMedia(payload);
+      ? this.apiService.updateMedia(payload.id, body)
+      : this.apiService.createMedia(body);
 
     request.subscribe({
       next: (created) => {

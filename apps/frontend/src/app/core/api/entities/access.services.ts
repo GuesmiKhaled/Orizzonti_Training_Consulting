@@ -16,6 +16,9 @@ export interface CreateUserDto {
   password: string;
   roleId: number;
   isActive?: boolean;
+  fullName?: string | null;
+  email?: string | null;
+  phone?: string | null;
 }
 
 export type UpdateUserDto = Partial<CreateUserDto>;
@@ -38,9 +41,14 @@ export class UsersService extends CrudService<
     return 'auth/users';
   }
 
-  listPage(page = 0, size = 20, search = ''): Observable<AdminUserPage> {
+  listPage(
+    page = 0,
+    size = 20,
+    search = '',
+    roleId: number | null = null,
+  ): Observable<AdminUserPage> {
     return this.http.get<AdminUserPage>(this.collectionUrl([]), {
-      params: { page, size, search },
+      params: { page, size, search, ...(roleId ? { roleId } : {}) },
     });
   }
 

@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
+import { UpdateBlogDto } from './dto/update-blog.dto';
 import { Public } from '../auth/decorators/public.decorator';
 import { RequirePermission } from '../auth/decorators/require-permission.decorator';
 
@@ -39,7 +40,7 @@ export class BlogController {
   @RequirePermission('manage_blog')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: Partial<CreateBlogDto>,
+    @Body() dto: UpdateBlogDto,
   ) {
     return this.blogService.update(id, dto);
   }

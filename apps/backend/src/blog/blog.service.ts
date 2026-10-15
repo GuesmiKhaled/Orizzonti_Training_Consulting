@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Blog } from './blog.entity';
 import { CreateBlogDto } from './dto/create-blog.dto';
+import { UpdateBlogDto } from './dto/update-blog.dto';
 
 @Injectable()
 export class BlogService {
@@ -31,7 +32,7 @@ export class BlogService {
     return this.blogRepository.save(blog);
   }
 
-  async update(id: number, dto: Partial<CreateBlogDto>) {
+  async update(id: number, dto: UpdateBlogDto) {
     const blog = await this.blogRepository.preload({ id, ...dto });
     if (!blog) {
       throw new NotFoundException('Blog not found');

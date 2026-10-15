@@ -638,3 +638,25 @@ Reusable standalone, OnPush components in `src/app/shared/ui/` (import from `sha
 - Create saves language, levels and exams in one transaction via `POST /languages/wizard`.
 - Edit sends only what changed, with `PATCH`, in dependency order (language, levels, exams). Each success becomes the new baseline, so after a failure a retry sends only what is left. Saved levels/exams are deleted from the Levels/Exams pages, not from the wizard.
 - Diff state lives in `LanguageWizardStore`: typed forms plus the last saved baseline; `diffValues` compares them. A new item counts as one change, a modified one as one per changed field.
+
+## Remaining sections (Phase 5)
+
+| Route | Page | Permission |
+| --- | --- | --- |
+| `/admin/overview` | Stat cards, requests per course, latest requests (names abbreviated) | `view_dashboard` |
+| `/admin/users` | Server-paged users table, search, role filter, add/edit modal | `manage_users` |
+| `/admin/users/roles` | Roles with grouped permissions; `super-admin` is shown as Locked | `manage_roles` |
+| `/admin/users/import` | Mass import: still a placeholder | `manage_users` |
+| `/admin/courses` | Courses table with level and start date, add/edit modal, image upload | `manage_courses` |
+| `/admin/blogs`, `/admin/blogs/new`, `/admin/blogs/:id` | Posts table and editor (publish toggle, cover upload) | `manage_blog` |
+| `/admin/media` | Slider image grid, add/edit modal with upload | `manage_media` |
+| `/admin/requests` | Course requests: review, accept, reject, delete | `manage_course_requests` |
+| `/admin/languages/registrations` | Exam registrations: filter, accept, reject, delete | `manage_course_requests` |
+| `/admin/settings/mail` | SMTP settings; the password is write-only | `manage_mail_settings` |
+| `/admin/settings/site` | Contact details, About text, highlights, next session date | `manage_site_settings` |
+
+- **New permission** `manage_site_settings` is created and given to `super-admin` when the backend starts. Restart the backend once, and other roles can be granted it on the roles page.
+- **Uploads**: `POST /media/upload` (field `file`, max 5 MB) accepts JPEG, PNG, WebP and GIF, identified by file content rather than name or MIME type. Files are stored under a random name in `UPLOAD_DIR` (default `./uploads`; a docker volume in `compose.yaml`) and served read-only from `/uploads`. `UPLOAD_PUBLIC_URL` overrides the origin used in the returned URL.
+- **Users** now have optional `fullName`, `email` and `phone`. The list masks phone numbers (`+216 ••• ••• 753`).
+- The public site does not read `GET /site-settings` yet; that is a later step.
+- The classic dashboard at `/admin/legacy` is kept until the new pages have been verified, then it can be deleted.

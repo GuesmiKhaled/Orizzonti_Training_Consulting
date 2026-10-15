@@ -1,0 +1,38 @@
+<app-modal-shell
+  [title]="course() ? 'Edit course' : 'Add course'"
+  [closeOnBackdrop]="false"
+  (closed)="closed.emit()"
+>
+  <form class="grid" [formGroup]="form" (ngSubmit)="save()" id="course-form">
+    <app-form-field class="span-2" label="Name" [required]="true" [error]="nameError()">
+      <input formControlName="name" />
+    </app-form-field>
+    <app-form-field label="Level" hint="For example A1, B2 or Beginner">
+      <input formControlName="level" />
+    </app-form-field>
+    <app-form-field label="Price">
+      <input formControlName="price" inputmode="decimal" />
+    </app-form-field>
+    <app-form-field label="Start date">
+      <input type="date" formControlName="startDate" />
+    </app-form-field>
+    <app-form-field label="Slug" hint="Leave empty to generate it from the name">
+      <input formControlName="slug" />
+    </app-form-field>
+    <app-form-field class="span-2" label="Description">
+      <textarea formControlName="description" rows="4"></textarea>
+    </app-form-field>
+    <div class="span-2">
+      <app-image-picker formControlName="imageUrl" [uploader]="uploader" />
+    </div>
+  </form>
+
+  <ng-container modal-footer>
+    <button type="button" class="btn btn-ghost" [disabled]="saving()" (click)="closed.emit()">
+      Cancel
+    </button>
+    <button type="submit" form="course-form" class="btn btn-primary" [disabled]="saving()">
+      {{ saving() ? 'Saving...' : course() ? 'Save course' : 'Create course' }}
+    </button>
+  </ng-container>
+</app-modal-shell>

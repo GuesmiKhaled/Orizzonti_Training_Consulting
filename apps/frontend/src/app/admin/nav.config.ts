@@ -92,7 +92,7 @@ export const ADMIN_NAV: readonly NavItem[] = [
       {
         label: 'Site settings',
         route: '/admin/settings/site',
-        permission: 'manage_mail_settings',
+        permission: 'manage_site_settings',
       },
       {
         label: 'Mail settings',

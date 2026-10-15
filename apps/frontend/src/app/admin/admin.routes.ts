@@ -3,10 +3,13 @@ import { Route, Routes } from '@angular/router';
 import { permissionGuard } from '../core/auth/auth.guards';
 import { AdminLayoutComponent } from './layout/admin-layout.component';
 
-/** A lazy, permission-guarded section with its own page component. */
+/**
+ * A lazy, permission-guarded section. A null breadcrumb leaves the parent's
+ * crumb as the last one (used for list pages under a group).
+ */
 function page(
   path: string,
-  breadcrumb: string,
+  breadcrumb: string | null,
   permission: string,
   load: () => Promise<Type<unknown>>,
 ): Route {
@@ -15,38 +18,16 @@ function page(
     ...(path === '' ? { pathMatch: 'full' as const } : {}),
     canMatch: [permissionGuard(permission)],
     loadComponent: load,
-    data: { breadcrumb },
+    data: breadcrumb ? { breadcrumb } : {},
   };
 }
 
-const loadPlaceholder = () =>
-  import('./pages/section-placeholder.component').then(
-    (m) => m.SectionPlaceholderComponent,
-  );
-
-/** A lazy, permission-guarded section. `legacy` deep-links to the classic dashboard. */
-function section(
-  path: string,
-  breadcrumb: string,
-  permission: string,
-  legacy?: string,
-): Route {
-  return {
-    path,
-    ...(path === '' ? { pathMatch: 'full' as const } : {}),
-    canMatch: [permissionGuard(permission)],
-    loadComponent: loadPlaceholder,
-    data: { breadcrumb, legacySection: legacy },
-  };
-}
-
-function group(
-  path: string,
-  breadcrumb: string,
-  children: Routes,
-): Route {
+function group(path: string, breadcrumb: string, children: Routes): Route {
   return { path, data: { breadcrumb }, children };
 }
+
+const placeholder = () =>
+  import('./pages/section-placeholder.component').then((m) => m.SectionPlaceholderComponent);
 
 export const ADMIN_ROUTES: Routes = [
   {
@@ -61,14 +42,22 @@ export const ADMIN_ROUTES: Routes = [
     component: AdminLayoutComponent,
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'overview' },
-      section('overview', 'Overview', 'view_dashboard', 'overview'),
+      page('overview', 'Overview', 'view_dashboard', () =>
+        import('./overview/overview-page.component').then((m) => m.OverviewPageComponent),
+      ),
       group('users', 'Users', [
-        section('', 'Users list', 'manage_users', 'users'),
-        section('import', 'Mass import', 'manage_users'),
-        section('roles', 'Affiliation roles', 'manage_roles', 'roles'),
+        page('', 'Users list', 'manage_users', () =>
+          import('./users/users-page.component').then((m) => m.UsersPageComponent),
+        ),
+        page('import', 'Mass import', 'manage_users', placeholder),
+        page('roles', 'Affiliation roles', 'manage_roles', () =>
+          import('./users/roles/roles-page.component').then((m) => m.RolesPageComponent),
+        ),
       ]),
       group('courses', 'Courses', [
-        section('', 'Courses dashboard', 'manage_courses', 'courses'),
+        page('', 'Courses dashboard', 'manage_courses', () =>
+          import('./courses/courses-page.component').then((m) => m.CoursesPageComponent),
+        ),
       ]),
       group('languages', 'Languages', [
         page('', 'Languages dashboard', 'manage_languages', () =>
@@ -82,28 +71,49 @@ export const ADMIN_ROUTES: Routes = [
         page('exams', 'Exams', 'manage_languages', () =>
           import('./languages/exams-page.component').then((m) => m.ExamsPageComponent),
         ),
-        section(
-          'registrations',
-          'Exam registrations',
-          'manage_course_requests',
-          'exam-registrations',
+        page('registrations', 'Exam registrations', 'manage_course_requests', () =>
+          import('./requests/exam-registrations-page.component').then(
+            (m) => m.ExamRegistrationsPageComponent,
+          ),
         ),
       ]),
-      section('blogs', 'Blogs', 'manage_blog', 'blogs'),
-      section('media', 'Slider media', 'manage_media', 'media'),
-      section('requests', 'Course requests', 'manage_course_requests', 'requests'),
+      group('blogs', 'Blogs', [
+        page('', null, 'manage_blog', () =>
+          import('./blogs/blogs-page.component').then((m) => m.BlogsPageComponent),
+        ),
+        page('new', 'New post', 'manage_blog', () =>
+          import('./blogs/blog-editor-page.component').then((m) => m.BlogEditorPageComponent),
+        ),
+        page(':id', 'Edit post', 'manage_blog', () =>
+          import('./blogs/blog-editor-page.component').then((m) => m.BlogEditorPageComponent),
+        ),
+      ]),
+      page('media', 'Slider media', 'manage_media', () =>
+        import('./media/media-page.component').then((m) => m.MediaPageComponent),
+      ),
+      page('requests', 'Course requests', 'manage_course_requests', () =>
+        import('./requests/course-requests-page.component').then(
+          (m) => m.CourseRequestsPageComponent,
+        ),
+      ),
       group('settings', 'Settings', [
-        section('site', 'Site settings', 'manage_mail_settings'),
-        section('mail', 'Mail settings', 'manage_mail_settings', 'mail'),
+        page('site', 'Site settings', 'manage_site_settings', () =>
+          import('./settings/site-settings-page.component').then(
+            (m) => m.SiteSettingsPageComponent,
+          ),
+        ),
+        page('mail', 'Mail settings', 'manage_mail_settings', () =>
+          import('./settings/mail-settings-page.component').then(
+            (m) => m.MailSettingsPageComponent,
+          ),
+        ),
       ]),
       {
         path: 'ui-kit',
         canMatch: [permissionGuard('manage_permissions')],
         data: { breadcrumb: 'UI kit' },
         loadComponent: () =>
-          import('./pages/ui-kit-demo.component').then(
-            (m) => m.UiKitDemoComponent,
-          ),
+          import('./pages/ui-kit-demo.component').then((m) => m.UiKitDemoComponent),
       },
       {
         path: 'forbidden',

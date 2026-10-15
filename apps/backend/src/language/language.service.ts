@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Language } from './language.entity';
 import { CreateLanguageDto } from './dto/create-language.dto';
+import { UpdateLanguageDto } from './dto/update-language.dto';
 
 @Injectable()
 export class LanguageService {
@@ -27,7 +28,7 @@ export class LanguageService {
     return this.languageRepository.save(this.languageRepository.create(dto));
   }
 
-  async update(id: number, dto: Partial<CreateLanguageDto>) {
+  async update(id: number, dto: UpdateLanguageDto) {
     const language = await this.languageRepository.preload({ id, ...dto });
     if (!language) {
       throw new NotFoundException('Language not found');

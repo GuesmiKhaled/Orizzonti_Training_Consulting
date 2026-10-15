@@ -30,6 +30,9 @@ export interface LoginRequest {
 export interface AuthUser {
   id: number;
   username: string;
+  fullName?: string | null;
+  email?: string | null;
+  phone?: string | null;
   isActive?: boolean;
   roleId?: number | null;
   role?: string;
@@ -67,7 +70,7 @@ export interface BlogItem {
   excerpt?: string;
   content?: string;
   slug?: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   isPublished?: boolean;
   createdAt?: string;
 }
@@ -78,8 +81,9 @@ export interface CourseItem {
   description?: string;
   level?: string;
   price?: string;
+  startDate?: string;
   slug?: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
 }
 
 export interface LanguageItem {
@@ -170,6 +174,29 @@ export interface DashboardStats {
   sliderCount: number;
   courseRequestsCount: number;
   newCourseRequestsCount: number;
+  adminUsersCount?: number;
+  requestsByCourse?: { name: string; count: number }[];
+  latestRequests?: {
+    id: number;
+    applicant: string;
+    courseName: string;
+    status: string;
+    createdAt: string;
+  }[];
+}
+
+export interface SiteSettings {
+  id?: number;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  contactAddress: string | null;
+  facebookUrl: string | null;
+  instagramUrl: string | null;
+  aboutText: string | null;
+  studentsCount: number | null;
+  coursesCount: number | null;
+  yearsOfExperience: number | null;
+  nextSessionDate: string | null;
 }
 
 export interface CourseRequestItem {

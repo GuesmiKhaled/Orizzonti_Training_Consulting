@@ -1,0 +1,87 @@
+<app-page-header title="Roles & permissions" subtitle="Assign permission sets to backoffice roles.">
+  <button actions type="button" class="btn btn-primary" (click)="startNew()">New role</button>
+</app-page-header>
+
+@if (loading()) {
+  <p class="state">Loading roles...</p>
+} @else {
+  <div class="layout">
+    <ul class="role-list" aria-label="Roles">
+      @for (role of roles(); track role.id) {
+        <li [class.selected]="selected()?.id === role.id">
+          <button type="button" class="role-card" (click)="select(role)">
+            <strong>{{ role.name }}</strong>
+            <small>{{ role.description || 'No description' }}</small>
+            <span>{{ role.permissions.length }} permissions</span>
+          </button>
+          @if (role.name === 'super-admin') {
+            <app-status-tag label="Locked" />
+          } @else {
+            <button type="button" class="link danger" (click)="deleting.set(role)">Delete</button>
+          }
+        </li>
+      }
+    </ul>
+
+    <section class="panel">
+      <header class="panel-header">
+        {{ creating() ? 'New role' : 'Edit role: ' + selected()?.name }}
+      </header>
+      <form class="panel-body" [formGroup]="form" (ngSubmit)="save()">
+        <div class="grid">
+          <app-form-field label="Role name" [required]="true" [error]="nameError()">
+            <input formControlName="name" />
+          </app-form-field>
+          <app-form-field label="Description">
+            <input formControlName="description" />
+          </app-form-field>
+        </div>
+
+        @for (group of groups(); track group.title) {
+          <fieldset class="group" [disabled]="locked()">
+            <legend>{{ group.title }}</legend>
+            <div class="perms">
+              @for (permission of group.items; track permission.id) {
+                <label class="perm">
+                  <input
+                    type="checkbox"
+                    [checked]="checked().has(permission.id)"
+                    (change)="toggle(permission.id, $event)"
+                  />
+                  <span>
+                    <strong>{{ label(permission.name) }}</strong>
+                    <small>{{ permission.name }}</small>
+                  </span>
+                </label>
+              }
+            </div>
+          </fieldset>
+        }
+
+        @if (locked()) {
+          <p class="state">The super-admin role always keeps full access and cannot be edited.</p>
+        } @else {
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" (click)="selected() ? select(selected()!) : startNew()">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving()">
+              {{ saving() ? 'Saving...' : 'Save role' }}
+            </button>
+          </div>
+        }
+      </form>
+    </section>
+  </div>
+}
+
+@if (deleting(); as role) {
+  <app-confirm-dialog
+    title="Delete role"
+    [message]="'Delete ' + role.name + '? Users with this role lose its permissions.'"
+    confirmLabel="Delete"
+    [danger]="true"
+    (confirmed)="confirmDelete(role)"
+    (cancelled)="deleting.set(null)"
+  />
+}

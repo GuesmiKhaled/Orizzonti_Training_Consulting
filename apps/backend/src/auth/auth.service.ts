@@ -116,8 +116,19 @@ export class AuthService implements OnModuleInit {
     const page = query.page ?? 0;
     const size = query.size ?? 20;
     const search = query.search?.trim();
+    const role = query.roleId ? { role: { id: query.roleId } } : {};
+    const term = search ? `%${search}%` : null;
+    const where = term
+      ? [
+          { username: Like(term), ...role },
+          { fullName: Like(term), ...role },
+          { email: Like(term), ...role },
+        ]
+      : query.roleId
+        ? role
+        : undefined;
     const [users, total] = await this.adminUserRepository.findAndCount({
-      where: search ? [{ username: Like(`%${search}%`) }] : undefined,
+      where,
       relations: ['role'],
       order: { username: 'ASC' },
       skip: page * size,
@@ -145,6 +156,9 @@ export class AuthService implements OnModuleInit {
       username,
       password: await bcrypt.hash(dto.password, 12),
       isActive: dto.isActive ?? true,
+      fullName: dto.fullName?.trim() || null,
+      email: dto.email?.trim() || null,
+      phone: dto.phone?.trim() || null,
       role,
     });
     return this.toSafeUser(await this.adminUserRepository.save(user));
@@ -179,6 +193,9 @@ export class AuthService implements OnModuleInit {
     if (dto.password) user.password = await bcrypt.hash(dto.password, 12);
     if (dto.isActive !== undefined) user.isActive = dto.isActive;
     if (dto.roleId !== undefined) user.role = nextRole;
+    if (dto.fullName !== undefined) user.fullName = dto.fullName?.trim() || null;
+    if (dto.email !== undefined) user.email = dto.email?.trim() || null;
+    if (dto.phone !== undefined) user.phone = dto.phone?.trim() || null;
 
     return this.toSafeUser(await this.adminUserRepository.save(user));
   }
@@ -351,6 +368,9 @@ export class AuthService implements OnModuleInit {
     return {
       id: user.id,
       username: user.username,
+      fullName: user.fullName ?? null,
+      email: user.email ?? null,
+      phone: user.phone ?? null,
       isActive: user.isActive,
       roleId: user.role?.id ?? null,
       role: user.role?.name ?? null,
@@ -404,6 +424,7 @@ export class AuthService implements OnModuleInit {
       'manage_mail_settings',
       'view_dashboard',
       'manage_course_requests',
+      'manage_site_settings',
       'view_statistics',
     ];
 

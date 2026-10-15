@@ -1218,3 +1218,11 @@ For API issues or questions:
 - `PATCH /languages/:id`, `PATCH .../levels/:levelId`, `PATCH .../exams/:sessionId` now validate against `PartialType` DTOs: unknown fields (for example `id`) return 400.
 - Exam responses from `GET /languages/:id/levels/:levelId/exams[/:sessionId]` include `level: { id, cefrLevel, ... }`.
 - `GET /languages` and `GET /languages/:id` now include `placesLeft`, `isBookable` and `bookingStatus` on the nested exam sessions.
+
+## Phase 5 additions
+
+- `POST /media/upload` (`manage_media`, `manage_blog` or `manage_courses`): multipart field `file`, up to 5 MB, JPEG/PNG/WebP/GIF checked by content. Returns `{ url }`. Files are served from `GET /uploads/<name>`.
+- `GET /site-settings` (public) and `PATCH /site-settings` (`manage_site_settings`): single-row site content. All fields are optional on PATCH; send `null` to clear one.
+- `GET /auth/users` accepts `roleId` and searches username, full name and email. User objects include `fullName`, `email`, `phone`; `POST`/`PATCH /auth/users` accept them (`null` clears on PATCH).
+- `GET /dashboard/stats` adds `adminUsersCount`, `requestsByCourse` (top 5) and `latestRequests` (applicant shown as "First L.").
+- Validated bodies: `POST /media`, `PATCH /media/:id`, `PATCH /blogs/:id`, `PATCH /courses/:id` and `PATCH /settings/mail` reject unknown fields (for example `id`) with 400.

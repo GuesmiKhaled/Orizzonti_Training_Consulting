@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateCourseDto {
   @IsNotEmpty()
@@ -23,5 +29,7 @@ export class CreateCourseDto {
   description?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(255)
   imageUrl?: string;
 }

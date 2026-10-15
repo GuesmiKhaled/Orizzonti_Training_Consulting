@@ -1,0 +1,53 @@
+<app-page-header
+  [title]="postId() ? 'Edit post' : 'New post'"
+  subtitle="Write the article and choose whether it is visible on the site."
+/>
+
+@if (failed()) {
+  <p class="state error" role="alert">Could not load this post.</p>
+} @else if (loading()) {
+  <p class="state">Loading post...</p>
+} @else {
+  <form class="panel" [formGroup]="form" (ngSubmit)="save()">
+    <header class="panel-header">{{ postId() ? 'Post details' : 'New post' }}</header>
+    <div class="panel-body">
+      <app-form-field label="Title" [required]="true" [error]="error('title')">
+        <input formControlName="title" />
+      </app-form-field>
+      <app-form-field
+        label="Slug"
+        hint="Used in the post URL. Leave empty to generate it from the title."
+      >
+        <input formControlName="slug" />
+      </app-form-field>
+      <app-form-field
+        label="Excerpt"
+        [required]="true"
+        [error]="error('excerpt')"
+        [hint]="form.controls.excerpt.value.length + ' / 500'"
+      >
+        <textarea formControlName="excerpt" rows="3"></textarea>
+      </app-form-field>
+      <app-form-field label="Content" [required]="true" [error]="error('content')">
+        <textarea formControlName="content" rows="12"></textarea>
+      </app-form-field>
+
+      <div class="cover">
+        <span class="cover-label">Cover image</span>
+        <app-image-picker formControlName="imageUrl" [uploader]="uploader" />
+      </div>
+
+      <label class="check">
+        <input type="checkbox" formControlName="isPublished" />
+        Published (visible on the public site)
+      </label>
+
+      <div class="actions">
+        <a class="btn btn-ghost" routerLink="/admin/blogs">Cancel</a>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Saving...' : postId() ? 'Save post' : 'Create post' }}
+        </button>
+      </div>
+    </div>
+  </form>
+}
