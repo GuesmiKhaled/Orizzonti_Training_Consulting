@@ -1,3 +1,4 @@
+/// <reference types="jasmine" />
 import { changeCount, changedFieldNames, diffValues } from './language-wizard.diff';
 import {
   examPatch,
