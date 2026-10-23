@@ -14,7 +14,7 @@ import {
 export class CreateLanguageDto {
   @IsNotEmpty()
   @MaxLength(100)
-  name: string;
+  name: string | undefined;
 
   @IsOptional()
   @MaxLength(20)

@@ -3,20 +3,20 @@ import { IsEmail, IsNotEmpty, MaxLength, MinLength } from 'class-validator';
 export class ContactDto {
   @IsNotEmpty()
   @MaxLength(120)
-  name: string;
+  name: string | undefined;
 
   @IsNotEmpty()
   @IsEmail()
   @MaxLength(255)
-  email: string;
+  email: string | undefined;
 
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(200)
-  subject: string;
+  subject: string | undefined;
 
   @IsNotEmpty()
   @MinLength(10)
   @MaxLength(2000)
-  message: string;
+  message: string | undefined;
 }

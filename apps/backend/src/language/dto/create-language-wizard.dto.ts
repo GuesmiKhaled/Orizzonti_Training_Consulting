@@ -21,7 +21,7 @@ export class WizardLevelDto extends CreateLanguageLevelDto {
 export class CreateLanguageWizardDto {
   @ValidateNested()
   @Type(() => CreateLanguageDto)
-  language: CreateLanguageDto;
+  language: CreateLanguageDto | undefined;
 
   @IsOptional()
   @IsArray()

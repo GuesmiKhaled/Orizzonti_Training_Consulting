@@ -10,17 +10,17 @@ import {
 
 export class CreateExamSessionDto {
   @IsDateString()
-  examDate: string;
+  examDate: string | undefined;
 
   @IsOptional()
   @IsString()
   location?: string;
 
   @IsDateString()
-  registrationStartDate: string;
+  registrationStartDate: string | undefined;
 
   @IsDateString()
-  registrationDeadline: string;
+  registrationDeadline: string | undefined;
 
   @IsOptional()
   @IsString()

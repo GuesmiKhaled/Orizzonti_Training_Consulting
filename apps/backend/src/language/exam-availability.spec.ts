@@ -40,7 +40,10 @@ describe('computeAvailability', () => {
   it('is closed after the deadline and before the start', () => {
     expect(
       computeAvailability(base, 0, new Date('2026-10-21T00:00:00Z')),
-    ).toMatchObject({ isBookable: false, bookingStatus: 'Registration closed' });
+    ).toMatchObject({
+      isBookable: false,
+      bookingStatus: 'Registration closed',
+    });
     expect(
       computeAvailability(base, 0, new Date('2026-10-01T00:00:00Z')),
     ).toMatchObject({

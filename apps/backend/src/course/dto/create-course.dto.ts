@@ -10,7 +10,7 @@ export class CreateCourseDto {
   @IsNotEmpty()
   @MinLength(2)
   @MaxLength(200)
-  name: string;
+  name: string | undefined;
 
   @IsOptional()
   slug?: string;
