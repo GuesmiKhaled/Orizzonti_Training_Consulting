@@ -67,16 +67,19 @@ export function assertJwtSecretConfigured(): void {
 }
 
 /**
- * Cookie options. SameSite=None requires Secure, so the deployment must
- * terminate HTTPS in front of the API (or use a local dev cert). The
- * `COOKIE_SECURE` env var lets local HTTP dev disable Secure if needed.
+ * Cookie options. In production (HTTPS) the cookies use `SameSite=None;
+ * Secure` so they travel cross-origin. Browsers reject `SameSite=None`
+ * without `Secure`, so for local HTTP dev (`COOKIE_SECURE=false`) we fall
+ * back to `SameSite=Lax` — the cookies are stored (not rejected) but only
+ * sent same-origin. Local cross-origin dev therefore needs either an
+ * nginx /api reverse proxy (same-origin) or HTTPS with `COOKIE_SECURE=true`.
  */
 export function cookieOptions(maxAgeSeconds: number) {
   const secure = process.env.COOKIE_SECURE !== 'false';
   return {
     httpOnly: true,
     secure,
-    sameSite: 'none' as const,
+    sameSite: secure ? ('none' as const) : ('lax' as const),
     maxAge: maxAgeSeconds * 1000,
     path: '/',
   };
@@ -88,7 +91,7 @@ export function csrfCookieOptions() {
   return {
     httpOnly: false,
     secure,
-    sameSite: 'none' as const,
+    sameSite: secure ? ('none' as const) : ('lax' as const),
     maxAge: REFRESH_TOKEN_TTL_SECONDS * 1000,
     path: '/',
   };
