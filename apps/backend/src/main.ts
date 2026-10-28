@@ -42,7 +42,16 @@ async function bootstrap() {
 
   // Security headers (audit finding #1) and explicit JSON body-size limit
   // (audit finding #6). Helmet sets HSTS, CSP, X-Frame-Options, etc.
-  app.use(helmet());
+  // Relax the cross-origin policies: the frontend and API are on different
+  // origins (different ports), so same-origin/require-corp would block
+  // every API response in the browser (ERR_BLOCKED_BY_RESPONSE.NotSameOrigin).
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginEmbedderPolicy: false,
+      crossOriginOpenerPolicy: { policy: 'unsafe-none' },
+    }),
+  );
   // Cookie parsing required for the cookie-based auth flow (audit finding #4).
   app.use(cookieParser());
   app.useBodyParser('json', { limit: process.env.BODY_SIZE_LIMIT ?? '1mb' });
