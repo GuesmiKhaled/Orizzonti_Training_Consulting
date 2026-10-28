@@ -6,18 +6,18 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { API_BASE_URL } from '../api/api.config';
+import { CsrfTokenService } from './csrf-token.service';
 import { authInterceptor } from './auth.interceptor';
 
 const BASE = 'http://api.test';
-const TOKEN_KEY = 'orizzonti-admin-token';
 
-describe('authInterceptor', () => {
+describe('authInterceptor (cookie-based auth)', () => {
   let http: HttpClient;
   let controller: HttpTestingController;
   let navigate: jasmine.Spy;
+  let csrf: CsrfTokenService;
 
   beforeEach(() => {
-    localStorage.clear();
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
@@ -29,57 +29,56 @@ describe('authInterceptor', () => {
     http = TestBed.inject(HttpClient);
     controller = TestBed.inject(HttpTestingController);
     navigate = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+    csrf = TestBed.inject(CsrfTokenService);
+    csrf.clear();
   });
 
   afterEach(() => {
     controller.verify();
-    localStorage.clear();
+    csrf.clear();
   });
 
-  it('attaches the bearer token to API requests', () => {
-    localStorage.setItem(TOKEN_KEY, 'abc');
+  it('sends withCredentials on API requests', () => {
     http.get(`${BASE}/blogs`).subscribe();
     const req = controller.expectOne(`${BASE}/blogs`);
-    expect(req.request.headers.get('Authorization')).toBe('Bearer abc');
+    expect(req.request.withCredentials).toBeTrue();
     req.flush([]);
   });
 
-  it('sends no header when there is no token', () => {
-    http.get(`${BASE}/blogs`).subscribe();
-    const req = controller.expectOne(`${BASE}/blogs`);
-    expect(req.request.headers.has('Authorization')).toBeFalse();
-    req.flush([]);
-  });
-
-  it('never sends the token to other origins', () => {
-    localStorage.setItem(TOKEN_KEY, 'abc');
+  it('does not send withCredentials to other origins', () => {
     http.get('https://example.org/data').subscribe();
     const req = controller.expectOne('https://example.org/data');
-    expect(req.request.headers.has('Authorization')).toBeFalse();
+    expect(req.request.withCredentials).toBeFalse();
     req.flush({});
   });
 
-  it('keeps an Authorization header that is already set', () => {
-    localStorage.setItem(TOKEN_KEY, 'abc');
-    http
-      .get(`${BASE}/blogs`, { headers: { Authorization: 'Bearer manual' } })
-      .subscribe();
+  it('attaches the CSRF header on POST when a token is available', () => {
+    (csrf as any).cachedToken = 'csrf-abc';
+    http.post(`${BASE}/blogs`, {}).subscribe();
     const req = controller.expectOne(`${BASE}/blogs`);
-    expect(req.request.headers.get('Authorization')).toBe('Bearer manual');
+    expect(req.request.headers.get('x-csrf-token')).toBe('csrf-abc');
+    req.flush({});
+  });
+
+  it('does not attach the CSRF header on GET', () => {
+    (csrf as any).cachedToken = 'csrf-abc';
+    http.get(`${BASE}/blogs`).subscribe();
+    const req = controller.expectOne(`${BASE}/blogs`);
+    expect(req.request.headers.has('x-csrf-token')).toBeFalse();
     req.flush([]);
   });
 
-  it('clears the token and redirects to /login on 401', () => {
-    localStorage.setItem(TOKEN_KEY, 'abc');
-    http.get(`${BASE}/auth/users`).subscribe({ error: () => undefined });
-    controller
-      .expectOne(`${BASE}/auth/users`)
-      .flush({}, { status: 401, statusText: 'Unauthorized' });
-    expect(localStorage.getItem(TOKEN_KEY)).toBeNull();
-    expect(navigate).toHaveBeenCalledWith('/login');
+  it('keeps an existing CSRF header that is already set', () => {
+    (csrf as any).cachedToken = 'csrf-abc';
+    http
+      .post(`${BASE}/blogs`, {}, { headers: { 'x-csrf-token': 'manual' } })
+      .subscribe();
+    const req = controller.expectOne(`${BASE}/blogs`);
+    expect(req.request.headers.get('x-csrf-token')).toBe('manual');
+    req.flush({});
   });
 
-  it('does not redirect when the login request itself returns 401', () => {
+  it('does not redirect on a 401 from the login request', () => {
     http.post(`${BASE}/auth/login`, {}).subscribe({ error: () => undefined });
     controller
       .expectOne(`${BASE}/auth/login`)
@@ -88,12 +87,41 @@ describe('authInterceptor', () => {
   });
 
   it('ignores 401 responses from other origins', () => {
-    localStorage.setItem(TOKEN_KEY, 'abc');
     http.get('https://example.org/x').subscribe({ error: () => undefined });
     controller
       .expectOne('https://example.org/x')
       .flush({}, { status: 401, statusText: 'Unauthorized' });
-    expect(localStorage.getItem(TOKEN_KEY)).toBe('abc');
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('transparently refreshes and retries on a 401 from a protected request', () => {
+    (csrf as any).cachedToken = 'csrf-abc';
+    http.get(`${BASE}/auth/users`).subscribe({
+      next: () => undefined,
+      error: () => undefined,
+    });
+    // First request returns 401.
+    controller
+      .expectOne(`${BASE}/auth/users`)
+      .flush({}, { status: 401, statusText: 'Unauthorized' });
+    // Interceptor calls /auth/refresh.
+    controller.expectOne(`${BASE}/auth/refresh`).flush({});
+    // Then re-fetches the CSRF token.
+    controller.expectOne(`${BASE}/auth/csrf`).flush({ token: 'csrf-new' });
+    // Then retries the original request.
+    const retry = controller.expectOne(`${BASE}/auth/users`);
+    retry.flush([]);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('redirects to /login when refresh also fails', () => {
+    http.get(`${BASE}/auth/users`).subscribe({ error: () => undefined });
+    controller
+      .expectOne(`${BASE}/auth/users`)
+      .flush({}, { status: 401, statusText: 'Unauthorized' });
+    controller
+      .expectOne(`${BASE}/auth/refresh`)
+      .flush({}, { status: 401, statusText: 'Unauthorized' });
+    expect(navigate).toHaveBeenCalledWith('/login');
   });
 });

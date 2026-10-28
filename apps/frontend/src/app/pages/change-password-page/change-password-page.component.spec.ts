@@ -11,7 +11,6 @@ import { ToastService } from '../../core/toast/toast.service';
 import { ChangePasswordPageComponent } from './change-password-page.component';
 
 const BASE = 'http://api.test';
-const TOKEN_KEY = 'orizzonti-admin-token';
 
 describe('ChangePasswordPageComponent', () => {
   let http: HttpTestingController;
@@ -34,8 +33,6 @@ describe('ChangePasswordPageComponent', () => {
   };
 
   beforeEach(() => {
-    localStorage.clear();
-    localStorage.setItem(TOKEN_KEY, 't');
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
@@ -55,7 +52,6 @@ describe('ChangePasswordPageComponent', () => {
   afterEach(() => {
     root.remove();
     http.verify();
-    localStorage.clear();
   });
 
   it('labels every field and hints the minimum length', () => {

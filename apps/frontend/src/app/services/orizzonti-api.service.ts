@@ -1,7 +1,6 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
 import { SKIP_ERROR_TOAST } from '../core/http/http-context.tokens';
 
 declare global {
@@ -61,7 +60,6 @@ export interface AdminUserPage {
 }
 
 export interface AuthResponse {
-  accessToken: string;
   user: AuthUser;
 }
 
@@ -220,7 +218,6 @@ export class OrizzontiApiService {
   private readonly baseUrl = (
     window.__ORIZZONTI_CONFIG__?.apiBaseUrl ?? 'http://localhost:5007'
   ).replace(/\/+$/, '');
-  private readonly tokenKey = 'orizzonti-admin-token';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -237,13 +234,9 @@ export class OrizzontiApiService {
   loginAdmin(payload: LoginRequest): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.baseUrl}/auth/login`, payload, {
+        withCredentials: true,
         context: this.inlineErrors(),
-      })
-      .pipe(
-        tap((response) => {
-          localStorage.setItem(this.tokenKey, response.accessToken);
-        }),
-      );
+      });
   }
 
   getBlogs(): Observable<BlogItem[]> {

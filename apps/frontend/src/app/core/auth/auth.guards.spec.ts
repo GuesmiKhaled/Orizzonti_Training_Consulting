@@ -17,16 +17,16 @@ import {
 import { Observable, firstValueFrom, isObservable, of } from 'rxjs';
 import { API_BASE_URL } from '../api/api.config';
 import { authGuard, permissionGuard, signedInGuard } from './auth.guards';
+import { AuthService } from './auth.service';
 
 const BASE = 'http://api.test';
-const TOKEN_KEY = 'orizzonti-admin-token';
 
-describe('auth guards', () => {
+describe('auth guards (cookie-based auth)', () => {
   let controller: HttpTestingController;
   let router: Router;
+  let auth: AuthService;
 
   beforeEach(() => {
-    localStorage.clear();
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
@@ -37,11 +37,13 @@ describe('auth guards', () => {
     });
     controller = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
+    auth = TestBed.inject(AuthService);
+    auth.reset();
   });
 
   afterEach(() => {
     controller.verify();
-    localStorage.clear();
+    auth.reset();
   });
 
   const run = <T>(factory: () => T): T =>
@@ -64,45 +66,56 @@ describe('auth guards', () => {
   const enter = (guard: CanActivateFn): Promise<boolean | UrlTree> =>
     firstValueFrom(asObservable(run(() => guard({} as never, {} as never))));
 
+  const flushProfile = (
+    profile: Record<string, unknown>,
+    token = 't',
+  ): void => {
+    controller
+      .expectOne(`${BASE}/auth/profile`)
+      .flush(profile, { headers: { 'x-csrf-token': token } });
+  };
+
   describe('signedInGuard', () => {
-    it('allows a request with a token without loading the profile', async () => {
-      localStorage.setItem(TOKEN_KEY, 't');
+    it('allows when a profile is already loaded', async () => {
+      (auth as any).state.set({
+        id: 1,
+        username: 'a',
+        permissions: [],
+        mustChangePassword: false,
+      });
       expect(await enter(signedInGuard)).toBeTrue();
       controller.expectNone(`${BASE}/auth/profile`);
     });
 
-    it('redirects anonymous users to /login', async () => {
-      const result = await enter(signedInGuard);
-      expect(router.serializeUrl(result as UrlTree)).toBe('/login');
+    it('loads the profile and allows when authenticated', async () => {
+      const pending = enter(signedInGuard);
+      flushProfile({ id: 1, username: 'a', permissions: [], mustChangePassword: false });
+      expect(await pending).toBeTrue();
+    });
+
+    it('redirects to /login when the profile is missing', async () => {
+      const pending = enter(signedInGuard);
+      controller
+        .expectOne(`${BASE}/auth/profile`)
+        .flush({}, { status: 401, statusText: 'Unauthorized' });
+      expect(router.serializeUrl((await pending) as UrlTree)).toBe('/login');
     });
   });
 
   describe('authGuard', () => {
     it('allows a signed-in account that is up to date', async () => {
-      localStorage.setItem(TOKEN_KEY, 't');
       const pending = enter(authGuard);
-      controller
-        .expectOne(`${BASE}/auth/profile`)
-        .flush({ id: 1, username: 'a', permissions: [], mustChangePassword: false });
+      flushProfile({ id: 1, username: 'a', permissions: [], mustChangePassword: false });
       expect(await pending).toBeTrue();
     });
 
     it('sends an account that must change its password to /change-password', async () => {
-      localStorage.setItem(TOKEN_KEY, 't');
       const pending = enter(authGuard);
-      controller
-        .expectOne(`${BASE}/auth/profile`)
-        .flush({ id: 1, username: 'a', permissions: [], mustChangePassword: true });
+      flushProfile({ id: 1, username: 'a', permissions: [], mustChangePassword: true });
       expect(router.serializeUrl((await pending) as UrlTree)).toBe('/change-password');
     });
 
-    it('redirects anonymous users to /login without a request', async () => {
-      const result = await enter(authGuard);
-      expect(router.serializeUrl(result as UrlTree)).toBe('/login');
-    });
-
     it('redirects to /login when the profile cannot be loaded', async () => {
-      localStorage.setItem(TOKEN_KEY, 't');
       const pending = enter(authGuard);
       controller
         .expectOne(`${BASE}/auth/profile`)
@@ -112,66 +125,21 @@ describe('auth guards', () => {
   });
 
   describe('permissionGuard', () => {
-    it('redirects to /login without a token (no request)', async () => {
-      const result = await match('manage_blog');
-      expect(router.serializeUrl(result as UrlTree)).toBe('/login');
-    });
-
     it('allows a user holding the permission', async () => {
-      localStorage.setItem(TOKEN_KEY, 't');
       const pending = match('manage_blog');
-      controller.expectOne(`${BASE}/auth/profile`).flush({
-        id: 1,
-        username: 'a',
-        permissions: ['manage_blog'],
-      });
+      flushProfile({ id: 1, username: 'a', permissions: ['manage_blog'] });
       expect(await pending).toBeTrue();
     });
 
     it('redirects to the forbidden page when the permission is missing', async () => {
-      localStorage.setItem(TOKEN_KEY, 't');
       const pending = match('manage_users');
-      controller.expectOne(`${BASE}/auth/profile`).flush({
-        id: 1,
-        username: 'a',
-        permissions: ['manage_blog'],
-      });
+      flushProfile({ id: 1, username: 'a', permissions: ['manage_blog'] });
       expect(router.serializeUrl((await pending) as UrlTree)).toBe(
         '/admin/forbidden',
       );
     });
 
-    it('loads the profile once per token', async () => {
-      localStorage.setItem(TOKEN_KEY, 't');
-      const first = match('manage_blog');
-      controller
-        .expectOne(`${BASE}/auth/profile`)
-        .flush({ id: 1, username: 'a', permissions: ['manage_blog'] });
-      await first;
-      expect(await match('manage_blog')).toBeTrue();
-      controller.expectNone(`${BASE}/auth/profile`);
-    });
-
-    it('reloads the profile when the token changes', async () => {
-      localStorage.setItem(TOKEN_KEY, 't1');
-      const first = match('manage_blog');
-      controller
-        .expectOne(`${BASE}/auth/profile`)
-        .flush({ id: 1, username: 'a', permissions: ['manage_blog'] });
-      await first;
-
-      localStorage.setItem(TOKEN_KEY, 't2');
-      const second = match('manage_blog');
-      controller
-        .expectOne(`${BASE}/auth/profile`)
-        .flush({ id: 2, username: 'b', permissions: [] });
-      expect(router.serializeUrl((await second) as UrlTree)).toBe(
-        '/admin/forbidden',
-      );
-    });
-
     it('redirects to /login when the profile request fails', async () => {
-      localStorage.setItem(TOKEN_KEY, 't');
       const pending = match('manage_blog');
       controller
         .expectOne(`${BASE}/auth/profile`)

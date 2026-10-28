@@ -5,43 +5,49 @@ import { Observable, of, tap } from 'rxjs';
 import { AuthUser } from '../../services/orizzonti-api.service';
 import { API_BASE_URL } from '../api/api.config';
 import { SKIP_ERROR_TOAST } from '../http/http-context.tokens';
-import { TokenStorage } from './token-storage.service';
+import { CsrfTokenService } from './csrf-token.service';
 
+/**
+ * Auth service for the cookie-based auth flow (audit finding #4). The access
+ * and refresh tokens live in httpOnly cookies set by the backend, so this
+ * service no longer touches localStorage. Auth state is derived from the
+ * `/auth/profile` response; `isAuthenticated()` is now async via
+ * `ensureProfile()`.
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
-  private readonly tokens = inject(TokenStorage);
   private readonly router = inject(Router);
+  private readonly csrf = inject(CsrfTokenService);
 
-  private loadedForToken: string | null = null;
   private readonly state = signal<AuthUser | null>(null);
 
   readonly profile = this.state.asReadonly();
   readonly permissions = computed(() => this.state()?.permissions ?? []);
 
+  /**
+   * True only when a profile has been loaded. Guards use this instead of a
+   * token check since the token is no longer readable from JS.
+   */
   isAuthenticated(): boolean {
-    return !!this.tokens.token;
+    return this.state() !== null;
   }
 
   has(permission: string): boolean {
     return this.permissions().includes(permission);
   }
 
-  /** Loads the profile once per token, so a new login never reuses stale permissions. */
+  /** Loads the profile once per session; cached until logout. */
   ensureProfile(): Observable<AuthUser | null> {
-    const token = this.tokens.token;
-    if (!token) {
-      this.reset();
-      return of(null);
-    }
     const current = this.state();
-    if (current && this.loadedForToken === token) {
+    if (current) {
       return of(current);
     }
-    return this.http.get<AuthUser>(`${this.baseUrl}/auth/profile`).pipe(
+    return this.http.get<AuthUser>(`${this.baseUrl}/auth/profile`, {
+      withCredentials: true,
+    }).pipe(
       tap((profile) => {
-        this.loadedForToken = token;
         this.state.set(profile);
       }),
     );
@@ -59,19 +65,26 @@ export class AuthService {
       .post<{ success: boolean }>(
         `${this.baseUrl}/auth/change-password`,
         { currentPassword, newPassword },
-        { context: new HttpContext().set(SKIP_ERROR_TOAST, true) },
+        {
+          withCredentials: true,
+          context: new HttpContext().set(SKIP_ERROR_TOAST, true),
+        },
       )
       .pipe(tap(() => this.reset()));
   }
 
   logout(): void {
-    this.tokens.clear();
+    // Call the backend to clear cookies; fire-and-forget.
+    this.http
+      .post(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true })
+      .subscribe({ error: () => undefined });
+    this.csrf.clear();
     this.reset();
     void this.router.navigateByUrl('/login');
   }
 
-  private reset(): void {
-    this.loadedForToken = null;
+  /** Clears in-memory auth state (used on 401 / logout). */
+  reset(): void {
     this.state.set(null);
   }
 }

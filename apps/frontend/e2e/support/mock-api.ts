@@ -136,8 +136,9 @@ const CATALOG: Record<string, unknown> = {
 
 const CORS = {
   'access-control-allow-origin': ORIGIN,
-  'access-control-allow-headers': 'authorization,content-type',
+  'access-control-allow-headers': 'authorization,content-type,x-csrf-token',
   'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS',
+  'access-control-allow-credentials': 'true',
 };
 
 const json = (route: Route, body: unknown, status = 200) =>
@@ -148,9 +149,15 @@ const json = (route: Route, body: unknown, status = 200) =>
     body: JSON.stringify(body),
   });
 
-/** Signs the browser in (token only; the profile comes from the mocked API). */
+/**
+ * Signs the browser in. With cookie-based auth the app derives auth state from
+ * `/auth/profile` (mocked below), so no localStorage token is needed. We set
+ * the non-HttpOnly CSRF cookie so state-changing requests carry the header.
+ */
 export async function signIn(page: Page): Promise<void> {
-  await page.addInitScript(() => localStorage.setItem('orizzonti-admin-token', 'e2e-token'));
+  await page.addInitScript(() => {
+    document.cookie = 'orizzonti_csrf=e2e-csrf-token; path=/';
+  });
 }
 
 /** Answers every API call from `state`; anything unexpected is recorded and fails the test. */
@@ -175,6 +182,15 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
     }
     if (method === 'GET' && path === '/auth/profile') {
       return json(route, state.profile);
+    }
+    if (method === 'GET' && path === '/auth/csrf') {
+      return json(route, { token: 'e2e-csrf-token' });
+    }
+    if (method === 'POST' && path === '/auth/refresh') {
+      return json(route, { user: state.profile });
+    }
+    if (method === 'POST' && path === '/auth/logout') {
+      return json(route, { success: true });
     }
     if (method === 'GET' && path === '/dashboard/stats') {
       return json(route, {
