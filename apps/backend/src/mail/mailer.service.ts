@@ -36,6 +36,11 @@ export class MailerService {
       secure: implicitTls,
       requireTLS: settings.secure && !implicitTls,
       auth: { user: settings.username, pass: settings.password },
+      // Audit finding #5: bound SMTP operations so a hung mail server does
+      // not tie up request threads (the public contact form depends on it).
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 20_000,
     });
     await transporter.sendMail({
       from: payload.from ?? settings.fromAddress,
