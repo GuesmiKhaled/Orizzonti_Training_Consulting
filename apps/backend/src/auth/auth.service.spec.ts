@@ -24,6 +24,12 @@ describe('AuthService', () => {
       {
         findOne: jest.fn(),
       } as any,
+      {
+        create: jest.fn((entity) => entity),
+        save: jest.fn().mockResolvedValue(undefined),
+        delete: jest.fn().mockResolvedValue(undefined),
+        findOne: jest.fn(),
+      } as any,
     );
 
     const result = await service.login('admin', 'admin123');
@@ -32,5 +38,18 @@ describe('AuthService', () => {
     expect(result.user.role).toBe('super-admin');
     expect(result.user.permissions).toContain('manage_blog');
     expect(result.accessToken).toBeTruthy();
+    expect(result.refreshToken).toBeTruthy();
+  });
+
+  it('revokes all refresh tokens for a user', async () => {
+    const deleteSpy = jest.fn().mockResolvedValue(undefined);
+    const service = new AuthService(
+      {} as any,
+      {} as any,
+      {} as any,
+      { delete: deleteSpy } as any,
+    );
+    await service.revokeAllUserTokens(42);
+    expect(deleteSpy).toHaveBeenCalledWith({ userId: 42 });
   });
 });

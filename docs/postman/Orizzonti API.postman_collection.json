@@ -166,9 +166,8 @@
                 "exec": [
                   "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
                   "const json = pm.response.json();",
-                  "pm.collectionVariables.set(\"accessToken\", json.accessToken);",
                   "pm.collectionVariables.set(\"mustChangePassword\", String(json.user.mustChangePassword));",
-                  "pm.test(\"A token is returned\", () => pm.expect(json.accessToken).to.be.a(\"string\"));",
+                  "pm.test(\"A user object is returned\", () => pm.expect(json.user).to.be.an(\"object\"));",
                   "if (json.user.mustChangePassword) { console.warn(\"This account must change its password: run \\\"Change password\\\" now.\"); }"
                 ]
               }
@@ -250,7 +249,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 1,\n    \"username\": \"admin\",\n    \"fullName\": \"Amel Ben Ali\",\n    \"email\": \"amel@example.com\",\n    \"phone\": \"+216 20 000 000\",\n    \"isActive\": true,\n    \"mustChangePassword\": false,\n    \"roleId\": 2,\n    \"role\": \"super-admin\",\n    \"permissions\": [\n      \"manage_users\",\n      \"manage_blog\",\n      \"...\"\n    ],\n    \"createdAt\": \"2026-10-01T09:00:00.000Z\",\n    \"updatedAt\": \"2026-10-01T09:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"user\": {\n    \"id\": 1,\n    \"username\": \"admin\",\n    \"fullName\": \"Amel Ben Ali\",\n    \"email\": \"amel@example.com\",\n    \"phone\": \"+216 20 000 000\",\n    \"isActive\": true,\n    \"mustChangePassword\": false,\n    \"roleId\": 2,\n    \"role\": \"super-admin\",\n    \"permissions\": [\n      \"manage_users\",\n      \"manage_blog\",\n      \"...\"\n    ],\n    \"createdAt\": \"2026-10-01T09:00:00.000Z\",\n    \"updatedAt\": \"2026-10-01T09:00:00.000Z\"\n  }\n}"
             },
             {
               "name": "201 Signed in, password change required",
@@ -295,7 +294,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 1,\n    \"username\": \"admin\",\n    \"fullName\": \"Amel Ben Ali\",\n    \"email\": \"amel@example.com\",\n    \"phone\": \"+216 20 000 000\",\n    \"isActive\": true,\n    \"mustChangePassword\": true,\n    \"roleId\": 2,\n    \"role\": \"super-admin\",\n    \"permissions\": [\n      \"manage_blog\"\n    ],\n    \"createdAt\": \"2026-10-01T09:00:00.000Z\",\n    \"updatedAt\": \"2026-10-01T09:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"user\": {\n    \"id\": 1,\n    \"username\": \"admin\",\n    \"fullName\": \"Amel Ben Ali\",\n    \"email\": \"amel@example.com\",\n    \"phone\": \"+216 20 000 000\",\n    \"isActive\": true,\n    \"mustChangePassword\": true,\n    \"roleId\": 2,\n    \"role\": \"super-admin\",\n    \"permissions\": [\n      \"manage_blog\"\n    ],\n    \"createdAt\": \"2026-10-01T09:00:00.000Z\",\n    \"updatedAt\": \"2026-10-01T09:00:00.000Z\"\n  }\n}"
             },
             {
               "name": "401 Unauthorized",
@@ -435,6 +434,114 @@
               ],
               "cookie": [],
               "body": "{\n  \"statusCode\": 429,\n  \"message\": \"ThrottlerException: Too Many Requests\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh (rotates cookies)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{apiBaseUrl}}/auth/refresh",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "auth": { "type": "noauth" },
+            "description": "Exchanges the `orizzonti_refresh` httpOnly cookie for a new access+refresh cookie pair. Limited to 5/min per IP. Returns 401 if the refresh cookie is missing or invalid."
+          },
+          "response": [
+            {
+              "name": "200 Refreshed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": { "raw": "{{apiBaseUrl}}/auth/refresh", "host": ["{{apiBaseUrl}}"], "path": ["auth", "refresh"] },
+                "auth": { "type": "noauth" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"user\": {\n    \"id\": 1,\n    \"username\": \"admin\",\n    \"permissions\": [\"manage_users\", \"manage_blog\"],\n    \"mustChangePassword\": false\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": { "raw": "{{apiBaseUrl}}/auth/refresh", "host": ["{{apiBaseUrl}}"], "path": ["auth", "refresh"] },
+                "auth": { "type": "noauth" }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"type\": \"about:blank\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"Invalid or expired refresh token\",\n  \"message\": \"Invalid or expired refresh token\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout (clears cookies)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{apiBaseUrl}}/auth/logout",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "auth": { "type": "noauth" },
+            "description": "Clears the `orizzonti_access`, `orizzonti_refresh` and `orizzonti_csrf` cookies AND revokes the refresh token's jti in the server-side allowlist, so it cannot be reused even if the cookie is captured. Public; no body required. Refresh tokens are also revoked automatically on password change, password reset by an admin, account deactivation, and account deletion."
+          },
+          "response": [
+            {
+              "name": "200 Logged out",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": { "raw": "{{apiBaseUrl}}/auth/logout", "host": ["{{apiBaseUrl}}"], "path": ["auth", "logout"] },
+                "auth": { "type": "noauth" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get CSRF token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiBaseUrl}}/auth/csrf",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["auth", "csrf"]
+            },
+            "auth": { "type": "noauth" },
+            "description": "Returns a double-submit CSRF token and sets the `orizzonti_csrf` cookie (non-HttpOnly). The client must send the token back via the `x-csrf-token` header on state-changing requests. Call once after login/refresh."
+          },
+          "response": [
+            {
+              "name": "200 Token",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{apiBaseUrl}}/auth/csrf", "host": ["{{apiBaseUrl}}"], "path": ["auth", "csrf"] },
+                "auth": { "type": "noauth" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"token\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\"\n}"
             }
           ]
         },

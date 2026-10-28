@@ -10,6 +10,10 @@ export function configureUploads(app: NestExpressApplication): void {
     setHeaders: (response) => {
       response.setHeader('X-Content-Type-Options', 'nosniff');
       response.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      // Allow cross-origin reads of uploaded images. The frontend and API
+      // are on different origins (different ports); without this header the
+      // browser blocks the image with ERR_BLOCKED_BY_RESPONSE.NotSameOrigin.
+      response.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
     },
   });
 }

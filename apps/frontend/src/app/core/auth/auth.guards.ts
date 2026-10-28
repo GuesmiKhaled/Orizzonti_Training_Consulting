@@ -3,23 +3,30 @@ import { CanActivateFn, CanMatchFn, Router } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
 import { AuthService } from './auth.service';
 
-/** Requires a token only; anonymous users are sent to /login. */
+/**
+ * Requires a loaded profile; anonymous users are sent to /login. With the
+ * cookie-based auth flow there is no readable token, so this calls
+ * `ensureProfile()` to determine auth state.
+ */
 export const signedInGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  return auth.isAuthenticated() ? true : router.parseUrl('/login');
+  if (auth.isAuthenticated()) {
+    return true;
+  }
+  return auth.ensureProfile().pipe(
+    map((profile) => (profile ? true : router.parseUrl('/login'))),
+    catchError(() => of(router.parseUrl('/login'))),
+  );
 };
 
 /**
- * Guards the admin area: needs a token, and an account that must pick a new
+ * Guards the admin area: needs a profile, and an account that must pick a new
  * password is sent to /change-password before anything else loads.
  */
 export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  if (!auth.isAuthenticated()) {
-    return router.parseUrl('/login');
-  }
   return auth.ensureProfile().pipe(
     map((profile) => {
       if (!profile) {

@@ -7,7 +7,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { AdminLoginPageComponent } from './admin-login-page.component';
 
-describe('AdminLoginPageComponent', () => {
+describe('AdminLoginPageComponent (cookie-based auth)', () => {
   let http: HttpTestingController;
   let root: HTMLElement;
   let fixture: ComponentFixture<AdminLoginPageComponent>;
@@ -27,14 +27,13 @@ describe('AdminLoginPageComponent', () => {
 
   const respond = (mustChangePassword: boolean): void => {
     const req = http.expectOne((r) => r.url.endsWith('/auth/login'));
+    expect(req.request.withCredentials).toBeTrue();
     req.flush({
-      accessToken: 'token',
       user: { id: 1, username: 'admin', permissions: [], mustChangePassword },
     });
   };
 
   beforeEach(() => {
-    localStorage.clear();
     TestBed.configureTestingModule({
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
@@ -49,14 +48,12 @@ describe('AdminLoginPageComponent', () => {
   afterEach(() => {
     root.remove();
     http.verify();
-    localStorage.clear();
   });
 
   it('goes to the admin area after a normal login', () => {
     signIn();
     respond(false);
     expect(navigate).toHaveBeenCalledWith('/admin');
-    expect(localStorage.getItem('orizzonti-admin-token')).toBe('token');
   });
 
   it('sends an account with a temporary password to the change-password page', () => {
@@ -65,9 +62,9 @@ describe('AdminLoginPageComponent', () => {
     expect(navigate).toHaveBeenCalledWith('/change-password');
   });
 
-  it('does not keep the user profile in local storage', () => {
+  it('does not store the token in local storage', () => {
     signIn();
     respond(false);
-    expect(localStorage.getItem('orizzonti-admin-profile')).toBeNull();
+    expect(localStorage.getItem('orizzonti-admin-token')).toBeNull();
   });
 });

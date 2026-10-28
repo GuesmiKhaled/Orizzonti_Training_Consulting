@@ -67,7 +67,8 @@ function makeAuth() {
     save: jest.fn(async (entity: object) => entity),
   };
   const roles = { findOne: jest.fn().mockResolvedValue({ id: 1, name: 'super-admin', permissions: [] }) };
-  const service = new AuthService(users as never, roles as never, {} as never);
+  const refreshTokens = { delete: jest.fn().mockResolvedValue(undefined), save: jest.fn().mockResolvedValue(undefined), create: jest.fn((e: object) => e), findOne: jest.fn() };
+  const service = new AuthService(users as never, roles as never, {} as never, refreshTokens as never);
   return { service, users, roles };
 }
 

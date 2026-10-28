@@ -9,13 +9,21 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Like, Repository } from 'typeorm';
+import { In, LessThan, Like, Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { MIN_PASSWORD_LENGTH, getJwtSecret } from './auth.constants';
+import { randomUUID } from 'node:crypto';
+import {
+  ACCESS_TOKEN_TTL,
+  MIN_PASSWORD_LENGTH,
+  REFRESH_TOKEN_TTL_SECONDS,
+  getJwtSecret,
+  getRefreshTokenSecret,
+} from './auth.constants';
 import { AdminUser } from './admin-user.entity';
 import { Permission } from './permission.entity';
 import { Role } from './role.entity';
+import { RefreshToken } from './refresh-token.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 import { ListAdminUsersDto } from './dto/list-admin-users.dto';
@@ -40,6 +48,8 @@ export class AuthService implements OnModuleInit {
     private readonly roleRepository: Repository<Role>,
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
+    @InjectRepository(RefreshToken)
+    private readonly refreshTokenRepository: Repository<RefreshToken>,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -73,20 +83,107 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    return {
-      user: this.toSafeUser(user),
-      accessToken: jwt.sign(
-        {
-          sub: user.id,
-          username: user.username,
-          role: user.role?.name ?? 'super-admin',
-        },
-        getJwtSecret(),
-        {
-          expiresIn: '8h',
-        },
-      ),
-    };
+    return this.issueTokens(user);
+  }
+
+  /**
+   * Issues a short-lived access token and a long-lived refresh token for the
+   * given user. The access token is returned in the body for backward
+   * compatibility with clients that read it; both tokens are also set as
+   * httpOnly cookies by the controller. The refresh token's jti is stored in
+   * the `refresh_tokens` allowlist so it can be revoked server-side.
+   */
+  async issueTokens(user: AdminUser) {
+    const safeUser = this.toSafeUser(user);
+    const accessToken = jwt.sign(
+      {
+        sub: user.id,
+        username: user.username,
+        role: user.role?.name ?? 'super-admin',
+      },
+      getJwtSecret(),
+      { expiresIn: ACCESS_TOKEN_TTL },
+    );
+    const jti = randomUUID();
+    const refreshToken = jwt.sign(
+      { sub: user.id, kind: 'refresh', jti },
+      getRefreshTokenSecret(),
+      { expiresIn: REFRESH_TOKEN_TTL_SECONDS },
+    );
+    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_SECONDS * 1000);
+    await this.refreshTokenRepository.save(
+      this.refreshTokenRepository.create({ jti, userId: user.id, expiresAt }),
+    );
+    return { user: safeUser, accessToken, refreshToken };
+  }
+
+  /**
+   * Validates a refresh token against both its JWT signature/expiry and the
+   * server-side allowlist, then rotates it: the old jti is deleted and a new
+   * token pair is issued. A refresh token whose jti is not in the allowlist
+   * is rejected even if its signature is valid (already used or revoked).
+   */
+  async refresh(refreshToken: string) {
+    let payload: jwt.JwtPayload;
+    try {
+      payload = jwt.verify(refreshToken, getRefreshTokenSecret()) as jwt.JwtPayload;
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+    if (payload.kind !== 'refresh' || !payload.jti) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+    const userId = Number(payload.sub);
+    if (!Number.isInteger(userId) || userId < 1) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+    // Allowlist check: the jti must exist. Delete it atomically so a replay
+    // (same jti used twice concurrently) fails on the second call.
+    const existing = await this.refreshTokenRepository.findOne({
+      where: { jti: payload.jti },
+    });
+    if (!existing) {
+      throw new UnauthorizedException('Refresh token has been revoked');
+    }
+    await this.refreshTokenRepository.delete({ jti: payload.jti });
+    // Best-effort cleanup of expired rows; keeps the allowlist bounded.
+    // Fire-and-forget so a slow cleanup never blocks the refresh.
+    void this.pruneExpiredTokens();
+    const user = await this.adminUserRepository.findOne({
+      where: { id: userId },
+      relations: ['role', 'role.permissions'],
+    });
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('Admin account is inactive or missing');
+    }
+    return this.issueTokens(user);
+  }
+
+  /**
+   * Revokes a single refresh token (by jti). Used by the logout endpoint.
+   * Silently succeeds if the jti is already gone (idempotent).
+   */
+  async revokeRefreshToken(jti: string): Promise<void> {
+    await this.refreshTokenRepository.delete({ jti });
+  }
+
+  /**
+   * Revokes every refresh token for a user. Used on password change, password
+   * reset by an admin, account deactivation, and account deletion, so any
+   * outstanding session is terminated immediately.
+   */
+  async revokeAllUserTokens(userId: number): Promise<void> {
+    await this.refreshTokenRepository.delete({ userId });
+  }
+
+  /**
+   * Best-effort cleanup of expired allowlist rows. Cheap enough to run on
+   * each refresh; keeps the table from growing without bound.
+   */
+  private async pruneExpiredTokens(): Promise<void> {
+    await this.refreshTokenRepository.delete({
+      expiresAt: LessThan(new Date()),
+    });
   }
 
   async getUserAccess(id: number) {
@@ -205,12 +302,19 @@ export class AuthService implements OnModuleInit {
       user.password = await bcrypt.hash(dto.password, 12);
       // An admin resetting someone else's password knows it, so that user must replace it.
       user.mustChangePassword = id !== requesterId;
+      // Revoke all refresh tokens so the user must sign in again with the new password.
+      await this.revokeAllUserTokens(id);
     }
     if (dto.isActive !== undefined) user.isActive = dto.isActive;
     if (dto.roleId !== undefined) user.role = nextRole;
     if (dto.fullName !== undefined) user.fullName = dto.fullName?.trim() || null;
     if (dto.email !== undefined) user.email = dto.email?.trim() || null;
     if (dto.phone !== undefined) user.phone = dto.phone?.trim() || null;
+
+    // Deactivating the account ends all sessions immediately.
+    if (dto.isActive === false) {
+      await this.revokeAllUserTokens(id);
+    }
 
     return this.toSafeUser(await this.adminUserRepository.save(user));
   }
@@ -222,6 +326,10 @@ export class AuthService implements OnModuleInit {
     const user = await this.findUser(id);
     await this.assertCanManageUser(requesterId, user);
     await this.ensureSuperAdminRemains(user, undefined, false);
+    // FK ON DELETE CASCADE removes the user's refresh-token rows, but delete
+    // them explicitly first so the revocation is observable even if the
+    // cascade is ever dropped.
+    await this.revokeAllUserTokens(id);
     await this.adminUserRepository.remove(user);
     return { deleted: true, id };
   }
@@ -468,6 +576,8 @@ export class AuthService implements OnModuleInit {
     user.password = await bcrypt.hash(dto.newPassword, 12);
     user.mustChangePassword = false;
     await this.adminUserRepository.save(user);
+    // Revoke all outstanding refresh tokens so other sessions end now.
+    await this.revokeAllUserTokens(userId);
     return { success: true };
   }
 
