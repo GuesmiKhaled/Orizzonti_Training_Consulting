@@ -25,7 +25,11 @@
   font-weight: 700;
   letter-spacing: 0.2em;
   text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
 }
+
+.brand-mini { display: none; }
 
 nav {
   display: grid;
@@ -42,6 +46,8 @@ nav {
   color: #fff;
   font-size: 0.9rem;
   text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .top-link:hover {
@@ -66,6 +72,8 @@ nav {
   color: rgba(255, 255, 255, 0.92);
   font-size: 0.82rem;
   text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .sub-link:hover {
@@ -77,4 +85,17 @@ nav {
 .sub-link.active {
   color: #fff;
   background: var(--adm-nav-active);
+}
+
+/* Collapsed (desktop icon rail): hide text labels, center icons */
+:host-context(.sidebar-collapsed),
+:host(.collapsed) {
+  .brand-full { display: none; }
+  .brand-mini { display: block; font-size: 1.1rem; }
+  .label { display: none; }
+  .brand { margin: 0 0.5rem 1rem; padding: 0.8rem 0; }
+  .top-link { justify-content: center; padding: 0.7rem 0; }
+  .group-title { justify-content: center; padding: 0.7rem 0; }
+  .sub-link { padding: 0.5rem 0; text-align: center; }
+  .group ul { display: none; }
 }

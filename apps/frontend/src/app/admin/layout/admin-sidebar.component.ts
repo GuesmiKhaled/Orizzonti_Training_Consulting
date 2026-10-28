@@ -17,5 +17,6 @@ import { NavItem } from '../nav.config';
 })
 export class AdminSidebarComponent {
   readonly items = input.required<readonly NavItem[]>();
+  readonly collapsed = input(false);
   readonly navigated = output<void>();
 }

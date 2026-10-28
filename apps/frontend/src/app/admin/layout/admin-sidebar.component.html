@@ -1,14 +1,15 @@
-<a class="brand" routerLink="/admin" aria-label="Orizzonti backoffice home">
-  ORIZZONTI
+<a class="brand" routerLink="/admin" aria-label="Orizzonti backoffice home" [title]="collapsed() ? 'Orizzonti' : ''">
+  <span class="brand-full">ORIZZONTI</span>
+  <span class="brand-mini">O</span>
 </a>
 
 <nav aria-label="Backoffice sections">
   @for (item of items(); track item.label) {
     @if (item.children; as children) {
       <section class="group">
-        <p class="group-title">
+        <p class="group-title" [title]="item.label">
           <i class="fa" [class]="item.icon" aria-hidden="true"></i>
-          {{ item.label }}
+          <span class="label">{{ item.label }}</span>
         </p>
         <ul>
           @for (child of children; track child.label) {
@@ -18,6 +19,7 @@
                 [routerLink]="child.route"
                 routerLinkActive="active"
                 [routerLinkActiveOptions]="{ exact: true }"
+                [title]="child.label"
                 (click)="navigated.emit()"
               >
                 {{ child.label }}
@@ -32,10 +34,11 @@
         [routerLink]="item.route"
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: true }"
+        [title]="item.label"
         (click)="navigated.emit()"
       >
         <i class="fa" [class]="item.icon" aria-hidden="true"></i>
-        {{ item.label }}
+        <span class="label">{{ item.label }}</span>
       </a>
     }
   }

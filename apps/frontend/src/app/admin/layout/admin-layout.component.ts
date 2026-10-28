@@ -33,7 +33,9 @@ const LEGACY_THEME_ID = 'legacy-theme';
 export class AdminLayoutComponent {
   private readonly auth = inject(AuthService);
 
-  protected readonly sidebarOpen = signal(false);
+  protected readonly sidebarOpen = signal(
+    typeof window !== 'undefined' && window.innerWidth >= 861,
+  );
   protected readonly nav = computed(() =>
     filterNav(ADMIN_NAV, (permission) => this.auth.has(permission)),
   );
