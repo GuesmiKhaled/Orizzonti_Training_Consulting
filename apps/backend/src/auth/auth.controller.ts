@@ -204,8 +204,9 @@ export class AuthController {
   }
 
   private clearAuthCookies(res: Response): void {
-    res.clearCookie(ACCESS_TOKEN_COOKIE, { path: '/' });
-    res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/' });
-    res.clearCookie(CSRF_COOKIE, { path: '/' });
+    const clearOpts = cookieOptions(0);
+    res.clearCookie(ACCESS_TOKEN_COOKIE, clearOpts);
+    res.clearCookie(REFRESH_TOKEN_COOKIE, clearOpts);
+    res.clearCookie(CSRF_COOKIE, csrfCookieOptions());
   }
 }

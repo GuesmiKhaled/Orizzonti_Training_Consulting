@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { timingSafeEqual } from 'node:crypto';
 import * as jwt from 'jsonwebtoken';
 import {
   ACCESS_TOKEN_COOKIE,
@@ -13,6 +14,14 @@ import {
   PUBLIC_ROUTE_KEY,
   getJwtSecret,
 } from '../auth.constants';
+
+/** Constant-time string comparison to prevent timing-side-channel attacks. */
+function timingSafeEqualStrings(a: string, b: string): boolean {
+  const aBuf = Buffer.from(a);
+  const bBuf = Buffer.from(b);
+  if (aBuf.length !== bBuf.length) return false;
+  return timingSafeEqual(aBuf, bBuf);
+}
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -91,7 +100,7 @@ export class CsrfGuard implements CanActivate {
       typeof cookieToken !== 'string' ||
       !headerToken ||
       typeof headerToken !== 'string' ||
-      cookieToken !== headerToken
+      !timingSafeEqualStrings(cookieToken, headerToken)
     ) {
       throw new UnauthorizedException('CSRF token missing or invalid');
     }
