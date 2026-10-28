@@ -1,13 +1,16 @@
-# .NET + Angular Engineering Playbook
+# NestJS + Angular Engineering Playbook
 
 **Skills, rules, testing, UI/UX, animation, security, vulnerabilities,
 performance, DevOps, and AI coding-agent instructions**
 
 This is a practical engineering checklist for production applications
-built with modern .NET / ASP.NET Core, Angular, TypeScript, and SQL
-Server or Oracle. Adapt rules to the actual project and supported
-framework versions; not every architecture pattern is appropriate for
-every application.
+built with modern NestJS / Node.js (TypeScript), Angular, and SQL Server
+(or another TypeORM-supported database). The original playbook targeted
+.NET / ASP.NET Core; the backend sections below have been remapped to
+NestJS + TypeORM + class-validator, which is the stack used by this
+repository. Adapt rules to the actual project and supported framework
+versions; not every architecture pattern is appropriate for every
+application.
 
 ## 1. Skills checklist
 
@@ -51,7 +54,7 @@ every application.
 -   [ ] DTOs, mapping and server-side validation
 -   [ ] Authentication and authorization
 -   [ ] Middleware, filters and exception handling
--   [ ] Async/await and CancellationToken propagation
+-   [ ] Async/await and cancellation/AbortSignal propagation
 -   [ ] Pagination, filtering, sorting and search
 -   [ ] Idempotency, rate limiting and safe retries
 -   [ ] OpenAPI / Swagger and API contracts
@@ -59,12 +62,12 @@ every application.
 ### Database and data access
 
 -   [ ] SQL schema design and normalization
--   [ ] EF Core, LINQ and query optimization
--   [ ] SQL Server and Oracle provider differences
+-   [ ] TypeORM repositories, query builder and query optimization
+-   [ ] SQL Server provider specifics (encrypt, trustServerCertificate)
 -   [ ] Transactions and concurrency control
 -   [ ] Indexes and execution plans
 -   [ ] Connection pooling and resource disposal
--   [ ] Migrations and backward-compatible changes
+-   [ ] Migrations/idempotent SQL scripts and backward-compatible changes
 -   [ ] Parameterized queries, retention and data lifecycle
 
 ### Testing and quality
@@ -144,32 +147,37 @@ every application.
 10. Preserve unrelated user changes and never expose secrets in
     generated files.
 
-### .NET backend
+### NestJS backend
 
--   Keep controllers thin; isolate business logic in testable services
-    or appropriate domain/application layers.
--   Validate untrusted input at system boundaries.
+-   Keep controllers thin; isolate business logic in testable
+    `@Injectable()` services (providers/modules).
+-   Validate untrusted input at system boundaries with class-validator
+    DTOs and the global `ValidationPipe` (`whitelist`,
+    `forbidNonWhitelisted`, `transform`).
 -   Use request/response DTOs; do not expose persistence entities by
     default.
 -   Use async I/O for asynchronous database and network operations;
-    avoid `.Result` and `.Wait()` in request paths.
--   Propagate `CancellationToken` through supported asynchronous
-    operations.
--   Centralize exception handling and return consistent Problem Details
-    responses where appropriate.
--   Use structured logs and correlation IDs; never log OTPs,
-    credentials, full card numbers or sensitive tokens.
--   Enforce authorization on every protected operation, including
-    resource/object-level checks.
+    avoid `.toPromise()` / blocking calls in request paths.
+-   Propagate `AbortSignal` / cancellation where supported by downstream
+    clients.
+-   Centralize exception handling with a global `ExceptionFilter` and
+    return consistent RFC 9457 Problem Details responses where
+    appropriate.
+-   Use structured logs (NestJS `Logger` or pino/winston) and correlation
+    IDs; never log OTPs, credentials, full card numbers or sensitive
+    tokens.
+-   Enforce authorization on every protected operation via
+    `@RequirePermission` guards, including resource/object-level checks.
 -   Keep secrets outside source control and validate configuration at
-    startup.
--   Parameterize SQL; manage transactions and concurrency explicitly;
-    avoid N+1 queries.
+    startup (e.g. `assertJwtSecretConfigured`); never add a fallback for
+    `JWT_SECRET`.
+-   Parameterize SQL via TypeORM repositories/query builder; manage
+    transactions and concurrency explicitly; avoid N+1 queries.
 -   Set timeouts and retry only transient, safe-to-retry operations.
 -   Preserve API contracts unless breaking changes are explicitly
     approved.
--   Apply Clean Architecture only when it improves maintainability,
-    testability or business-rule isolation.
+-   Apply Clean/Modular Architecture only when it improves
+    maintainability, testability or business-rule isolation.
 
 ### Angular frontend
 
@@ -291,22 +299,28 @@ Example error shape (adapt to your API standard):
 -   Configure CSP and security headers at the server or edge.
 -   Handle session expiry and logout predictably.
 
-### .NET API and infrastructure
+### NestJS API and infrastructure
 
--   Enforce authentication and resource-level authorization server-side.
--   Prevent SQL injection with parameterized queries and safe ORM usage.
+-   Enforce authentication and resource-level authorization server-side
+    (JWT guard + `@RequirePermission`).
+-   Prevent SQL injection with TypeORM parameterized queries / query
+    builder; never concatenate user input into SQL.
 -   Validate and constrain input sizes, uploads, URLs and deserialized
-    objects.
+    objects (class-validator + `ValidationPipe`).
 -   Protect against SSRF, open redirects, path traversal and unsafe file
-    handling.
--   Configure CORS with explicit trusted origins.
--   Apply rate limits, request-size limits, timeouts and resource
-    quotas.
+    handling (validate upload magic bytes, deny dotfiles, randomize
+    names).
+-   Configure CORS with explicit trusted origins
+    (`process.env.CORS_ORIGINS`).
+-   Apply rate limits (`@nestjs/throttler`), request-size limits,
+    timeouts and resource quotas.
 -   Use an approved secret manager and rotate compromised credentials.
--   Use HTTPS, suitable cookie flags, HSTS and security headers.
+-   Use HTTPS, suitable cookie flags, HSTS and security headers
+    (helmet or equivalent).
 -   Apply least-privilege identities and restrict network access.
 -   Redact sensitive logs and prevent log injection.
--   Use vetted cryptographic libraries; never invent algorithms.
+-   Use vetted cryptographic libraries (`bcryptjs`, `jsonwebtoken`); never
+    invent algorithms.
 -   Check object-level, tenant-level and function-level authorization
     (IDOR/BOLA).
 
@@ -332,27 +346,28 @@ tests at important boundaries, and end-to-end tests for critical
 journeys.
 
   --------------------------------------------------------------------------
-  Area                    .NET examples            Angular examples
+  Area                    NestJS examples           Angular examples
   ----------------------- ------------------------ -------------------------
-  Unit tests              xUnit, NUnit, MSTest,    Vitest or supported
-                          TUnit                    project runner
+  Unit tests              Jest (ts-jest),          Vitest or supported
+                          NestJS testing module     project runner
+                                                  (Karma/Jasmine here)
+  Mocking                Jest mocks,             Test doubles and HTTP
+                         `@nestjs/testing`        testing utilities
 
-  Mocking                 NSubstitute, Moq, fakes  Test doubles and HTTP
-                                                   testing utilities
+  Integration             NestJS app module        HTTP contract tests
+                          with test DB / mocked
+                          repositories
+  End-to-end              Supertest against        Playwright or Cypress
+                          NestJS app               (Playwright here)
 
-  Integration             WebApplicationFactory,   HTTP contract tests
-                          test database            
-
-  End-to-end              API workflow tests       Playwright or Cypress
-
-  Static quality          Roslyn analyzers,        ESLint, TypeScript checks
-                          SonarQube                
+  Static quality          ESLint, TypeScript       ESLint, TypeScript checks
+                          checks, SonarQube
 
   Security                SAST, dependency         Dependency/SAST/browser
-                          scanning, DAST           security checks
+                          scanning, DAST          security checks
 
-  Performance             k6, NBomber or           Lighthouse, browser
-                          equivalent               profiling, k6 for APIs
+  Performance             k6 or equivalent for    Lighthouse, browser
+                          the API                  profiling, k6 for APIs
   --------------------------------------------------------------------------
 
 ### Test cases for each meaningful feature
@@ -387,10 +402,10 @@ alone is not proof of correctness.
 -   Profile rendering before adding complexity.
 -   Measure Core Web Vitals and real-device responsiveness.
 
-### .NET API
+### NestJS API
 
 -   Measure database queries and API latency before optimizing.
--   Use projections and retrieve only required columns.
+-   Use TypeORM `select` projections and retrieve only required columns.
 -   Avoid N+1 queries and unbounded result sets.
 -   Apply pagination, query limits and measured indexes.
 -   Use async I/O and dispose resources correctly.
@@ -427,9 +442,9 @@ alone is not proof of correctness.
 
 1.  Restore dependencies and validate
     formatting/configuration/lockfiles.
-2.  Build .NET and Angular using production configuration.
-3.  Run Roslyn analyzers, ESLint, TypeScript checks and configured
-    SonarQube rules.
+2.  Build NestJS and Angular using production configuration.
+3.  Run ESLint, TypeScript checks, Jest tests, and configured SonarQube
+    rules.
 4.  Run unit, component, integration and required regression tests.
 5.  Scan dependencies, secrets, source code and container images.
 6.  Deploy artifacts to a controlled test environment.
@@ -449,26 +464,27 @@ rationale and review/expiry date.
 
 ``` text
 project/
-├── src/
-│   ├── backend/
-│   │   ├── Api/
-│   │   ├── Application/
-│   │   ├── Domain/
-│   │   └── Infrastructure/
+├── apps/
+│   ├── backend/src/
+│   │   ├── auth/            (guards, decorators, entities, service)
+│   │   ├── <feature>/       (controller, service, entity, dto, *.spec.ts)
+│   │   ├── mail/
+│   │   ├── media/
+│   │   ├── app.module.ts
+│   │   └── main.ts
 │   └── frontend/src/app/
-│       ├── core/
-│       ├── shared/
-│       ├── features/
-│       └── layouts/
-├── tests/
-│   ├── backend.UnitTests/
-│   ├── backend.IntegrationTests/
-│   └── frontend.e2e/
+│       ├── core/            (api, auth, http, toast)
+│       ├── shared/          (ui components, image-library)
+│       ├── admin/           (feature areas)
+│       ├── pages/
+│       ├── app.config.ts
+│       └── app.routes.ts
 ├── docs/
-│   ├── architecture/
-│   ├── api/
-│   └── security/
-├── pipeline configuration
+│   ├── api-contracts.md
+│   ├── postman/
+│   └── audit.md
+├── other/                   (idempotent SQL scripts)
+├── img/                     (source images for the generated library)
 └── README.md
 ```
 
@@ -497,7 +513,7 @@ Use these rules for Windsurf, Devin, or another coding agent:
 ### Copy-ready `AGENTS.md` starter
 
 ``` markdown
-# Full-Stack Engineering Rules — .NET + Angular
+# Full-Stack Engineering Rules — NestJS + Angular
 
 ## Workflow
 - Inspect architecture and conventions before changes.
@@ -506,10 +522,10 @@ Use these rules for Windsurf, Devin, or another coding agent:
 - Preserve unrelated user modifications.
 - Never claim verification unless it actually ran and passed.
 
-## .NET
+## NestJS
 - Keep controllers thin and business logic testable.
 - Use DTOs, server-side validation and consistent API errors.
-- Use async I/O and propagate CancellationToken.
+- Use async I/O and propagate cancellation where supported.
 - Parameterize SQL; manage transactions and concurrency explicitly.
 - Enforce least privilege and resource-level authorization.
 - Never log secrets, OTPs, credentials or sensitive payment data.
@@ -554,23 +570,27 @@ These links focus on official documentation, established standards and
 tool references. They are a curated starting library, not literally
 every resource on the internet.
 
-### .NET and ASP.NET Core
+### NestJS, Node.js and TypeScript backend
+
+-   [NestJS documentation](https://docs.nestjs.com/)
+-   [TypeORM documentation](https://typeorm.io/)
+-   [class-validator](https://github.com/typestack/class-validator)
+-   [Express security best practices](https://expressjs.com/en/advanced/best-practice-security.html)
+-   [Node.js documentation](https://nodejs.org/en/docs)
+-   [TypeScript handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
+-   [Jest documentation](https://jestjs.io/docs/getting-started)
+-   [OWASP Node.js security cheat sheet](https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html)
+-   [Microsoft REST API Guidelines](https://github.com/microsoft/api-guidelines)
+
+#### Supplementary .NET / ASP.NET Core references
+
+(Kept for cross-reference when reading older playbook material; the
+backend of this repository is NestJS, not .NET.)
 
 -   [.NET documentation](https://learn.microsoft.com/en-us/dotnet/)
 -   [ASP.NET Core
-    documentation](https://learn.microsoft.com/en-us/aspnet/core/?view=aspnetcore-10.0)
--   [.NET architecture
-    guides](https://dotnet.microsoft.com/en-us/learn/dotnet/architecture-guides)
--   [Testing in
-    .NET](https://learn.microsoft.com/en-us/dotnet/core/testing/)
--   [ASP.NET Core
-    security](https://learn.microsoft.com/en-us/aspnet/core/security/?view=aspnetcore-10.0)
--   [ASP.NET Core
-    performance](https://learn.microsoft.com/en-us/aspnet/core/performance/?view=aspnetcore-10.0)
--   [C# documentation](https://learn.microsoft.com/en-us/dotnet/csharp/)
+    documentation](https://learn.microsoft.com/en-us/aspnet/core/)
 -   [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/)
--   [Microsoft REST API
-    Guidelines](https://github.com/microsoft/api-guidelines)
 
 ### Angular, TypeScript and frontend
 
@@ -631,11 +651,10 @@ every resource on the internet.
 
 -   [Playwright](https://playwright.dev/docs/intro)
 -   [Cypress](https://docs.cypress.io/)
--   [xUnit](https://xunit.net/)
--   [NUnit](https://nunit.org/)
--   [MSTest](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-mstest)
+-   [Jest](https://jestjs.io/docs/getting-started)
 -   [Vitest](https://vitest.dev/guide/)
 -   [Testing Library](https://testing-library.com/docs/)
+-   [Supertest](https://github.com/ladjs/supertest)
 -   [k6 performance testing](https://grafana.com/docs/k6/latest/)
 -   [Lighthouse](https://developer.chrome.com/docs/lighthouse/overview/)
 -   [Pact contract testing](https://docs.pact.io/)
@@ -643,8 +662,6 @@ every resource on the internet.
 ### Code quality, architecture and API design
 
 -   [SonarQube documentation](https://docs.sonarsource.com/)
--   [Microsoft .NET code
-    analysis](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/overview)
 -   [ESLint](https://eslint.org/docs/latest/)
 -   [Prettier](https://prettier.io/docs/)
 -   [OpenAPI specification](https://spec.openapis.org/oas/latest.html)
@@ -660,13 +677,9 @@ every resource on the internet.
     documentation](https://learn.microsoft.com/en-us/sql/sql-server/)
 -   [SQL Server query
     performance](https://learn.microsoft.com/en-us/sql/relational-databases/performance/)
--   [Oracle Database
-    documentation](https://docs.oracle.com/en/database/)
--   [EF Core
-    performance](https://learn.microsoft.com/en-us/ef/core/performance/)
+-   [TypeORM query builder](https://typeorm.io/select-query-builder)
 -   [OpenTelemetry documentation](https://opentelemetry.io/docs/)
--   [Microsoft .NET
-    diagnostics](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/)
+-   [Node.js diagnostics](https://nodejs.org/en/docs/guides/diagnostics/)
 
 ### DevOps, containers and delivery
 
