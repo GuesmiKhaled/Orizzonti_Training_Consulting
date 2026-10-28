@@ -1,0 +1,9 @@
+# Ensure shell scripts and Dockerfiles keep LF line endings on checkout,
+# even when the repo is cloned on Windows. CRLF endings break Linux
+# container entrypoints (exec /docker-entrypoint.sh: no such file or directory).
+*.sh text eol=lf
+Dockerfile text eol=lf
+docker-compose*.yaml text eol=lf
+docker-compose*.yml text eol=lf
+compose*.yaml text eol=lf
+compose*.yml text eol=lf
