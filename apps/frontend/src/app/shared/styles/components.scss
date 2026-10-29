@@ -173,7 +173,7 @@
 .form-label {
   display: block;
   font-weight: $font-weight-medium;
-  color: $color-gray-900;
+  color: $text-strong;
   margin-bottom: $space-2;
   font-size: $font-size-sm;
 
@@ -243,7 +243,7 @@
 }
 
 .form-help {
-  color: $color-gray-600;
+  color: $text-muted;
   font-size: $font-size-xs;
   margin-top: $space-1;
   display: block;
@@ -343,7 +343,7 @@
   overflow-x: auto;
   border: 1px solid $table-border-color;
   border-radius: $radius-lg;
-  background-color: $color-white;
+  background-color: $surface;
 }
 
 .table {
@@ -361,7 +361,7 @@
     text-align: left;
     font-weight: $font-weight-semibold;
     font-size: $font-size-sm;
-    color: $color-gray-700;
+    color: $text-muted;
     white-space: nowrap;
   }
 
@@ -399,7 +399,7 @@
 .table-empty {
   padding: $space-12 $space-6;
   text-align: center;
-  color: $color-gray-500;
+  color: $text-subtle;
 }
 
 // ============================================================================
@@ -472,8 +472,8 @@
   }
 
   &.badge-gray {
-    background-color: $color-gray-200;
-    color: $color-gray-700;
+    background-color: $surface-muted;
+    color: $text-muted;
   }
 }
 
@@ -494,7 +494,7 @@
 .empty-state {
   padding: $space-12 $space-6;
   text-align: center;
-  color: $color-gray-500;
+  color: $text-subtle;
 
   svg {
     width: 64px;
@@ -537,7 +537,7 @@
 
   .modal-header {
     padding: $space-6;
-    border-bottom: 1px solid $color-gray-200;
+    border-bottom: 1px solid $divider;
 
     h2 {
       margin: 0;
@@ -550,7 +550,7 @@
 
   .modal-footer {
     padding: $space-6;
-    border-top: 1px solid $color-gray-200;
+    border-top: 1px solid $divider;
     display: flex;
     gap: $space-3;
     justify-content: flex-end;
@@ -571,11 +571,11 @@
   gap: $space-2;
   margin-top: $space-6;
   padding-top: $space-6;
-  border-top: 1px solid $color-gray-200;
+  border-top: 1px solid $divider;
 
   .pagination-info {
     font-size: $font-size-sm;
-    color: $color-gray-600;
+    color: $text-muted;
     margin-right: auto;
   }
 
@@ -606,11 +606,11 @@
   }
 
   .breadcrumb-separator {
-    color: $color-gray-400;
+    color: $text-subtle;
   }
 
   .breadcrumb-current {
-    color: $color-gray-600;
+    color: $text-muted;
   }
 }
 
@@ -626,8 +626,8 @@
   border-radius: $radius-full;
   font-size: $font-size-xs;
   font-weight: $font-weight-medium;
-  background-color: $color-gray-200;
-  color: $color-gray-700;
+  background-color: $surface-muted;
+  color: $text-muted;
   gap: $space-1;
 
   &.tag-primary {
@@ -663,7 +663,7 @@
   display: grid;
   gap: $space-1;
   margin: 0;
-  color: $color-gray-700;
+  color: $text-muted;
   font-size: $font-size-xs;
   font-weight: $font-weight-normal;
 
@@ -682,7 +682,7 @@
     &:focus {
       outline: none;
       border-color: $color-primary;
-      box-shadow: 0 0 0 3px color-mix(in srgb, #{$color-primary} 10%, transparent);
+      box-shadow: 0 0 0 3px $focus-ring-color;
     }
   }
 
@@ -693,7 +693,7 @@
 
   &__was {
     margin-left: $space-1;
-    color: $color-gray-500;
+    color: $text-subtle;
   }
 
   &--changed {
@@ -726,6 +726,31 @@
 }
 
 .ui-field__hint {
-  color: $color-gray-500;
+  color: $text-subtle;
+}
+
+// ============================================================================
+// TOOLTIP (appTooltip directive — element appended to body)
+// ============================================================================
+
+.app-tooltip {
+  position: fixed;
+  z-index: $z-tooltip;
+  max-width: 240px;
+  padding: $space-1 $space-2;
+  border-radius: $radius-base;
+  background: $color-gray-900;
+  color: $color-white;
+  font-size: $font-size-xs;
+  line-height: $line-height-normal;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+[data-theme='dark'] .app-tooltip {
+  background: $surface-elevated;
+  color: $text-strong;
+  border: 1px solid $border-color;
 }
 }

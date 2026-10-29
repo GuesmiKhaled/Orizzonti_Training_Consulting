@@ -22,7 +22,7 @@
       (menuToggled)="toggleSidebar()"
       (loggedOut)="logout()"
     />
-    <main class="content">
+    <main class="content" [class.route-transitioning]="routeTransitioning()">
       <app-admin-breadcrumbs />
       <router-outlet />
     </main>

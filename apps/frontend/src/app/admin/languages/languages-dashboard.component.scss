@@ -15,13 +15,15 @@
   gap: 0.75rem;
   padding: 1rem 1.1rem 0.6rem;
   border-radius: var(--adm-radius-card);
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  background: var(--adm-surface, #fff);
+  box-shadow: 0 1px 3px var(--adm-shadow-color, rgba(15, 23, 42, 0.08));
+  animation: card-enter 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
 
   &.add {
     place-items: center;
     min-height: 190px;
-    border: 2px dashed #94a3b8;
+    border: 2px dashed var(--adm-border-strong, #94a3b8);
     background: transparent;
     box-shadow: none;
     color: var(--adm-primary);
@@ -30,9 +32,18 @@
     cursor: pointer;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.6);
+      background: var(--adm-surface-hover, rgba(255, 255, 255, 0.6));
     }
   }
+}
+
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card { animation: none; }
 }
 
 .thumb {
@@ -41,7 +52,7 @@
   margin: -1rem -1.1rem 0;
   aspect-ratio: 16 / 7;
   object-fit: cover;
-  background: #eef1f6;
+  background: var(--adm-surface-muted, #eef1f6);
 }
 
 .top {
@@ -58,7 +69,7 @@
 
 .code {
   margin: 0.1rem 0 0;
-  color: #475569;
+  color: var(--adm-text-muted, #475569);
   font-size: 0.8rem;
 }
 
@@ -89,7 +100,7 @@
 
 .next {
   margin: 0;
-  color: #475569;
+  color: var(--adm-text-muted, #475569);
   font-size: 0.8rem;
 }
 
@@ -98,7 +109,7 @@
   gap: 1.25rem;
   margin: 0 -1.1rem;
   padding: 0.7rem 1.1rem;
-  border-top: 1px solid #eef1f6;
+  border-top: 1px solid var(--adm-border, #eef1f6);
 }
 
 .link {
@@ -114,7 +125,7 @@
 
 .state {
   margin: 0;
-  color: #475569;
+  color: var(--adm-text-muted, #475569);
 
   &.error {
     color: var(--adm-danger);

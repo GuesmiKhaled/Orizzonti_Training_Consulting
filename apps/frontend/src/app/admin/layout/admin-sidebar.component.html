@@ -6,10 +6,13 @@
 <nav aria-label="Backoffice sections">
   @for (item of items(); track item.label) {
     @if (item.children; as children) {
-      <section class="group">
-        <p class="group-title" [title]="item.label">
-          <i class="fa" [class]="item.icon" aria-hidden="true"></i>
+      <section class="group" [class.has-active]="hasActiveChild(children)">
+        <p class="group-title" [title]="item.label" tabindex="0" [attr.aria-expanded]="!collapsed()">
+          @if (item.icon) {
+            <app-nav-icon [name]="item.icon" />
+          }
           <span class="label">{{ item.label }}</span>
+          <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
         </p>
         <ul>
           @for (child of children; track child.label) {
@@ -37,7 +40,9 @@
         [title]="item.label"
         (click)="navigated.emit()"
       >
-        <i class="fa" [class]="item.icon" aria-hidden="true"></i>
+        @if (item.icon) {
+          <app-nav-icon [name]="item.icon" />
+        }
         <span class="label">{{ item.label }}</span>
       </a>
     }

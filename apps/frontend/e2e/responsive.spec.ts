@@ -86,8 +86,13 @@ for (const viewport of VIEWPORTS) {
       const sidebar = page.getByRole('navigation', { name: 'Backoffice sections' });
       const menu = page.getByRole('button', { name: 'Menu' });
       if (viewport.width > 860) {
+        // On desktop the sidebar starts expanded and the toggle collapses it to an icon rail.
         await expect(sidebar).toBeInViewport();
-        await expect(menu).toBeHidden();
+        await expect(menu).toBeVisible();
+        await menu.click();
+        await expect(sidebar).toBeInViewport();
+        await menu.click();
+        await expect(sidebar).toBeInViewport();
         return;
       }
       await expect(menu).toBeVisible();

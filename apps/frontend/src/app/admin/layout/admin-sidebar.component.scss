@@ -1,63 +1,85 @@
 :host {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 6px;
   height: 100%;
-  padding: 1rem 0 1rem;
+  padding: 16px 10px 12px;
   overflow-y: auto;
-  color: #fff;
-  background: linear-gradient(
-    180deg,
-    var(--adm-sidebar-from),
-    var(--adm-sidebar-to)
-  );
+  scrollbar-width: none;
+  color: var(--adm-on-side, #dcebe7);
+  background: var(--adm-side, #0f2d29);
+  border-right: 1px solid var(--adm-border);
 }
 
+:host::-webkit-scrollbar { display: none; }
+
 .brand {
-  display: grid;
-  place-items: center;
-  margin: 0 1rem 1rem;
-  padding: 1.1rem 0;
-  border: 1px dashed rgba(255, 255, 255, 0.6);
-  border-radius: var(--adm-radius-card);
-  color: #fff;
-  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 2px 8px 18px;
+  font-size: 21px;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: -0.04em;
+  color: #fff;
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
 }
 
+.brand-full { display: inline; }
 .brand-mini { display: none; }
 
 nav {
-  display: grid;
-  gap: 0.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .top-link,
 .group-title {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 12px;
+  height: 44px;
   margin: 0;
-  padding: 0.6rem 1rem;
-  color: #fff;
-  font-size: 0.9rem;
+  padding: 0 12px;
+  color: var(--adm-on-side, #dcebe7);
+  font-size: 14px;
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
 }
 
-.top-link:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+.top-link:hover,
+.group-title:hover {
+  background: rgba(255, 255, 255, 0.06);
   text-decoration: none;
 }
 
 .top-link.active {
-  background: var(--adm-nav-active);
+  color: var(--adm-nav-active-text, #0b2925);
+  background: var(--adm-nav-active, #c4ecd9);
+}
+
+/* Highlight the group icon when a child route is active */
+.group.has-active > .group-title {
+  color: var(--adm-nav-active-text, #0b2925);
+  background: var(--adm-nav-active, #c4ecd9);
+}
+
+/* Chevron indicator for expandable groups */
+.chevron {
+  width: 18px;
+  height: 18px;
+  margin-left: auto;
+  transition: transform 200ms ease;
+  opacity: 0.5;
+  flex-shrink: 0;
 }
 
 .group ul {
@@ -69,33 +91,69 @@ nav {
 .sub-link {
   display: block;
   padding: 0.5rem 1rem 0.5rem 2.6rem;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--adm-on-side, rgba(220, 235, 231, 0.9));
   font-size: 0.82rem;
+  font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
+  border-radius: 10px;
+  transition: background 160ms ease, color 160ms ease;
 }
 
 .sub-link:hover {
+  background: rgba(255, 255, 255, 0.06);
   color: #fff;
-  background: rgba(255, 255, 255, 0.08);
   text-decoration: none;
 }
 
 .sub-link.active {
-  color: #fff;
-  background: var(--adm-nav-active);
+  color: var(--adm-nav-active-text, #0b2925);
+  background: var(--adm-nav-active, #c4ecd9);
 }
 
-/* Collapsed (desktop icon rail): hide text labels, center icons */
+/* Collapsed (desktop icon rail): hide text labels, show only icons */
 :host-context(.sidebar-collapsed),
 :host(.collapsed) {
   .brand-full { display: none; }
   .brand-mini { display: block; font-size: 1.1rem; }
   .label { display: none; }
-  .brand { margin: 0 0.5rem 1rem; padding: 0.8rem 0; }
-  .top-link { justify-content: center; padding: 0.7rem 0; }
-  .group-title { justify-content: center; padding: 0.7rem 0; }
-  .sub-link { padding: 0.5rem 0; text-align: center; }
-  .group ul { display: none; }
+  .chevron { display: none; }
+  .brand { justify-content: center; padding: 2px 0 14px; }
+  .top-link { justify-content: center; height: 48px; padding: 0; }
+  .group-title { justify-content: center; height: 48px; padding: 0; position: relative; }
+
+  /* Flyout: show sub-links in a floating panel on hover/focus */
+  .group { position: relative; }
+
+  .group ul {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    background: var(--adm-side, #0f2d29);
+    border: 1px solid var(--adm-border);
+    border-radius: 14px;
+    box-shadow: var(--adm-shadow-pop);
+    min-width: 200px;
+    z-index: 50;
+  }
+
+  .group:hover ul,
+  .group:focus-within ul {
+    display: block;
+  }
+
+  .group .sub-link {
+    padding: 0.5rem 0.85rem;
+    color: var(--adm-on-side, rgba(220, 235, 231, 0.9));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron { transition: none; }
+  .top-link, .group-title, .sub-link { transition: none; }
 }

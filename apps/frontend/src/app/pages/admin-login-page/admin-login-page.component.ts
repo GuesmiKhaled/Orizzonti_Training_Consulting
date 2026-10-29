@@ -1,106 +1,206 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import {
   FormBuilder,
-  FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { OrizzontiApiService } from '../../services/orizzonti-api.service';
+import { ThemeToggleComponent } from '../../shared/ui';
 
 @Component({
   selector: 'app-admin-login-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [ReactiveFormsModule, RouterModule, ThemeToggleComponent],
   template: `
-    <section class="login-shell">
+    <section class="login-shell admin-theme">
+      <div class="theme-corner"><app-theme-toggle /></div>
       <div class="login-card">
-        <h1>Admin login</h1>
-        <div class="status" *ngIf="message" [class.error]="isError">
-          {{ message }}
+        <div class="brand">
+          <img src="/img/log_orizzonti.png" alt="Orizzonti Training & Consulting" />
         </div>
+        <h1>Admin login</h1>
+        <p class="subtitle">Sign in to the backoffice.</p>
+
+        @if (message) {
+          <div class="status" [class.error]="isError" [attr.role]="isError ? 'alert' : 'status'">
+            {{ message }}
+          </div>
+        }
+
         <form [formGroup]="form" (ngSubmit)="submit()">
-          <label>
-            <span>Username</span>
-            <input formControlName="username" />
+          <label class="field">
+            <span class="label">Username</span>
+            <input
+              formControlName="username"
+              autocomplete="username"
+              [attr.aria-invalid]="form.get('username')?.touched && form.get('username')?.invalid"
+            />
+            @if (form.get('username')?.touched && form.get('username')?.invalid) {
+              <span class="error" role="alert">Username is required.</span>
+            }
           </label>
-          <label>
-            <span>Password</span>
-            <input formControlName="password" type="password" />
+
+          <label class="field">
+            <span class="label">Password</span>
+            <input
+              formControlName="password"
+              type="password"
+              autocomplete="current-password"
+              [attr.aria-invalid]="form.get('password')?.touched && form.get('password')?.invalid"
+            />
+            @if (form.get('password')?.touched && form.get('password')?.invalid) {
+              <span class="error" role="alert">
+                {{ form.get('password')?.errors?.['minlength'] ? 'At least 6 characters.' : 'Password is required.' }}
+              </span>
+            }
           </label>
-          <button type="submit" [disabled]="form.invalid || isSubmitting">
-            {{ isSubmitting ? 'Signing in...' : 'Login' }}
+
+          <button type="submit" class="login-btn" [disabled]="form.invalid || isSubmitting">
+            <span class="btn-label">{{ isSubmitting ? 'Signing in...' : 'Login' }}</span>
+            @if (isSubmitting) {
+              <span class="spinner" aria-hidden="true"></span>
+            }
           </button>
         </form>
       </div>
     </section>
   `,
-  styles: [
-    `
-      .login-shell {
-        min-height: 70vh;
-        display: grid;
-        place-items: center;
-        background: #f2f1f8;
-        padding: 2rem;
-      }
-      .login-card {
-        background: white;
-        border-top: 4px solid #ff6600;
-        border-radius: 4px;
-        padding: 2rem;
-        width: min(420px, 100%);
-        box-shadow: 0 8px 24px rgba(68, 66, 90, 0.12);
-      }
-      h1 {
-        margin-top: 0;
-      }
-      .status {
-        padding: 0.8rem 1rem;
-        border-radius: 10px;
-        background: #eaf7ee;
-        color: #1f6f42;
-        margin-bottom: 1rem;
-      }
-      .status.error {
-        background: #fdecec;
-        color: #9f1c1c;
-      }
-      form {
-        display: grid;
-        gap: 1rem;
-      }
-      label {
-        display: grid;
-        gap: 0.45rem;
-        font-weight: 600;
-      }
-      input {
-        padding: 0.85rem 1rem;
-        border: 1px solid #d8dbe2;
-        border-radius: 10px;
-      }
-      button {
-        background: #44425a;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 0.9rem 1.3rem;
-        font-weight: 700;
-      }
-      button[disabled] {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-    `,
-  ],
+  styles: `
+    .login-shell {
+      position: relative;
+      min-height: 70vh;
+      display: grid;
+      place-items: center;
+      background: var(--adm-bg, #f1f4f9);
+      padding: 2rem;
+    }
+    .theme-corner {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+    }
+    .login-card {
+      width: min(420px, 100%);
+      padding: 2.25rem 2rem;
+      background: var(--adm-surface, #fff);
+      border: 1px solid var(--adm-border, #eef1f6);
+      border-radius: var(--adm-radius-card, 6px);
+      box-shadow: 0 8px 24px var(--adm-shadow-color, rgba(15, 23, 42, 0.12));
+    }
+    .brand {
+      display: grid;
+      place-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .brand img {
+      max-height: 48px;
+      width: auto;
+    }
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.5rem;
+      color: var(--adm-text, #1f2937);
+    }
+    .subtitle {
+      margin: 0 0 1.5rem;
+      color: var(--adm-text-muted, #475569);
+      font-size: 0.9rem;
+    }
+    .status {
+      padding: 0.75rem 1rem;
+      border-radius: var(--adm-radius-card, 6px);
+      background: var(--adm-success-light, #dcfce7);
+      color: var(--adm-success-dark, #15803d);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    .status.error {
+      background: var(--adm-danger-light, #fee2e2);
+      color: var(--adm-danger-dark, #b91c1c);
+    }
+    form {
+      display: grid;
+      gap: 1rem;
+    }
+    .field {
+      display: grid;
+      gap: 0.4rem;
+    }
+    .label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--adm-text, #1f2937);
+    }
+    input {
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--adm-input-border, #cbd5e1);
+      border-radius: var(--adm-radius-card, 6px);
+      background: var(--adm-input-bg, #fff);
+      color: var(--adm-text, #1f2937);
+      font: inherit;
+      font-size: 0.9rem;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--adm-primary, #0a5cbd);
+      box-shadow: 0 0 0 3px var(--adm-focus-ring, rgba(10, 92, 189, 0.35));
+    }
+    .error {
+      font-size: 0.75rem;
+      color: var(--adm-danger, #dc2626);
+    }
+    .login-btn {
+      height: 44px;
+      border: 0;
+      border-radius: var(--adm-radius-card, 6px);
+      background: var(--adm-primary, #0a5cbd);
+      color: var(--adm-text-on-primary, #fff);
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background 150ms ease, transform 100ms ease;
+    }
+    .login-btn:hover:not(:disabled) {
+      background: var(--adm-primary-dark, #084a99);
+    }
+    .login-btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .login-btn:focus-visible {
+      outline: 2px solid var(--adm-primary, #0a5cbd);
+      outline-offset: 2px;
+    }
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      .spinner { animation: none; }
+      .login-btn { transition: none; }
+    }
+  `,
 })
 export class AdminLoginPageComponent {
-  readonly form: FormGroup;
   isSubmitting = false;
   message = '';
   isError = false;
+  readonly form: ReturnType<FormBuilder['group']>;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -122,7 +222,8 @@ export class AdminLoginPageComponent {
     this.message = '';
     this.isError = false;
 
-    this.apiService.loginAdmin(this.form.value).subscribe({
+    const value = this.form.getRawValue() as { username: string; password: string };
+    this.apiService.loginAdmin(value).subscribe({
       next: (response) => {
         this.message = 'Login successful.';
         this.isSubmitting = false;

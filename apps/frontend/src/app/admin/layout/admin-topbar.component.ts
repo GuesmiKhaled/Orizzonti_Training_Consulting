@@ -4,17 +4,18 @@ import {
   input,
   output,
 } from '@angular/core';
+import { ThemeToggleComponent } from '../../shared/ui';
 
 @Component({
   selector: 'app-admin-topbar',
   standalone: true,
+  imports: [ThemeToggleComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button
       type="button"
       class="menu-button"
       [attr.aria-expanded]="sidebarOpen()"
-      [attr.aria-label]="sidebarOpen() ? 'Close navigation' : 'Open navigation'"
       (click)="menuToggled.emit()"
     >
       <span class="hamburger" [class.open]="sidebarOpen()">
@@ -22,9 +23,11 @@ import {
         <span></span>
         <span></span>
       </span>
+      <span class="menu-label">Menu</span>
     </button>
     <div class="user">
-      <span>{{ userLabel() }}</span>
+      <app-theme-toggle />
+      <span class="user-label">{{ userLabel() }}</span>
       <button type="button" class="logout" (click)="loggedOut.emit()">
         Sign out
       </button>
@@ -36,10 +39,10 @@ import {
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      min-height: 48px;
-      padding: 0 1rem 0 1.25rem;
-      background: #fff;
-      border-bottom: 1px solid #e3e8f0;
+      min-height: 56px;
+      padding: 0 1.25rem;
+      background: var(--adm-surface, #fbfcfb);
+      border-bottom: 1px solid var(--adm-border);
     }
     button {
       border: 0;
@@ -56,13 +59,20 @@ import {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
+      gap: 0.4rem;
+      width: auto;
       height: 40px;
-      border-radius: 8px;
+      padding: 0 0.75rem;
+      border-radius: 12px;
       transition: background 160ms ease;
     }
+    .menu-label {
+      color: var(--adm-primary, #0d5c55);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
     .menu-button:hover {
-      background: rgba(68, 66, 90, 0.08);
+      background: var(--adm-surface-hover, rgba(13, 92, 85, 0.06));
     }
     .hamburger {
       position: relative;
@@ -77,7 +87,7 @@ import {
       width: 100%;
       height: 2px;
       border-radius: 2px;
-      background: var(--adm-primary, #44425a);
+      background: var(--adm-primary, #0d5c55);
       transition:
         transform 220ms cubic-bezier(0.4, 0, 0.2, 1),
         opacity 160ms ease,
@@ -107,6 +117,22 @@ import {
       align-items: center;
       gap: 1rem;
       font-size: 0.85rem;
+    }
+    .user-label {
+      color: var(--adm-text-muted, #586a65);
+    }
+    .logout {
+      padding: 0.4rem 0.85rem;
+      border-radius: 10px;
+      color: var(--adm-danger, #cf4429);
+      transition: background 160ms ease;
+    }
+    .logout:hover {
+      background: var(--adm-danger-light, #fee2e2);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hamburger span { transition: none; }
+      .menu-button, .logout { transition: none; }
     }
   `,
 })

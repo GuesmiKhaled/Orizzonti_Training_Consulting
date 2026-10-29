@@ -5,33 +5,114 @@
 // ============================================================================
 
 :root {
-  --adm-sidebar-from: #17566e;
-  --adm-sidebar-to: #1b7fa3;
-  --adm-nav-active: #0f3f52;
-  --adm-panel-header: #1783b0;
-  /* Panel header fill under white text: #1783b0 is 4.28:1, this is 5.6:1 (WCAG AA needs 4.5). */
-  --adm-panel-header-strong: #136f95;
+  --adm-sidebar-from: #0f2d29;
+  --adm-sidebar-to: #0f2d29;
+  --adm-nav-active: #c4ecd9;
+  --adm-nav-active-text: #0b2925;
+  --adm-panel-header: #0d5c55;
+  --adm-panel-header-strong: #0a4a44;
 
-  --adm-primary: #0a5cbd;
-  --adm-primary-light: #3b82d6;
-  --adm-primary-dark: #084a99;
-  --adm-primary-bg: #e7f0fb;
+  --adm-primary: #0d5c55;
+  --adm-primary-light: #138a7e;
+  --adm-primary-dark: #0a4a44;
+  --adm-primary-bg: #d7efe4;
 
-  --adm-danger: #dc2626;
+  --adm-danger: #cf4429;
   --adm-danger-light: #fee2e2;
   --adm-danger-dark: #b91c1c;
 
-  --adm-success: #16a34a;
+  --adm-success: #1d8656;
   --adm-success-light: #dcfce7;
   --adm-success-dark: #15803d;
 
-  --adm-warning: #f59e0b;
+  --adm-warning: #b8700f;
   --adm-warning-light: #fef3c7;
   --adm-warning-dark: #d97706;
 
-  --adm-bg: #f1f4f9;
-  --adm-radius-card: 6px;
+  --adm-bg: #eef2ef;
+  --adm-bg-glow-a: #d7efe4;
+  --adm-bg-glow-b: #e6eef6;
+  --adm-radius-card: 16px;
+  --adm-radius-tile: 12px;
   --adm-radius-pill: 999px;
+
+  // Semantic surface/text/border tokens (light defaults).
+  --adm-surface: #fbfcfb;
+  --adm-surface-elevated: #ffffff;
+  --adm-surface-muted: #f4f7f5;
+  --adm-surface-hover: #f1f5f1;
+  --adm-text: #10231f;
+  --adm-text-muted: #586a65;
+  --adm-text-subtle: #8a9994;
+  --adm-text-on-primary: #f1fbf7;
+  --adm-border: #10231f16;
+  --adm-border-strong: #10231f29;
+  --adm-divider: #10231f16;
+  --adm-input-bg: #ffffff;
+  --adm-input-border: #10231f29;
+  --adm-focus-ring: rgba(13, 92, 85, 0.25);
+  --adm-shadow-color: 0 1px 2px #10231f0a, 0 14px 34px -22px #10231f38;
+  --adm-shadow-pop: 0 24px 60px -18px #10231f4d, 0 2px 6px #10231f14;
+  --adm-shadow-color-strong: 0 24px 60px -18px #10231f4d;
+  --adm-backdrop: rgba(15, 23, 42, 0.5);
+}
+
+// ============================================================================
+// DARK THEME
+// Activated by [data-theme="dark"] on <html>. The pre-paint script in
+// index.html sets this before first render to avoid FOUC.
+// ============================================================================
+[data-theme='dark'] {
+  --adm-sidebar-from: #0e1918;
+  --adm-sidebar-to: #0e1918;
+  --adm-nav-active: #5cd0b4;
+  --adm-nav-active-text: #06201c;
+  --adm-panel-header: #1b2a28;
+  --adm-panel-header-strong: #243a37;
+
+  --adm-primary: #5cd0b4;
+  --adm-primary-light: #6fd3a6;
+  --adm-primary-dark: #3cc0ad;
+  --adm-primary-bg: #138a7e29;
+
+  --adm-danger: #f2836a;
+  --adm-danger-light: #3a1d1d;
+  --adm-danger-dark: #fca5a5;
+
+  --adm-success: #5fd09a;
+  --adm-success-light: #14321f;
+  --adm-success-dark: #86efac;
+
+  --adm-warning: #f0b45a;
+  --adm-warning-light: #3a2a0a;
+  --adm-warning-dark: #fcd34d;
+
+  --adm-bg: #0b1312;
+  --adm-bg-glow-a: #138a7e29;
+  --adm-bg-glow-b: #4c94dc14;
+  --adm-radius-card: 16px;
+  --adm-radius-tile: 12px;
+  --adm-radius-pill: 999px;
+
+  // Semantic surface/text/border tokens (dark overrides).
+  --adm-surface: #121d1c;
+  --adm-surface-elevated: #1b2a28;
+  --adm-surface-muted: #172423;
+  --adm-surface-hover: #1b2a28;
+  --adm-text: #e5efec;
+  --adm-text-muted: #9db0aa;
+  --adm-text-subtle: #6f817c;
+  --adm-text-on-primary: #06201c;
+  --adm-border: #ffffff13;
+  --adm-border-strong: #ffffff26;
+  --adm-divider: #ffffff13;
+  --adm-input-bg: #1b2a28;
+  --adm-input-border: #ffffff26;
+  --adm-focus-ring: rgba(92, 208, 180, 0.35);
+  --adm-shadow-color: 0 1px 0 #ffffff0a inset, 0 18px 40px -26px #000c;
+  --adm-shadow-pop: 0 24px 60px -18px #000000bf, 0 0 0 1px #ffffff14;
+  --adm-shadow-color-strong: 0 24px 60px -18px #000000bf;
+  --adm-backdrop: rgba(0, 0, 0, 0.65);
 }
 
 // ============================================================================
@@ -80,6 +161,27 @@ $color-gray-600: #4b5563;
 $color-gray-700: #374151;
 $color-gray-800: #1f2937;
 $color-gray-900: #111827;
+
+// ============================================================================
+// SEMANTIC SURFACE / TEXT / BORDER ALIASES
+// Components should prefer these over raw #fff / #475569 / #eef1f6 so the
+// dark theme overrides flow through automatically.
+// ============================================================================
+
+$surface: var(--adm-surface);
+$surface-elevated: var(--adm-surface-elevated);
+$surface-muted: var(--adm-surface-muted);
+$surface-hover: var(--adm-surface-hover);
+$text-strong: var(--adm-text);
+$text-muted: var(--adm-text-muted);
+$text-subtle: var(--adm-text-subtle);
+$border-color: var(--adm-border);
+$border-strong: var(--adm-border-strong);
+$divider: var(--adm-divider);
+$shadow-color: var(--adm-shadow-color);
+$shadow-color-strong: var(--adm-shadow-color-strong);
+$backdrop-color: var(--adm-backdrop);
+$focus-ring-color: var(--adm-focus-ring);
 
 // ============================================================================
 // TYPOGRAPHY
@@ -206,12 +308,12 @@ $input-height: 40px;
 $input-height-sm: 32px;
 $input-height-lg: 48px;
 
-$input-border-color: $color-gray-300;
+$input-border-color: var(--adm-input-border);
 $input-border-color-focus: $color-primary;
-$input-bg-color: $color-white;
-$input-bg-color-disabled: $color-gray-100;
-$input-text-color: $color-gray-900;
-$input-text-color-placeholder: $color-gray-500;
+$input-bg-color: var(--adm-input-bg);
+$input-bg-color-disabled: $surface-muted;
+$input-text-color: $text-strong;
+$input-text-color-placeholder: $text-subtle;
 
 // ============================================================================
 // BUTTONS
@@ -228,17 +330,17 @@ $button-padding-y: 8px;
 // TABLES
 // ============================================================================
 
-$table-border-color: $color-gray-200;
-$table-header-bg: $color-gray-50;
-$table-row-hover-bg: $color-gray-50;
-$table-row-stripe-bg: $color-gray-50;
+$table-border-color: $divider;
+$table-header-bg: $surface-muted;
+$table-row-hover-bg: $surface-hover;
+$table-row-stripe-bg: $surface-muted;
 
 // ============================================================================
 // CARDS
 // ============================================================================
 
-$card-bg: $color-white;
-$card-border-color: $color-gray-200;
+$card-bg: $surface;
+$card-border-color: $border-color;
 $card-shadow: $shadow-sm;
 $card-padding: $space-6;
 $card-border-radius: var(--adm-radius-card);
@@ -247,8 +349,8 @@ $card-border-radius: var(--adm-radius-card);
 // MODALS
 // ============================================================================
 
-$modal-backdrop-bg: rgba(0, 0, 0, 0.5);
-$modal-bg: $color-white;
+$modal-backdrop-bg: $backdrop-color;
+$modal-bg: $surface;
 $modal-border-radius: $radius-xl;
 $modal-shadow: $shadow-2xl;
 $modal-max-width: 600px;

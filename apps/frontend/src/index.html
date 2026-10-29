@@ -12,17 +12,23 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css"
-      rel="stylesheet"
-    />
     <script src="runtime-config.js"></script>
     <script>
-      const legacyTheme = document.createElement("link");
-      legacyTheme.id = "legacy-theme";
-      legacyTheme.rel = "stylesheet";
-      legacyTheme.href = "/legacy-css/style.css";
-      document.head.appendChild(legacyTheme);
+      // Pre-paint theme: avoid FOUC by setting data-theme before first render.
+      (function () {
+        try {
+          var stored = localStorage.getItem("orizzonti-theme");
+          var theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {
+          document.documentElement.setAttribute("data-theme", "light");
+        }
+      })();
     </script>
   </head>
   <body>

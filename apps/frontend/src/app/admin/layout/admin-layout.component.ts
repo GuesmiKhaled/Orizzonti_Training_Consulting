@@ -1,20 +1,22 @@
-import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   computed,
   inject,
   signal,
 } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {
+  NavigationEnd,
+  NavigationStart,
+  Router,
+  RouterOutlet,
+} from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { ADMIN_NAV, filterNav } from '../nav.config';
 import { AdminBreadcrumbsComponent } from './admin-breadcrumbs.component';
 import { AdminSidebarComponent } from './admin-sidebar.component';
 import { AdminTopbarComponent } from './admin-topbar.component';
-
-const LEGACY_THEME_ID = 'legacy-theme';
 
 @Component({
   selector: 'app-admin-layout',
@@ -32,10 +34,12 @@ const LEGACY_THEME_ID = 'legacy-theme';
 })
 export class AdminLayoutComponent {
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   protected readonly sidebarOpen = signal(
     typeof window !== 'undefined' && window.innerWidth >= 861,
   );
+  protected readonly routeTransitioning = signal(false);
   protected readonly nav = computed(() =>
     filterNav(ADMIN_NAV, (permission) => this.auth.has(permission)),
   );
@@ -46,7 +50,7 @@ export class AdminLayoutComponent {
 
   constructor() {
     this.auth.ensureProfile().subscribe();
-    this.suspendLegacyTheme();
+    this.setupRouteTransition();
   }
 
   protected toggleSidebar(): void {
@@ -61,10 +65,14 @@ export class AdminLayoutComponent {
     this.auth.logout();
   }
 
-  /** The public site's Bootstrap sheet must not style the admin; restored on leave. */
-  private suspendLegacyTheme(): void {
-    const link = inject(DOCUMENT).getElementById(LEGACY_THEME_ID);
-    link?.setAttribute('media', 'not all');
-    inject(DestroyRef).onDestroy(() => link?.removeAttribute('media'));
+  private setupRouteTransition(): void {
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationStart))
+      .subscribe(() => this.routeTransitioning.set(true));
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        setTimeout(() => this.routeTransitioning.set(false), 250);
+      });
   }
 }

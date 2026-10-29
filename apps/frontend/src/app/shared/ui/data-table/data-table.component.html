@@ -17,7 +17,7 @@
     <div class="toolbar-slot"><ng-content select="[table-toolbar]" /></div>
   </div>
 
-  <div class="scroll">
+  <div class="scroll" [class.sticky]="stickyHeader()">
     <table>
       <thead>
         <tr>
@@ -41,46 +41,59 @@
         </tr>
       </thead>
       <tbody>
-        @for (row of visibleRows(); track idOf(row, $index)) {
-          <tr>
-            @for (column of columns(); track column.key) {
-              <td>
-                @let custom = templateFor(column.key);
-                @if (custom) {
-                  <ng-container
-                    [ngTemplateOutlet]="custom"
-                    [ngTemplateOutletContext]="{ $implicit: row }"
-                  />
-                } @else {
-                  @if (column.tag; as makeTag) {
-                    @let tag = makeTag(row);
-                    <app-status-tag [label]="tag.label" [tone]="tag.tone" />
+        @if (loading() && skeleton()) {
+          @for (i of skeletonRows(); track $index) {
+            <tr class="skeleton-row">
+              @for (column of columns(); track column.key) {
+                <td><app-skeleton variant="text" height="0.85rem" /></td>
+              }
+              @if (actions().length) {
+                <td><app-skeleton variant="text" width="60px" height="0.85rem" /></td>
+              }
+            </tr>
+          }
+        } @else {
+          @for (row of visibleRows(); track idOf(row, $index)) {
+            <tr>
+              @for (column of columns(); track column.key) {
+                <td>
+                  @let custom = templateFor(column.key);
+                  @if (custom) {
+                    <ng-container
+                      [ngTemplateOutlet]="custom"
+                      [ngTemplateOutletContext]="{ $implicit: row }"
+                    />
                   } @else {
-                    {{ valueOf(row, column) }}
+                    @if (column.tag; as makeTag) {
+                      @let tag = makeTag(row);
+                      <app-status-tag [label]="tag.label" [tone]="tag.tone" />
+                    } @else {
+                      {{ valueOf(row, column) }}
+                    }
                   }
-                }
+                </td>
+              }
+              @if (actions().length) {
+                <td class="row-actions">
+                  @for (action of actions(); track action.id) {
+                    <button
+                      type="button"
+                      [class.danger]="action.tone === 'danger'"
+                      (click)="actionTriggered.emit({ action: action.id, row })"
+                    >
+                      {{ action.label }}
+                    </button>
+                  }
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td class="state" [attr.colspan]="columns().length + (actions().length ? 1 : 0)">
+                {{ loading() ? 'Loading...' : emptyMessage() }}
               </td>
-            }
-            @if (actions().length) {
-              <td class="row-actions">
-                @for (action of actions(); track action.id) {
-                  <button
-                    type="button"
-                    [class.danger]="action.tone === 'danger'"
-                    (click)="actionTriggered.emit({ action: action.id, row })"
-                  >
-                    {{ action.label }}
-                  </button>
-                }
-              </td>
-            }
-          </tr>
-        } @empty {
-          <tr>
-            <td class="state" [attr.colspan]="columns().length + (actions().length ? 1 : 0)">
-              {{ loading() ? 'Loading...' : emptyMessage() }}
-            </td>
-          </tr>
+            </tr>
+          }
         }
       </tbody>
     </table>
@@ -88,8 +101,10 @@
 
   <app-table-pagination
     [page]="page()"
-    [pageSize]="pageSize()"
+    [pageSize]="effectivePageSize()"
     [total]="totalCount()"
+    [pageSizeOptions]="pageSizeOptions()"
     (pageChange)="goToPage($event)"
+    (pageSizeChange)="onPageSizeChange($event)" />
   />
 </section>

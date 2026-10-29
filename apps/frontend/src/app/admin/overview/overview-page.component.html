@@ -2,11 +2,11 @@
 
 @if (stats(); as data) {
   <section class="stats" aria-label="Key figures">
-    <app-stat-card label="Courses" [value]="data.coursesCount" accent="dark" />
-    <app-stat-card label="Languages" [value]="data.languagesCount" accent="success" />
-    <app-stat-card label="Blog posts" [value]="data.blogsCount" accent="primary" />
-    <app-stat-card label="New requests" [value]="data.newCourseRequestsCount" accent="danger" />
-    <app-stat-card label="Admin users" [value]="data.adminUsersCount ?? 0" accent="warning" />
+    <app-stat-card label="Courses" [value]="data.coursesCount" accent="dark" style="--i: 0" />
+    <app-stat-card label="Languages" [value]="data.languagesCount" accent="success" style="--i: 1" />
+    <app-stat-card label="Blog posts" [value]="data.blogsCount" accent="primary" style="--i: 2" />
+    <app-stat-card label="New requests" [value]="data.newCourseRequestsCount" accent="danger" style="--i: 3" />
+    <app-stat-card label="Admin users" [value]="data.adminUsersCount ?? 0" accent="warning" style="--i: 4" />
   </section>
 
   <div class="columns">

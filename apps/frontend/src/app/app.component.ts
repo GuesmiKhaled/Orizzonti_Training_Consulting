@@ -1,335 +1,83 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import {
   NavigationEnd,
+  NavigationStart,
   Router,
-  RouterLink,
-  RouterLinkActive,
   RouterOutlet,
 } from '@angular/router';
 import { filter } from 'rxjs';
-import { SiteContentService } from './core/site/site-content.service';
 import { ToastContainerComponent } from './core/toast/toast-container.component';
+import { SiteHeaderComponent, SiteFooterComponent } from './shared/layout';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    CommonModule,
     RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
     ToastContainerComponent,
+    SiteHeaderComponent,
+    SiteFooterComponent,
   ],
   template: `
-    <header id="top" *ngIf="!isBackofficeArea">
-      <div class="container-fluid d-none d-lg-block">
-        <div class="row align-items-center py-4 px-xl-5">
-          <div class="col-lg-3">
-            <a routerLink="/" aria-label="Orizzonti home">
-              <img
-                class="site-logo desktop-logo"
-                src="/img/log_orizzonti.png"
-                alt="Orizzonti Training & Consulting"
-              />
-            </a>
-          </div>
-          <div class="col-lg-3 text-right">
-            <div class="d-inline-flex align-items-center">
-              <i
-                class="fa fa-2x fa-map-marker-alt text-primary mr-3"
-                aria-hidden="true"
-              ></i>
-              <div class="text-left">
-                <h6 class="font-weight-semi-bold mb-1">Our Office</h6>
-                <small>6 rue Lucie Faure, Tunis, Tunisia</small>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3 text-right">
-            <div class="d-inline-flex align-items-center">
-              <i
-                class="fa fa-2x fa-envelope text-primary mr-3"
-                aria-hidden="true"
-              ></i>
-              <div class="text-left">
-                <h6 class="font-weight-semi-bold mb-1">Email Us</h6>
-                <small>{{ site.email() }}</small>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3 text-right">
-            <div class="d-inline-flex align-items-center">
-              <i
-                class="fa fa-2x fa-phone text-primary mr-3"
-                aria-hidden="true"
-              ></i>
-              <div class="text-left">
-                <h6 class="font-weight-semi-bold mb-1">Call Us</h6>
-                <small>{{ site.headerPhone() }}</small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="container-fluid site-navigation">
-        <div class="row border-top px-xl-5">
-          <div class="col-lg-3 d-none d-lg-block"></div>
-          <div class="col-lg-9">
-            <nav
-              class="navbar navbar-expand-lg bg-light navbar-light py-3 py-lg-0 px-0"
-              aria-label="Main navigation"
-            >
-              <a
-                routerLink="/"
-                class="d-block d-lg-none"
-                aria-label="Orizzonti home"
-              >
-                <img
-                  class="site-logo mobile-logo"
-                  src="/img/log_orizzonti.png"
-                  alt="Orizzonti Training & Consulting"
-                />
-              </a>
-              <button
-                type="button"
-                class="navbar-toggler"
-                (click)="isMenuOpen = !isMenuOpen"
-                [attr.aria-expanded]="isMenuOpen"
-                aria-controls="mainNavigation"
-                aria-label="Toggle navigation"
-              >
-                <span class="navbar-toggler-icon"></span>
-              </button>
-              <div
-                id="mainNavigation"
-                class="navbar-collapse justify-content-between"
-                [class.show]="isMenuOpen"
-              >
-                <div class="navbar-nav py-0">
-                  <a
-                    routerLink="/"
-                    routerLinkActive="active"
-                    [routerLinkActiveOptions]="{ exact: true }"
-                    class="nav-item nav-link"
-                    (click)="isMenuOpen = false"
-                    >Home</a
-                  >
-                  <a
-                    routerLink="/about"
-                    routerLinkActive="active"
-                    class="nav-item nav-link"
-                    (click)="isMenuOpen = false"
-                    >About</a
-                  >
-                  <a
-                    routerLink="/courses"
-                    routerLinkActive="active"
-                    class="nav-item nav-link"
-                    (click)="isMenuOpen = false"
-                    >Courses</a
-                  >
-                  <a
-                    routerLink="/blog"
-                    routerLinkActive="active"
-                    class="nav-item nav-link"
-                    (click)="isMenuOpen = false"
-                    >News</a
-                  >
-                  <a
-                    routerLink="/contact"
-                    routerLinkActive="active"
-                    class="nav-item nav-link"
-                    (click)="isMenuOpen = false"
-                    >Contact</a
-                  >
-                  <a
-                    routerLink="/login"
-                    routerLinkActive="active"
-                    class="nav-item nav-link"
-                    (click)="isMenuOpen = false"
-                    >Admin</a
-                  >
-                </div>
-                <div
-                  id="menu_languages"
-                  class="legacy-language-menu"
-                  (mouseenter)="isLanguageMenuOpen = true"
-                  (mouseleave)="isLanguageMenuOpen = false"
-                  (focusout)="closeLanguageMenu($event)"
-                >
-                  <button
-                    type="button"
-                    class="language-trigger"
-                    aria-controls="subMenu"
-                    [attr.aria-expanded]="isLanguageMenuOpen"
-                    (click)="isLanguageMenuOpen = !isLanguageMenuOpen"
-                  >
-                    Select Language
-                  </button>
-                  <div id="subMenu" [hidden]="!isLanguageMenuOpen">
-                    <ul>
-                      <li>
-                        <button
-                          type="button"
-                          [class.active]="language === 'en'"
-                          (click)="setLanguage('en')"
-                        >
-                          English
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          type="button"
-                          [class.active]="language === 'fr'"
-                          (click)="setLanguage('fr')"
-                        >
-                          French
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          type="button"
-                          [class.active]="language === 'it'"
-                          (click)="setLanguage('it')"
-                        >
-                          Italian
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          type="button"
-                          [class.active]="language === 'ar'"
-                          (click)="setLanguage('ar')"
-                        >
-                          Arabic
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </nav>
-          </div>
-        </div>
-      </div>
-    </header>
+    @if (!isBackofficeArea) {
+      <app-site-header />
+    }
 
     <app-toast-container />
-    <main class="site-main">
+    <main class="site-main" [class.route-transitioning]="routeTransitioning()">
       <router-outlet></router-outlet>
     </main>
 
-    <footer
-      *ngIf="!isBackofficeArea"
-      class="container-fluid bg-dark text-white py-5 px-sm-3 px-lg-5 site-footer"
-    >
-      <div class="row pt-4">
-        <div class="col-lg-7 col-md-12">
-          <div class="row">
-            <div class="col-md-7 mb-4">
-              <h5 class="text-primary text-uppercase mb-4">Get In Touch</h5>
-              <p>
-                <i class="fa fa-map-marker-alt mr-2" aria-hidden="true"></i
-                >{{ site.address() }}
-              </p>
-              <p>
-                <i class="fa fa-phone-alt mr-2" aria-hidden="true"></i
-                >{{ site.phone() }}
-              </p>
-              <p>
-                <i class="fa fa-envelope mr-2" aria-hidden="true"></i
-                >{{ site.email() }}
-              </p>
-              <div class="d-flex justify-content-start mt-4 social-links">
-                <a
-                  class="btn btn-outline-light btn-square mr-2"
-                  [href]="site.facebookUrl()"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Orizzonti on Facebook"
-                  ><i class="fab fa-facebook-f" aria-hidden="true"></i
-                ></a>
-                <a
-                  class="btn btn-outline-light btn-square"
-                  [href]="site.instagramUrl()"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Orizzonti on Instagram"
-                  ><i class="fab fa-instagram" aria-hidden="true"></i
-                ></a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-5 mb-4">
-          <h5 class="text-primary text-uppercase mb-4">Our Courses</h5>
-          <div class="d-flex flex-column justify-content-start">
-            @for (language of site.footerLanguages(); track language.id) {
-              <a class="text-white mb-2" [routerLink]="['/languages', language.id]"
-                ><i class="fa fa-angle-right mr-2" aria-hidden="true"></i
-                >{{ language.label }}</a
-              >
-            } @empty {
-              @for (label of defaultLanguageLinks; track label) {
-                <a class="text-white mb-2" routerLink="/courses"
-                  ><i class="fa fa-angle-right mr-2" aria-hidden="true"></i
-                  >{{ label }}</a
-                >
-              }
-            }
-          </div>
-        </div>
-      </div>
-
-      <div class="row border-top pt-4 mt-3 footer-legal">
-        <div class="col-lg-6 text-center text-md-left mb-3 mb-lg-0">
-          <p class="m-0">
-            &copy; <a href="#top" class="text-white">Orizzonti.tn</a>. All
-            Rights Reserved. Designed by
-            <a
-              href="https://www.linkedin.com/in/khaled-guesmi/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-white"
-              >Khaled Guesmi</a
-            >
-          </p>
-        </div>
-        <div class="col-lg-6 text-center text-lg-right">
-          <a class="text-white mr-3" href="mailto:info&#64;orizzonti.tn"
-            >Privacy</a
-          >
-          <a class="text-white" href="/other/terms.html">Terms</a>
-        </div>
-      </div>
-    </footer>
-    <a
-      *ngIf="!isBackofficeArea"
-      href="#top"
-      class="btn btn-lg btn-primary btn-lg-square back-to-top"
-      aria-label="Back to top"
-    >
-      <i class="fa fa-angle-double-up" aria-hidden="true"></i>
-    </a>
+    @if (!isBackofficeArea) {
+      <app-site-footer />
+      <a href="#top" class="back-to-top" aria-label="Back to top">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg>
+      </a>
+    }
   `,
   styles: [
     `
       .site-main {
         min-height: 55vh;
       }
+      .site-main.route-transitioning::ng-deep > router-outlet + * {
+        animation: route-fade-in 220ms ease-out;
+      }
+      @keyframes route-fade-in {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .back-to-top {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 100;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: var(--adm-radius-card, 6px);
+        background: var(--adm-primary, #0a5cbd);
+        color: #fff;
+        text-decoration: none;
+        box-shadow: 0 4px 12px var(--adm-shadow-color, rgba(15,23,42,0.2));
+        transition: background 150ms ease, transform 150ms ease;
+      }
+      .back-to-top:hover { background: var(--adm-primary-dark, #084a99); transform: translateY(-2px); }
+      .back-to-top:focus-visible { outline: 2px solid var(--adm-primary, #0a5cbd); outline-offset: 2px; }
+      .back-to-top svg { width: 20px; height: 20px; }
+      @media (prefers-reduced-motion: reduce) {
+        .site-main.route-transitioning::ng-deep > router-outlet + * { animation: none; }
+        .back-to-top { transition: none; }
+      }
     `,
   ],
 })
 export class AppComponent {
-  protected readonly site = inject(SiteContentService);
-  protected readonly defaultLanguageLinks = ['Italiano', 'العربّية', 'English', 'Français'];
   title = 'Orizzonti Training & Consulting';
   isBackofficeArea = false;
-  isMenuOpen = false;
-  isLanguageMenuOpen = false;
-  language = 'en';
+  protected readonly routeTransitioning = signal(false);
 
   constructor(router: Router) {
     const updateArea = (url: string) => {
@@ -346,19 +94,16 @@ export class AppComponent {
         ),
       )
       .subscribe((event) => updateArea(event.urlAfterRedirects));
-  }
 
-  setLanguage(language: string): void {
-    this.language = language;
-    document.documentElement.lang = language;
-    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
-    this.isLanguageMenuOpen = false;
-  }
-
-  closeLanguageMenu(event: FocusEvent): void {
-    const menu = event.currentTarget as HTMLElement;
-    if (!menu.contains(event.relatedTarget as Node | null)) {
-      this.isLanguageMenuOpen = false;
-    }
+    // Route transition: pulse the flag on start, clear on end.
+    router.events
+      .pipe(filter((event) => event instanceof NavigationStart))
+      .subscribe(() => this.routeTransitioning.set(true));
+    router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        // Brief delay so the animation has time to play before clearing.
+        setTimeout(() => this.routeTransitioning.set(false), 250);
+      });
   }
 }
