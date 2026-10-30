@@ -2,16 +2,12 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  height: 100%;
+  min-height: 100%;
   padding: 16px 10px 12px;
-  overflow-y: auto;
-  scrollbar-width: none;
   color: var(--adm-on-side, #dcebe7);
   background: var(--adm-side, #0f2d29);
   border-right: 1px solid var(--adm-border);
 }
-
-:host::-webkit-scrollbar { display: none; }
 
 .brand {
   display: flex;
@@ -36,6 +32,7 @@ nav {
   gap: 2px;
 }
 
+/* ---- Top-level links and group headers ---- */
 .top-link,
 .group-title {
   display: flex;
@@ -47,27 +44,27 @@ nav {
   color: var(--adm-on-side, #dcebe7);
   font-size: 14px;
   font-weight: 600;
+  font-family: inherit;
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
+  background: transparent;
+  border: none;
   border-radius: 14px;
   cursor: pointer;
   transition: background 160ms ease, color 160ms ease;
+  width: 100%;
+  text-align: left;
 }
 
 .top-link:hover,
 .group-title:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
   text-decoration: none;
 }
 
 .top-link.active {
-  color: var(--adm-nav-active-text, #0b2925);
-  background: var(--adm-nav-active, #c4ecd9);
-}
-
-/* Highlight the group icon when a child route is active */
-.group.has-active > .group-title {
   color: var(--adm-nav-active-text, #0b2925);
   background: var(--adm-nav-active, #c4ecd9);
 }
@@ -77,21 +74,27 @@ nav {
   width: 18px;
   height: 18px;
   margin-left: auto;
-  transition: transform 200ms ease;
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 0.5;
   flex-shrink: 0;
 }
 
+/* Rotate chevron when group is expanded */
+.group-title[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+
 .group ul {
   margin: 0;
-  padding: 0;
+  padding: 0 0 4px;
   list-style: none;
+  overflow: hidden;
 }
 
 .sub-link {
   display: block;
   padding: 0.5rem 1rem 0.5rem 2.6rem;
-  color: var(--adm-on-side, rgba(220, 235, 231, 0.9));
+  color: var(--adm-on-side, rgba(220, 235, 231, 0.85));
   font-size: 0.82rem;
   font-weight: 500;
   text-decoration: none;
@@ -102,7 +105,7 @@ nav {
 }
 
 .sub-link:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
   text-decoration: none;
 }
@@ -122,6 +125,12 @@ nav {
   .brand { justify-content: center; padding: 2px 0 14px; }
   .top-link { justify-content: center; height: 48px; padding: 0; }
   .group-title { justify-content: center; height: 48px; padding: 0; position: relative; }
+
+  /* In collapsed mode, highlight the group icon when a child is active */
+  .group.has-active > .group-title {
+    color: var(--adm-nav-active-text, #0b2925);
+    background: var(--adm-nav-active, #c4ecd9);
+  }
 
   /* Flyout: show sub-links in a floating panel on hover/focus */
   .group { position: relative; }
@@ -149,7 +158,7 @@ nav {
 
   .group .sub-link {
     padding: 0.5rem 0.85rem;
-    color: var(--adm-on-side, rgba(220, 235, 231, 0.9));
+    color: var(--adm-on-side, rgba(220, 235, 231, 0.85));
   }
 }
 

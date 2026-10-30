@@ -7,29 +7,37 @@
   @for (item of items(); track item.label) {
     @if (item.children; as children) {
       <section class="group" [class.has-active]="hasActiveChild(children)">
-        <p class="group-title" [title]="item.label" tabindex="0" [attr.aria-expanded]="!collapsed()">
+        <button
+          type="button"
+          class="group-title"
+          [title]="item.label"
+          [attr.aria-expanded]="isGroupExpanded(item.label)"
+          (click)="toggleGroup(item.label)"
+        >
           @if (item.icon) {
             <app-nav-icon [name]="item.icon" />
           }
           <span class="label">{{ item.label }}</span>
           <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
-        </p>
-        <ul>
-          @for (child of children; track child.label) {
-            <li>
-              <a
-                class="sub-link"
-                [routerLink]="child.route"
-                routerLinkActive="active"
-                [routerLinkActiveOptions]="{ exact: true }"
-                [title]="child.label"
-                (click)="navigated.emit()"
-              >
-                {{ child.label }}
-              </a>
-            </li>
-          }
-        </ul>
+        </button>
+        @if (isGroupExpanded(item.label)) {
+          <ul>
+            @for (child of children; track child.label) {
+              <li>
+                <a
+                  class="sub-link"
+                  [routerLink]="child.route"
+                  routerLinkActive="active"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                  [title]="child.label"
+                  (click)="navigated.emit()"
+                >
+                  {{ child.label }}
+                </a>
+              </li>
+            }
+          </ul>
+        }
       </section>
     } @else {
       <a

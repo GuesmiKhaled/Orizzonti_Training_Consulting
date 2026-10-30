@@ -11,6 +11,8 @@ html {
 body {
   min-width: 320px;
   font-family: "Poppins", sans-serif;
+  background: var(--adm-bg, #eef2ef);
+  color: var(--adm-text, #10231f);
 }
 
 button,

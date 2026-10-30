@@ -23,8 +23,14 @@
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   transition: width 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Collapsed: let flyout panels escape the sidebar column horizontally */
+.shell.sidebar-collapsed .sidebar {
+  overflow: visible;
 }
 
 .main {

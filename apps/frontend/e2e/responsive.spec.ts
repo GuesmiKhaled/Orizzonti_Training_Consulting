@@ -100,6 +100,8 @@ for (const viewport of VIEWPORTS) {
       await menu.click();
       await expect(sidebar).toBeVisible();
       await expect(sidebar).toBeInViewport();
+      // Groups start collapsed — expand "Users" before clicking its child link.
+      await page.getByRole('button', { name: 'Users' }).click();
       await page.getByRole('link', { name: 'Users list' }).click();
       await expect(page).toHaveURL(/\/admin\/users$/);
       await expect(sidebar).toBeHidden();

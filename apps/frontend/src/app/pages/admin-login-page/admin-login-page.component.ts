@@ -69,7 +69,7 @@ import { ThemeToggleComponent } from '../../shared/ui';
   styles: `
     .login-shell {
       position: relative;
-      min-height: 70vh;
+      min-height: 100dvh;
       display: grid;
       place-items: center;
       background: var(--adm-bg, #f1f4f9);
