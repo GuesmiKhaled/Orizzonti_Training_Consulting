@@ -24,11 +24,14 @@ import {
   REFRESH_TOKEN_COOKIE,
   REFRESH_TOKEN_TTL_SECONDS,
   ACCESS_TOKEN_TTL_SECONDS,
+  TRUSTED_DEVICE_COOKIE,
+  TRUSTED_DEVICE_TTL_SECONDS,
   cookieOptions,
   csrfCookieOptions,
   getRefreshTokenSecret,
 } from './auth.constants';
 import { LoginDto } from './dto/login.dto';
+import { CompleteOtpDto } from './dto/complete-otp.dto';
 import { AllowPendingPasswordChange } from './decorators/allow-pending-password-change.decorator';
 import { Public } from './decorators/public.decorator';
 import { RequirePermission } from './decorators/require-permission.decorator';
@@ -48,10 +51,47 @@ export class AuthController {
   @Throttle(LOGIN_THROTTLE)
   async login(
     @Body() dto: LoginDto,
+    @Req() request: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const result = await this.authService.login(dto.username, dto.password);
+    const trustedDeviceToken = request.cookies?.[TRUSTED_DEVICE_COOKIE];
+    const result = await this.authService.login(
+      dto.username,
+      dto.password,
+      trustedDeviceToken,
+    );
+    if ('challengeRequired' in result) {
+      return result;
+    }
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
+    return { user: result.user };
+  }
+
+  @Post('complete-otp-verification')
+  @Public()
+  @Throttle(LOGIN_THROTTLE)
+  async completeOtpVerification(
+    @Body() dto: CompleteOtpDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const ua = request.headers['user-agent'];
+    const ip = request.ip ?? null;
+    const deviceMetadata = this.authService.parseUserAgent(ua);
+    const result = await this.authService.completeOtpVerification(
+      dto.challengeId,
+      dto.code,
+      deviceMetadata,
+      ip,
+    );
+    this.setAuthCookies(res, result.accessToken, result.refreshToken);
+    if (result.trustedDeviceToken) {
+      res.cookie(
+        TRUSTED_DEVICE_COOKIE,
+        result.trustedDeviceToken,
+        cookieOptions(TRUSTED_DEVICE_TTL_SECONDS),
+      );
+    }
     return { user: result.user };
   }
 
@@ -204,8 +244,10 @@ export class AuthController {
   }
 
   private clearAuthCookies(res: Response): void {
-    res.clearCookie(ACCESS_TOKEN_COOKIE, { path: '/' });
-    res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/' });
-    res.clearCookie(CSRF_COOKIE, { path: '/' });
+    const clearOpts = cookieOptions(0);
+    res.clearCookie(ACCESS_TOKEN_COOKIE, clearOpts);
+    res.clearCookie(REFRESH_TOKEN_COOKIE, clearOpts);
+    res.clearCookie(CSRF_COOKIE, csrfCookieOptions());
+    res.clearCookie(TRUSTED_DEVICE_COOKIE, clearOpts);
   }
 }

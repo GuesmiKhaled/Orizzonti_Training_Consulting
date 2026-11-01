@@ -69,15 +69,15 @@ const ACTION_STATUS: Readonly<Record<string, Status>> = {
         <option value="rejected">Rejected</option>
       </select>
     </app-data-table>
-    @if (deleting(); as request) {
+    @if (deleting(); as request)
+      {
       <app-confirm-dialog
         title="Delete request"
         [message]="'Delete the request from ' + request.fullName + '?'"
         confirmLabel="Delete"
         [danger]="true"
         (confirmed)="confirmDelete(request)"
-        (cancelled)="deleting.set(null)"
-      />
+        (cancelled)="deleting.set(null)"> </app-confirm-dialog>
     }
   `,
   styleUrl: '../pages/page-common.scss',
@@ -129,7 +129,8 @@ export class CourseRequestsPageComponent implements OnInit {
     { id: 'reject', label: 'Reject' },
     { id: 'delete', label: 'Delete', tone: 'danger' },
   ];
-  protected readonly rowId = (request: CourseRequestItem): number => request.id ?? 0;
+  protected readonly rowId = (request: CourseRequestItem): number =>
+    request.id ?? 0;
 
   ngOnInit(): void {
     this.load();

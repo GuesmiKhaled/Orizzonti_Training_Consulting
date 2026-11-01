@@ -122,7 +122,7 @@ describe('public pages read the site settings', () => {
         yearsOfExperience: 12,
         nextSessionDate: '2026-11-01T09:00:00.000Z',
       });
-      const about = root.querySelector('.section-title')?.closest('.col-lg-7')?.textContent ?? '';
+      const about = root.querySelector('.section-title')?.closest('.about-content')?.textContent ?? '';
       expect(about).toContain('We teach languages.');
       expect(about).toContain('We certify students.');
       expect(about).not.toContain('CERT.IT SIS');

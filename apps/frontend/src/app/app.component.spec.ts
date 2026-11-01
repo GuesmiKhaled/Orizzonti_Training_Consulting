@@ -39,7 +39,7 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.site-logo')?.getAttribute('alt')).toContain(
+    expect(compiled.querySelector('.brand-logo')?.getAttribute('alt')).toContain(
       'Orizzonti Training & Consulting',
     );
     expect(compiled.textContent).toContain('Courses');
@@ -54,16 +54,16 @@ describe('AppComponent', () => {
     await router.navigateByUrl('/admin');
     fixture.detectChanges();
     expect(
-      (fixture.nativeElement as HTMLElement).querySelector('.site-footer'),
+      (fixture.nativeElement as HTMLElement).querySelector('app-site-footer'),
     ).toBeNull();
     expect(
-      (fixture.nativeElement as HTMLElement).querySelector('header'),
+      (fixture.nativeElement as HTMLElement).querySelector('app-site-header'),
     ).toBeNull();
 
     await router.navigateByUrl('/');
     fixture.detectChanges();
     expect(
-      (fixture.nativeElement as HTMLElement).querySelector('.site-footer'),
+      (fixture.nativeElement as HTMLElement).querySelector('app-site-footer'),
     ).not.toBeNull();
   });
 });

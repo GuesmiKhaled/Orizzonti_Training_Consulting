@@ -21,7 +21,7 @@
   font-family: $font-family-base;
   font-size: $font-size-base;
   line-height: $line-height-normal;
-  color: $color-gray-900;
+  color: $text-strong;
   background-color: $page-bg;
 }
 
@@ -92,13 +92,13 @@ a {
 
 small, .text-sm {
   font-size: $font-size-sm;
-  color: $color-gray-600;
+  color: $text-muted;
 }
 
 code {
   font-family: $font-family-mono;
   font-size: $font-size-sm;
-  background-color: $color-gray-100;
+  background-color: $surface-muted;
   padding: $space-1 $space-2;
   border-radius: $radius-base;
 }
@@ -124,7 +124,7 @@ ul, ol {
 label {
   display: block;
   font-weight: $font-weight-medium;
-  color: $color-gray-900;
+  color: $text-strong;
   margin-bottom: $space-2;
   font-size: $font-size-sm;
 }
@@ -170,7 +170,7 @@ select {
 
   &:disabled {
     background-color: $input-bg-color-disabled;
-    color: $color-gray-500;
+    color: $text-subtle;
     cursor: not-allowed;
   }
 
@@ -303,6 +303,21 @@ tbody tr {
 :focus-visible {
   outline: 2px solid $color-primary;
   outline-offset: 2px;
+}
+
+// ============================================================================
+// REDUCED MOTION (global guard)
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-theme *,
+  .admin-theme *::before,
+  .admin-theme *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 // ============================================================================

@@ -278,13 +278,13 @@ describe('HTTP behaviour', () => {
     return app;
   };
 
-  it('limits login attempts to 5 per minute', async () => {
+  it('limits login attempts to 3 per 10 minutes', async () => {
     const login = jest.fn().mockResolvedValue({ accessToken: 't' });
     const app = await boot([AuthController as never], [{ provide: AuthService, useValue: { login } }]);
     const attempt = () => request(app.getHttpServer()).post('/auth/login').send({ username: 'admin', password: 'wrong-password' });
-    for (let i = 0; i < 5; i++) await attempt().expect(201);
+    for (let i = 0; i < 3; i++) await attempt().expect(201);
     await attempt().expect(429);
-    expect(login).toHaveBeenCalledTimes(5);
+    expect(login).toHaveBeenCalledTimes(3);
     await app.close();
   });
 

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, firstValueFrom, shareReplay } from 'rxjs';
+import { Observable, shareReplay, tap } from 'rxjs';
 import { API_BASE_URL } from '../api/api.config';
 
 /** HTTP header name for the double-submit CSRF token. */
@@ -54,17 +54,24 @@ export class CsrfTokenService {
         withCredentials: true,
       })
       .pipe(
-        // shareReplay so concurrent callers share one request
+        // Cache the token synchronously when the response arrives so that
+        // downstream subscribers (e.g. the auth interceptor's switchMap) see
+        // it immediately. Caching via a Promise microtask (firstValueFrom)
+        // was too late: the switchMap callback ran before the .then().
+        tap((res) => {
+          this.cachedToken = res.token;
+        }),
+        // shareReplay so concurrent callers share one request.
         shareReplay(1),
+        tap({
+          complete: () => {
+            this.inflight = null;
+          },
+          error: () => {
+            this.inflight = null;
+          },
+        }),
       );
-    firstValueFrom(this.inflight)
-      .then((res) => {
-        this.cachedToken = res.token;
-        this.inflight = null;
-      })
-      .catch(() => {
-        this.inflight = null;
-      });
     return this.inflight;
   }
 

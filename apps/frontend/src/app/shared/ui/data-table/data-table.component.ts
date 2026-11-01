@@ -20,6 +20,7 @@ import {
   readCell,
   sortCell,
 } from './data-table.types';
+import { SkeletonComponent } from '../skeleton/skeleton.component';
 import { TablePaginationComponent } from './table-pagination.component';
 import { StatusTagComponent } from '../status-tag/status-tag.component';
 
@@ -31,7 +32,7 @@ import { StatusTagComponent } from '../status-tag/status-tag.component';
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [NgTemplateOutlet, StatusTagComponent, TablePaginationComponent],
+  imports: [NgTemplateOutlet, SkeletonComponent, StatusTagComponent, TablePaginationComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
@@ -44,7 +45,10 @@ export class DataTableComponent<T extends object> {
   readonly mode = input<'client' | 'server'>('client');
   readonly total = input<number | null>(null);
   readonly pageSize = input(10);
+  readonly pageSizeOptions = input<readonly number[]>([5, 10, 25, 50]);
   readonly loading = input(false);
+  readonly skeleton = input(false);
+  readonly stickyHeader = input(true);
   readonly searchable = input(true);
   readonly searchPlaceholder = input('Search');
   readonly emptyMessage = input('No results found.');
@@ -52,12 +56,15 @@ export class DataTableComponent<T extends object> {
 
   readonly queryChange = output<TableQuery>();
   readonly actionTriggered = output<RowActionEvent<T>>();
+  readonly pageSizeChange = output<number>();
 
   protected readonly cells = contentChildren(DataTableCellDirective);
 
   protected readonly search = signal('');
   protected readonly sortKey = signal<string | null>(null);
   protected readonly sortDirection = signal<SortDirection>('asc');
+  /** null = follow the `pageSize` input; a number = user overrode it via the selector. */
+  protected readonly currentPageSize = signal<number | null>(null);
   private readonly requestedPage = signal(0);
 
   protected readonly matched = computed<readonly T[]>(() => {
@@ -85,6 +92,13 @@ export class DataTableComponent<T extends object> {
     );
   });
 
+  protected readonly effectivePageSize = computed(() => this.currentPageSize() ?? this.pageSize());
+
+  /** Array of length = page size, for `@for` skeleton row iteration. */
+  protected readonly skeletonRows = computed(() =>
+    Array.from({ length: Math.min(this.effectivePageSize(), 8) }, (_, i) => i),
+  );
+
   protected readonly totalCount = computed(() =>
     this.mode() === 'server'
       ? (this.total() ?? this.rows().length)
@@ -94,7 +108,7 @@ export class DataTableComponent<T extends object> {
   protected readonly page = computed(() => {
     const last = Math.max(
       0,
-      Math.ceil(this.totalCount() / this.pageSize()) - 1,
+      Math.ceil(this.totalCount() / this.effectivePageSize()) - 1,
     );
     return Math.min(this.requestedPage(), last);
   });
@@ -103,8 +117,8 @@ export class DataTableComponent<T extends object> {
     if (this.mode() === 'server') {
       return this.matched();
     }
-    const start = this.page() * this.pageSize();
-    return this.matched().slice(start, start + this.pageSize());
+    const start = this.page() * this.effectivePageSize();
+    return this.matched().slice(start, start + this.effectivePageSize());
   });
 
   protected valueOf(row: T, column: TableColumn<T>): CellValue {
@@ -151,13 +165,20 @@ export class DataTableComponent<T extends object> {
     this.emitQuery();
   }
 
+  protected onPageSizeChange(size: number): void {
+    this.currentPageSize.set(size);
+    this.requestedPage.set(0);
+    this.pageSizeChange.emit(size);
+    this.emitQuery();
+  }
+
   private emitQuery(): void {
     this.queryChange.emit({
       search: this.search(),
       sortKey: this.sortKey(),
       sortDirection: this.sortDirection(),
       page: this.page(),
-      pageSize: this.pageSize(),
+      pageSize: this.effectivePageSize(),
     });
   }
 }

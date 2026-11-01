@@ -1,4 +1,8 @@
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  HttpClient,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -28,7 +32,9 @@ describe('authInterceptor (cookie-based auth)', () => {
     });
     http = TestBed.inject(HttpClient);
     controller = TestBed.inject(HttpTestingController);
-    navigate = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+    navigate = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(
+      true,
+    );
     csrf = TestBed.inject(CsrfTokenService);
     csrf.clear();
   });
@@ -75,6 +81,18 @@ describe('authInterceptor (cookie-based auth)', () => {
       .subscribe();
     const req = controller.expectOne(`${BASE}/blogs`);
     expect(req.request.headers.get('x-csrf-token')).toBe('manual');
+    req.flush({});
+  });
+
+  it('proactively fetches a CSRF token before the first POST when none is cached', () => {
+    // No cached token: the interceptor should GET /auth/csrf first, then
+    // send the POST with the freshly fetched token.
+    http.post(`${BASE}/blogs`, {}).subscribe();
+    // CSRF bootstrap request.
+    controller.expectOne(`${BASE}/auth/csrf`).flush({ token: 'csrf-fresh' });
+    // The actual POST, now carrying the token.
+    const req = controller.expectOne(`${BASE}/blogs`);
+    expect(req.request.headers.get('x-csrf-token')).toBe('csrf-fresh');
     req.flush({});
   });
 

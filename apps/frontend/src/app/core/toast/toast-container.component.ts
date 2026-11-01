@@ -8,7 +8,7 @@ import { ToastService } from './toast.service';
   template: `
     <div class="toast-stack" aria-live="polite" aria-atomic="false">
       @for (toast of toasts.toasts(); track toast.id) {
-        <div class="toast" [class]="'toast toast-' + toast.kind" role="status">
+        <div class="toast" [class]="'toast toast-' + toast.kind" [attr.role]="toast.kind === 'error' ? 'alert' : 'status'">
           <span>{{ toast.message }}</span>
           <button
             type="button"
@@ -41,6 +41,7 @@ import { ToastService } from './toast.service';
       color: #fff;
       background: #1f2937;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+      animation: toast-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
     }
     .toast-error {
       background: var(--adm-danger, #dc2626);
@@ -58,6 +59,13 @@ import { ToastService } from './toast.service';
       font-size: 1.25rem;
       line-height: 1;
       cursor: pointer;
+    }
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateX(1rem); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .toast { animation: none; }
     }
   `,
 })

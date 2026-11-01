@@ -5,11 +5,31 @@ export const ALLOW_PENDING_PASSWORD_CHANGE_KEY = 'allowPendingPasswordChange';
 export const MIN_JWT_SECRET_LENGTH = 32;
 export const MIN_PASSWORD_LENGTH = 12;
 
-/** Cookie names for the cookie-based auth flow (audit finding #4). */
-export const ACCESS_TOKEN_COOKIE = 'orizzonti_access';
-export const REFRESH_TOKEN_COOKIE = 'orizzonti_refresh';
-export const CSRF_COOKIE = 'orizzonti_csrf';
+/** Cookie names for the cookie-based auth flow (audit finding #4).
+ * In production (COOKIE_SECURE != false) the `__Host-` prefix is applied,
+ * which tells the browser to reject the cookie unless it is Secure, Path=/,
+ * no Domain attribute, and HTTPS-only. This prevents subdomain cookie
+ * injection. In local HTTP dev the plain names are used (the prefix requires
+ * Secure, which is off in dev).
+ */
+const useHostPrefix = process.env.COOKIE_SECURE !== 'false';
+export const ACCESS_TOKEN_COOKIE = useHostPrefix
+  ? '__Host-orizzonti_access'
+  : 'orizzonti_access';
+export const REFRESH_TOKEN_COOKIE = useHostPrefix
+  ? '__Host-orizzonti_refresh'
+  : 'orizzonti_refresh';
+export const CSRF_COOKIE = useHostPrefix
+  ? '__Host-orizzonti_csrf'
+  : 'orizzonti_csrf';
 export const CSRF_HEADER = 'x-csrf-token';
+
+/** Trusted-device cookie (non-HttpOnly so the client can't read it, but sent
+ * automatically with credentials). Long-lived (30 days). */
+export const TRUSTED_DEVICE_COOKIE = useHostPrefix
+  ? '__Host-orizzonti_trusted_device'
+  : 'orizzonti_trusted_device';
+export const TRUSTED_DEVICE_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
 /** Lifetimes. Access token is short-lived; refresh token is longer. */
 export const ACCESS_TOKEN_TTL = '15m';

@@ -86,8 +86,13 @@ for (const viewport of VIEWPORTS) {
       const sidebar = page.getByRole('navigation', { name: 'Backoffice sections' });
       const menu = page.getByRole('button', { name: 'Menu' });
       if (viewport.width > 860) {
+        // On desktop the sidebar starts expanded and the toggle collapses it to an icon rail.
         await expect(sidebar).toBeInViewport();
-        await expect(menu).toBeHidden();
+        await expect(menu).toBeVisible();
+        await menu.click();
+        await expect(sidebar).toBeInViewport();
+        await menu.click();
+        await expect(sidebar).toBeInViewport();
         return;
       }
       await expect(menu).toBeVisible();
@@ -95,8 +100,13 @@ for (const viewport of VIEWPORTS) {
       await menu.click();
       await expect(sidebar).toBeVisible();
       await expect(sidebar).toBeInViewport();
+      // Groups start collapsed — expand "Users" before clicking its child link.
+      await page.getByRole('button', { name: 'Users' }).click();
       await page.getByRole('link', { name: 'Users list' }).click();
       await expect(page).toHaveURL(/\/admin\/users$/);
+      // Sidebar stays open after navigation — close it by clicking the backdrop
+      // (the visible part to the right of the 240px sidebar on a 360px screen).
+      await page.locator('.backdrop').click({ position: { x: 300, y: 400 } });
       await expect(sidebar).toBeHidden();
     });
 

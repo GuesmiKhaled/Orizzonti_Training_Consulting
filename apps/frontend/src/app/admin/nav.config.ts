@@ -9,13 +9,13 @@ export interface NavItem {
 export const ADMIN_NAV: readonly NavItem[] = [
   {
     label: 'Overview',
-    icon: 'fa-chart-pie',
+    icon: 'overview',
     route: '/admin/overview',
     permission: 'view_dashboard',
   },
   {
     label: 'Users',
-    icon: 'fa-users',
+    icon: 'users',
     children: [
       { label: 'Users list', route: '/admin/users', permission: 'manage_users' },
       {
@@ -32,7 +32,7 @@ export const ADMIN_NAV: readonly NavItem[] = [
   },
   {
     label: 'Courses',
-    icon: 'fa-book-open',
+    icon: 'courses',
     children: [
       {
         label: 'Courses dashboard',
@@ -43,7 +43,7 @@ export const ADMIN_NAV: readonly NavItem[] = [
   },
   {
     label: 'Languages',
-    icon: 'fa-language',
+    icon: 'languages',
     children: [
       {
         label: 'Languages dashboard',
@@ -69,25 +69,25 @@ export const ADMIN_NAV: readonly NavItem[] = [
   },
   {
     label: 'Blogs',
-    icon: 'fa-newspaper',
+    icon: 'blogs',
     route: '/admin/blogs',
     permission: 'manage_blog',
   },
   {
     label: 'Slider media',
-    icon: 'fa-images',
+    icon: 'media',
     route: '/admin/media',
     permission: 'manage_media',
   },
   {
     label: 'Course requests',
-    icon: 'fa-inbox',
+    icon: 'requests',
     route: '/admin/requests',
     permission: 'manage_course_requests',
   },
   {
     label: 'Settings',
-    icon: 'fa-cog',
+    icon: 'settings',
     children: [
       {
         label: 'Site settings',

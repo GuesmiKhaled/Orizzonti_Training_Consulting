@@ -7,7 +7,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, Repository } from 'typeorm';
-import { MailerService } from '../mail/mailer.service';
+import { NotificationService } from '../notification/notification.service';
+import { examBookingEmailTemplate } from '../notification/email-templates';
 import { CreateExamRegistrationDto } from './dto/create-exam-registration.dto';
 import { computeAvailability, ExamAvailability } from './exam-availability';
 import {
@@ -27,7 +28,7 @@ export class ExamRegistrationService {
     @InjectRepository(ExamRegistration)
     private readonly registrationRepository: Repository<ExamRegistration>,
     private readonly dataSource: DataSource,
-    private readonly mailer: MailerService,
+    private readonly notifications: NotificationService,
   ) {}
 
   async decorate<T extends ExamSession>(
@@ -44,7 +45,9 @@ export class ExamRegistrationService {
           .groupBy('r.examSessionId')
           .getRawMany<{ examSessionId: number; count: string }>()
       : [];
-    const held = new Map(rows.map((r) => [Number(r.examSessionId), Number(r.count)]));
+    const held = new Map(
+      rows.map((r) => [Number(r.examSessionId), Number(r.count)]),
+    );
     return sessions.map((session) =>
       Object.assign(
         session,
@@ -68,6 +71,7 @@ export class ExamRegistrationService {
         const locked = levelExists
           ? await manager.findOne(ExamSession, {
               where: { id: sessionId, languageLevelId: levelId },
+              relations: ['level', 'level.language'],
               lock: { mode: 'pessimistic_write' },
             })
           : null;
@@ -101,15 +105,37 @@ export class ExamRegistrationService {
             status: 'pending',
           }),
         );
+        // Enqueue the confirmation email inside the transaction (outbox).
+        // A unique-constraint violation (duplicate notification) is silently
+        // skipped by enqueue; other errors are logged but do not roll back
+        // the registration.
+        const template = examBookingEmailTemplate({
+          fullName: created.fullName,
+          languageName: locked.level?.language?.name ?? '',
+          cefrLevel: locked.level?.cefrLevel ?? null,
+          examDate: this.formatDate(locked.examDate),
+          location: locked.location ?? null,
+          bookingReference: `EX-${created.id}`,
+          status: 'pending',
+        });
+        try {
+          await this.notifications.enqueue(manager, {
+            recipient: email,
+            notificationType: 'exam_booking',
+            relatedEntityId: created.id,
+            subject: template.subject,
+            htmlBody: template.html,
+            textBody: template.text,
+          });
+        } catch {
+          this.logger.error(
+            `Failed to enqueue exam_booking email for registration ${created.id}.`,
+          );
+        }
         return { registration: created, session: locked };
       },
     );
 
-    await this.notify(
-      email,
-      'Exam registration received',
-      `Dear ${registration.fullName},\n\nWe received your registration request for the exam on ${this.formatDate(session.examDate)}. Our team will review it and contact you shortly.\n\nOrizzonti Training & Consulting`,
-    );
     return {
       id: registration.id,
       status: registration.status,
@@ -157,6 +183,7 @@ export class ExamRegistrationService {
         }
         const lockedSession = await manager.findOne(ExamSession, {
           where: { id: existing.examSessionId },
+          relations: ['level', 'level.language'],
           lock: { mode: 'pessimistic_write' },
         });
         if (!lockedSession) {
@@ -172,23 +199,41 @@ export class ExamRegistrationService {
         }
         const didChange = existing.status !== status;
         existing.status = status;
+        const saved = await manager.save(existing);
+
+        if (didChange && status !== 'pending') {
+          const accepted = status === 'accepted';
+          const template = examBookingEmailTemplate({
+            fullName: saved.fullName,
+            languageName: lockedSession.level?.language?.name ?? '',
+            cefrLevel: lockedSession.level?.cefrLevel ?? null,
+            examDate: this.formatDate(lockedSession.examDate),
+            location: lockedSession.location ?? null,
+            bookingReference: `EX-${saved.id}`,
+            status: accepted ? 'accepted' : 'rejected',
+          });
+          try {
+            await this.notifications.enqueue(manager, {
+              recipient: saved.email,
+              notificationType: accepted ? 'exam_accepted' : 'exam_rejected',
+              relatedEntityId: saved.id,
+              subject: template.subject,
+              htmlBody: template.html,
+              textBody: template.text,
+            });
+          } catch {
+            this.logger.error(
+              `Failed to enqueue ${accepted ? 'accepted' : 'rejected'} email for registration ${saved.id}.`,
+            );
+          }
+        }
         return {
-          registration: await manager.save(existing),
+          registration: saved,
           session: lockedSession,
           changed: didChange,
         };
       });
 
-    if (changed && status !== 'pending') {
-      const accepted = status === 'accepted';
-      await this.notify(
-        registration.email,
-        accepted ? 'Exam registration accepted' : 'Exam registration declined',
-        accepted
-          ? `Dear ${registration.fullName},\n\nYour registration for the exam on ${this.formatDate(session.examDate)} has been accepted. A place is reserved for you.\n\nOrizzonti Training & Consulting`
-          : `Dear ${registration.fullName},\n\nWe are sorry, your registration for the exam on ${this.formatDate(session.examDate)} could not be accepted. Please contact us for alternatives.\n\nOrizzonti Training & Consulting`,
-      );
-    }
     return registration;
   }
 
@@ -211,13 +256,5 @@ export class ExamRegistrationService {
 
   private formatDate(date: Date): string {
     return new Date(date).toISOString().slice(0, 10);
-  }
-
-  private async notify(to: string, subject: string, text: string) {
-    try {
-      await this.mailer.sendMail({ to, subject, text });
-    } catch {
-      this.logger.error(`Failed to send "${subject}" email.`);
-    }
   }
 }

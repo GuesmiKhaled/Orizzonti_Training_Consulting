@@ -7,7 +7,8 @@
   grid-template-columns: minmax(0, 1fr);
   padding: 1rem;
   overflow-y: auto;
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--adm-backdrop, rgba(15, 23, 42, 0.5));
+  animation: backdrop-in 200ms ease;
 }
 
 .dialog {
@@ -17,8 +18,9 @@
   min-width: 0;
   max-height: calc(100vh - 2rem);
   border-radius: var(--adm-radius-card);
-  background: #fff;
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.3);
+  background: var(--adm-surface, #fff);
+  box-shadow: 0 20px 45px var(--adm-shadow-color-strong, rgba(15, 23, 42, 0.3));
+  animation: dialog-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
 
   &:focus {
     outline: none;
@@ -34,6 +36,23 @@
 
   &[data-size='lg'] {
     max-width: 900px;
+  }
+}
+
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .dialog {
+    animation: none;
   }
 }
 
@@ -53,10 +72,15 @@ h2 {
 .close {
   border: 0;
   background: transparent;
-  color: #475569;
+  color: var(--adm-text-muted, #475569);
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
+  transition: color 150ms ease;
+
+  &:hover {
+    color: var(--adm-text, #1f2937);
+  }
 }
 
 .body {

@@ -16,8 +16,8 @@
   <p class="state">Loading languages...</p>
 } @else {
   <div class="cards">
-    @for (card of cards(); track card.id) {
-      <article class="card">
+    @for (card of cards(); track card.id; let i = $index) {
+      <article class="card" [style.--i]="i">
         @if (card.imageUrl) {
           <img class="thumb" [src]="card.imageUrl" alt="" loading="lazy" />
         }

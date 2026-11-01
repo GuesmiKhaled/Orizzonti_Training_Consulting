@@ -147,9 +147,10 @@ describe('DataTableComponent', () => {
 
     it('returns to the first page when searching', () => {
       setup({ pageSize: 2 });
-      root
-        .querySelectorAll<HTMLButtonElement>('app-table-pagination button')[1]
-        .click();
+      const next = Array.from(root.querySelectorAll<HTMLButtonElement>('app-table-pagination button')).find(
+        (b) => b.textContent?.includes('Next'),
+      );
+      next?.click();
       fixture.detectChanges();
       typeSearch('a');
       expect(root.querySelector('app-table-pagination')?.textContent).toContain('1-');
@@ -204,9 +205,10 @@ describe('DataTableComponent', () => {
 
     it('requests the next page', () => {
       setup({ mode: 'server', rows: ROWS.slice(0, 2), total: 5, pageSize: 2 });
-      root
-        .querySelectorAll<HTMLButtonElement>('app-table-pagination button')[1]
-        .click();
+      const next = Array.from(root.querySelectorAll<HTMLButtonElement>('app-table-pagination button')).find(
+        (b) => b.textContent?.includes('Next'),
+      );
+      next?.click();
       expect(queries[queries.length - 1].page).toBe(1);
     });
   });

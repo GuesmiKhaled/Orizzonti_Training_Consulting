@@ -61,6 +61,21 @@ export interface AdminUserPage {
 
 export interface AuthResponse {
   user: AuthUser;
+  challengeRequired?: false;
+}
+
+export interface ChallengeRequiredResponse {
+  challengeRequired: true;
+  challengeId: string;
+  userId: number;
+  email: string | null;
+}
+
+export type LoginResponse = AuthResponse | ChallengeRequiredResponse;
+
+export interface CompleteOtpRequest {
+  challengeId: string;
+  code: string;
 }
 
 export interface BlogItem {
@@ -231,12 +246,28 @@ export class OrizzontiApiService {
     });
   }
 
-  loginAdmin(payload: LoginRequest): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${this.baseUrl}/auth/login`, payload, {
+  loginAdmin(payload: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(
+      `${this.baseUrl}/auth/login`,
+      payload,
+      {
         withCredentials: true,
         context: this.inlineErrors(),
-      });
+      },
+    );
+  }
+
+  completeOtpVerification(
+    payload: CompleteOtpRequest,
+  ): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      `${this.baseUrl}/auth/complete-otp-verification`,
+      payload,
+      {
+        withCredentials: true,
+        context: this.inlineErrors(),
+      },
+    );
   }
 
   getBlogs(): Observable<BlogItem[]> {
@@ -278,5 +309,4 @@ export class OrizzontiApiService {
       { context: this.inlineErrors() },
     );
   }
-
 }

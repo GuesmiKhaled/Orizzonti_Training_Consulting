@@ -176,7 +176,7 @@ describe('LanguageDetailPageComponent registration dialog', () => {
       .expectOne(`${BASE}/languages/1/levels/5/exams/9/register`)
       .flush({ message: 'This exam is fully booked.' }, { status: 409, statusText: 'Conflict' });
     fixture.detectChanges();
-    expect(root.querySelector('.alert-danger[role="alert"]')?.textContent).toContain('fully booked');
+    expect(root.querySelector('.alert-error[role="alert"]')?.textContent).toContain('fully booked');
     expect(dialog()).not.toBeNull();
   });
 });

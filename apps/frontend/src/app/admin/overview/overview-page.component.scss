@@ -4,6 +4,17 @@
   gap: 0.75rem;
 }
 
+/* Staggered entrance for stat cards. */
+.stats > * {
+  animation: stat-enter 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+@keyframes stat-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .columns {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -27,7 +38,7 @@
 .bar-track {
   height: 14px;
   border-radius: 2px;
-  background: #eef1f6;
+  background: var(--adm-surface-muted, #eef1f6);
 }
 
 .bar {
@@ -50,16 +61,21 @@ table {
 th,
 td {
   padding: 0.7rem 1.25rem;
-  border-bottom: 1px solid #eef1f6;
+  border-bottom: 1px solid var(--adm-border, #eef1f6);
   text-align: left;
 }
 
 th {
-  background: #f8fafc;
+  background: var(--adm-surface-muted, #f8fafc);
   font-weight: 600;
 }
 
 .empty {
   padding: 1.25rem;
   text-align: center;
+  color: var(--adm-text-muted, #475569);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stats > * { animation: none; }
 }

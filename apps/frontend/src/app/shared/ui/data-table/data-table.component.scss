@@ -1,8 +1,8 @@
 .panel {
   overflow: hidden;
   border-radius: var(--adm-radius-card);
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  background: var(--adm-surface, #fff);
+  box-shadow: 0 1px 3px var(--adm-shadow-color, rgba(15, 23, 42, 0.08));
 }
 
 .panel-header {
@@ -28,10 +28,18 @@
   flex: 1;
   min-width: 0;
   padding: 0.55rem 0.8rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--adm-border-strong, #cbd5e1);
   border-radius: 4px;
+  background: var(--adm-input-bg, #fff);
+  color: var(--adm-text, #1f2937);
   font: inherit;
   font-size: 0.9rem;
+
+  &:focus {
+    outline: none;
+    border-color: var(--adm-primary, #0a5cbd);
+    box-shadow: 0 0 0 3px var(--adm-focus-ring, rgba(10, 92, 189, 0.35));
+  }
 }
 
 .toolbar-slot {
@@ -47,6 +55,12 @@
   overflow-x: auto;
 }
 
+.scroll.sticky th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -56,13 +70,18 @@ table {
 th,
 td {
   padding: 0.85rem 1.25rem;
-  border-bottom: 1px solid #eef1f6;
+  border-bottom: 1px solid var(--adm-border, #eef1f6);
   text-align: left;
 }
 
 th {
-  background: #f8fafc;
+  background: var(--adm-surface-muted, #f8fafc);
   font-weight: 600;
+}
+
+.skeleton-row td {
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
 }
 
 .sort {
@@ -95,6 +114,6 @@ th {
 
 .state {
   padding: 1.5rem;
-  color: #475569;
+  color: var(--adm-text-muted, #475569);
   text-align: center;
 }

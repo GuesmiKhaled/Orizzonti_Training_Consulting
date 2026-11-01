@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { describeHttpError } from '../../core/http/error.interceptor';
 import { ToastService } from '../../core/toast/toast.service';
+import { ThemeToggleComponent } from '../../shared/ui';
 
 export const MIN_PASSWORD_LENGTH = 12;
 
@@ -40,7 +41,7 @@ export function passwordsValidator(group: AbstractControl): ValidationErrors | n
 @Component({
   selector: 'app-change-password-page',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ThemeToggleComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './change-password-page.component.html',
   styleUrl: './change-password-page.component.scss',
@@ -121,5 +122,34 @@ export class ChangePasswordPageComponent {
 
   protected signOut(): void {
     this.auth.logout();
+  }
+
+  /** Returns the CSS class for a single strength-bar segment. */
+  protected strengthClass(password: string, index: number): string {
+    const level = this.strengthLevel(password);
+    if (index >= level) {
+      return '';
+    }
+    if (level <= 1) return 'filled-weak';
+    if (level === 2) return 'filled-fair';
+    if (level === 3) return 'filled-good';
+    return 'filled-strong';
+  }
+
+  protected strengthLabel(password: string): string {
+    if (!password) return '';
+    const level = this.strengthLevel(password);
+    return ['', 'Weak', 'Fair', 'Good', 'Strong'][level] ?? '';
+  }
+
+  /** 0 (empty) to 4 (strong). Simple heuristic — no dictionary check. */
+  private strengthLevel(password: string): number {
+    if (!password) return 0;
+    let score = 0;
+    if (password.length >= 12) score++;
+    if (password.length >= 16) score++;
+    if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+    if (/\d/.test(password) && /[^A-Za-z0-9]/.test(password)) score++;
+    return Math.min(score, 4);
   }
 }

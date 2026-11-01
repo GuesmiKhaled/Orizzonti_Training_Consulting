@@ -1,8 +1,8 @@
-<div class="shell" [class.sidebar-open]="sidebarOpen()">
+<div class="shell" [class.sidebar-collapsed]="!sidebarOpen()">
   <app-admin-sidebar
     class="sidebar"
     [items]="nav()"
-    (navigated)="closeSidebar()"
+    [collapsed]="!sidebarOpen()"
   />
 
   @if (sidebarOpen()) {
@@ -17,10 +17,11 @@
   <div class="main">
     <app-admin-topbar
       [userLabel]="userLabel()"
+      [sidebarOpen]="sidebarOpen()"
       (menuToggled)="toggleSidebar()"
       (loggedOut)="logout()"
     />
-    <main class="content">
+    <main class="content" [class.route-transitioning]="routeTransitioning()">
       <app-admin-breadcrumbs />
       <router-outlet />
     </main>
