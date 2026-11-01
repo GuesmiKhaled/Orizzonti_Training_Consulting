@@ -7,6 +7,8 @@
 :root {
   --adm-sidebar-from: #0f2d29;
   --adm-sidebar-to: #0f2d29;
+  --adm-side: #0f2d29;
+  --adm-on-side: #dcebe7;
   --adm-nav-active: #c4ecd9;
   --adm-nav-active-text: #0b2925;
   --adm-panel-header: #0d5c55;
@@ -65,6 +67,8 @@
 [data-theme='dark'] {
   --adm-sidebar-from: #0e1918;
   --adm-sidebar-to: #0e1918;
+  --adm-side: #0e1918;
+  --adm-on-side: #c4e8db;
   --adm-nav-active: #5cd0b4;
   --adm-nav-active-text: #06201c;
   --adm-panel-header: #1b2a28;

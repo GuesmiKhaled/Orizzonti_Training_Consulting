@@ -265,6 +265,22 @@ interface Slide {
 
     .section { padding: 3.5rem 0; }
 
+    /* Fluid entrance: stagger each section on page load. */
+    .section {
+      animation: home-section-enter 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .section:nth-of-type(1) { animation-delay: 0ms; }
+    .section:nth-of-type(2) { animation-delay: 80ms; }
+    .section:nth-of-type(3) { animation-delay: 160ms; }
+    .section:nth-of-type(4) { animation-delay: 240ms; }
+    .section:nth-of-type(5) { animation-delay: 320ms; }
+    .section:nth-of-type(6) { animation-delay: 400ms; }
+    .section:nth-of-type(n+7) { animation-delay: 480ms; }
+    @keyframes home-section-enter {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     /* Hero carousel */
     .hero-carousel {
       min-height: 360px;
@@ -589,6 +605,7 @@ interface Slide {
 
     @media (prefers-reduced-motion: reduce) {
       .subject-image, .course-item, .btn-primary { transition: none; }
+      .section { animation: none; }
     }
   `,
 })

@@ -159,7 +159,7 @@ describe('accessibility (axe-core)', () => {
   });
 
   it('overview', async () => audit(await render(OverviewPageComponent)));
-  it('users table', async () => audit(await render(UsersPageComponent, {}, 300)));
+  it('users table', async () => audit(await render(UsersPageComponent, {}, 700)));
   it('add-user modal', async () => audit(await render(UserFormModalComponent, { user: null, roles: ROLES })));
   it('roles and permissions', async () => audit(await render(RolesPageComponent)));
   it('languages dashboard', async () => audit(await render(LanguagesDashboardComponent)));

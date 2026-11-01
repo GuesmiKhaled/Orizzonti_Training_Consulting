@@ -11,7 +11,7 @@ import { ExamRegistration } from './exam-registration.entity';
 import { ExamRegistrationService } from './exam-registration.service';
 import { LanguageWizardService } from './language-wizard.service';
 import { ExamRegistrationController } from './exam-registration.controller';
-import { MailModule } from '../mail/mail.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { MailModule } from '../mail/mail.module';
       ExamSession,
       ExamRegistration,
     ]),
-    MailModule,
+    NotificationModule,
   ],
   controllers: [LanguageController, ExamRegistrationController],
   providers: [

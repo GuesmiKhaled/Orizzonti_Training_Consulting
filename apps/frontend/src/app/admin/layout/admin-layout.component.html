@@ -3,7 +3,6 @@
     class="sidebar"
     [items]="nav()"
     [collapsed]="!sidebarOpen()"
-    (navigated)="closeSidebar()"
   />
 
   @if (sidebarOpen()) {

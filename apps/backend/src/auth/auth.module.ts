@@ -8,9 +8,17 @@ import { RefreshToken } from './refresh-token.entity';
 import { Role } from './role.entity';
 import { CsrfGuard, JwtAuthGuard } from './guards/jwt-auth.guard';
 import { PermissionsGuard } from './guards/permissions.guard';
+import { OtpModule } from '../otp/otp.module';
+import { TrustedDeviceModule } from '../trusted-device/trusted-device.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AdminUser, Role, Permission, RefreshToken])],
+  imports: [
+    TypeOrmModule.forFeature([AdminUser, Role, Permission, RefreshToken]),
+    OtpModule,
+    TrustedDeviceModule,
+    MailModule,
+  ],
   controllers: [AuthController],
   providers: [AuthService, JwtAuthGuard, CsrfGuard, PermissionsGuard],
   exports: [AuthService],

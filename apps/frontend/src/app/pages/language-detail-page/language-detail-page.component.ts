@@ -179,6 +179,20 @@ interface RegistrationTarget {
   `,
   styles: `
     :host { display: block; }
+    :host > * {
+      animation: page-enter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    :host > *:nth-child(1) { animation-delay: 0ms; }
+    :host > *:nth-child(2) { animation-delay: 80ms; }
+    :host > *:nth-child(3) { animation-delay: 160ms; }
+    :host > *:nth-child(n+4) { animation-delay: 240ms; }
+    @keyframes page-enter {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      :host > * { animation: none; }
+    }
     .container { max-width: 1140px; margin: 0 auto; padding: 0 1.5rem; }
     .section { padding: 3.5rem 0; background: var(--adm-surface-muted, #f8f9fa); }
 

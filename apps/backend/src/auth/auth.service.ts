@@ -30,6 +30,27 @@ import { ListAdminUsersDto } from './dto/list-admin-users.dto';
 import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { OtpService } from '../otp/otp.service';
+import {
+  TrustedDeviceService,
+  DeviceMetadata,
+} from '../trusted-device/trusted-device.service';
+import { MailerService } from '../mail/mailer.service';
+import { otpEmailTemplate } from '../notification/email-templates';
+
+export interface LoginResult {
+  user: ReturnType<AuthService['toSafeUser']>;
+  accessToken: string;
+  refreshToken: string;
+  trustedDeviceToken?: string;
+}
+
+export interface ChallengeRequiredResult {
+  challengeRequired: true;
+  challengeId: string;
+  userId: number;
+  email: string | null;
+}
 
 /**
  * Passwords that shipped as defaults in earlier versions. They are only used to
@@ -50,11 +71,19 @@ export class AuthService implements OnModuleInit {
     private readonly permissionRepository: Repository<Permission>,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
+    private readonly otpService: OtpService,
+    private readonly trustedDeviceService: TrustedDeviceService,
+    private readonly mailer: MailerService,
   ) {}
 
   async onModuleInit(): Promise<void> {
     await this.ensureRoleAndPermissionSeed();
     await this.seedDefaultAdmin();
+  }
+
+  /** Parse User-Agent into device metadata (delegates to TrustedDeviceService). */
+  parseUserAgent(ua: string | undefined): DeviceMetadata {
+    return this.trustedDeviceService.parseUserAgent(ua);
   }
 
   async validateUser(
@@ -77,13 +106,83 @@ export class AuthService implements OnModuleInit {
     return user;
   }
 
-  async login(username: string, password: string) {
+  async login(
+    username: string,
+    password: string,
+    trustedDeviceToken?: string,
+  ): Promise<LoginResult | ChallengeRequiredResult> {
     const user = await this.validateUser(username, password);
     if (!user) {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    return this.issueTokens(user);
+    // If a valid trusted-device cookie is present, skip OTP and issue tokens.
+    if (trustedDeviceToken) {
+      const device =
+        await this.trustedDeviceService.validate(trustedDeviceToken);
+      if (device && device.userId === user.id) {
+        return this.issueTokens(user);
+      }
+    }
+
+    // No trusted device: require OTP verification.
+    const { challengeId, code } = await this.otpService.createChallenge(
+      user.id,
+    );
+    if (user.email) {
+      const template = otpEmailTemplate(code);
+      try {
+        await this.mailer.sendMail({
+          to: user.email,
+          subject: template.subject,
+          text: template.text,
+          html: template.html,
+        });
+      } catch {
+        this.logger.error(`Failed to send OTP email to ${user.email}`);
+      }
+    } else if (process.env.NODE_ENV !== 'production') {
+      this.logger.warn(
+        `OTP challenge ${challengeId.slice(0, 8)} created but user has no email; code: ${code}`,
+      );
+    }
+
+    return {
+      challengeRequired: true,
+      challengeId,
+      userId: user.id,
+      email: user.email ?? null,
+    };
+  }
+
+  /**
+   * Completes OTP verification: validates the code, creates a trusted device,
+   * and issues tokens. Returns the token pair + the trusted-device token to
+   * set as a cookie.
+   */
+  async completeOtpVerification(
+    challengeId: string,
+    code: string,
+    deviceMetadata: DeviceMetadata,
+    ip: string | null,
+  ): Promise<LoginResult> {
+    const userId = await this.otpService.verifyAndConsume(challengeId, code);
+    const user = await this.adminUserRepository.findOne({
+      where: { id: userId },
+      relations: ['role', 'role.permissions'],
+    });
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('Account is inactive or missing');
+    }
+
+    const tokens = await this.issueTokens(user);
+    const trusted = await this.trustedDeviceService.create(
+      userId,
+      deviceMetadata,
+      ip,
+    );
+
+    return { ...tokens, trustedDeviceToken: trusted.deviceToken };
   }
 
   /**
@@ -126,7 +225,10 @@ export class AuthService implements OnModuleInit {
   async refresh(refreshToken: string) {
     let payload: jwt.JwtPayload;
     try {
-      payload = jwt.verify(refreshToken, getRefreshTokenSecret()) as jwt.JwtPayload;
+      payload = jwt.verify(
+        refreshToken,
+        getRefreshTokenSecret(),
+      ) as jwt.JwtPayload;
     } catch {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
@@ -307,7 +409,8 @@ export class AuthService implements OnModuleInit {
     }
     if (dto.isActive !== undefined) user.isActive = dto.isActive;
     if (dto.roleId !== undefined) user.role = nextRole;
-    if (dto.fullName !== undefined) user.fullName = dto.fullName?.trim() || null;
+    if (dto.fullName !== undefined)
+      user.fullName = dto.fullName?.trim() || null;
     if (dto.email !== undefined) user.email = dto.email?.trim() || null;
     if (dto.phone !== undefined) user.phone = dto.phone?.trim() || null;
 
@@ -550,7 +653,9 @@ export class AuthService implements OnModuleInit {
       role: superAdminRole ?? undefined,
     });
     await this.adminUserRepository.save(admin);
-    this.logger.log('Created the initial "admin" account; it must change its password at first login.');
+    this.logger.log(
+      'Created the initial "admin" account; it must change its password at first login.',
+    );
   }
 
   async changePassword(userId: number, dto: ChangePasswordDto) {

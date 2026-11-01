@@ -5,6 +5,8 @@ import {
   ConfirmDialogComponent,
   DataTableComponent,
   FormFieldComponent,
+  GlassyCarouselComponent,
+  GlassySlide,
   ImagePickerComponent,
   ModalShellComponent,
   PageHeaderComponent,
@@ -14,6 +16,7 @@ import {
   StatusTagComponent,
   StepperComponent,
   StepperStep,
+  SvgIconAnimationsComponent,
   TableColumn,
 } from '../../shared/ui';
 
@@ -34,12 +37,14 @@ interface DemoUser {
     ConfirmDialogComponent,
     DataTableComponent,
     FormFieldComponent,
+    GlassyCarouselComponent,
     ImagePickerComponent,
     ModalShellComponent,
     PageHeaderComponent,
     StatCardComponent,
     StatusTagComponent,
     StepperComponent,
+    SvgIconAnimationsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './ui-kit-demo.component.html',
@@ -55,6 +60,29 @@ export class UiKitDemoComponent {
   protected readonly modalOpen = signal(false);
   protected readonly pendingDelete = signal<DemoUser | null>(null);
   protected readonly image = new FormControl<string | null>(null);
+
+  protected readonly carouselSlides: readonly GlassySlide[] = [
+    {
+      image: '/img/course-1.jpg',
+      title: 'English for Beginners',
+      subtitle: 'Start your language journey with expert instructors.',
+    },
+    {
+      image: '/img/course-2.jpg',
+      title: 'French Intermediate',
+      subtitle: 'Build fluency with immersive conversation practice.',
+    },
+    {
+      image: '/img/course-3.jpg',
+      title: 'Arabic Advanced',
+      subtitle: 'Master classical and modern Arabic literature.',
+    },
+    {
+      image: '/img/course-4.jpg',
+      title: 'German Intensive',
+      subtitle: 'Prepare for certification with our intensive program.',
+    },
+  ];
 
   protected readonly users = signal<readonly DemoUser[]>([
     { id: 1, name: 'Guesmi Khaled', role: 'Super admin', active: true },

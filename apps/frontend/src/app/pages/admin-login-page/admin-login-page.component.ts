@@ -1,13 +1,8 @@
 import { Component } from '@angular/core';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { OrizzontiApiService } from '../../services/orizzonti-api.service';
 import { ThemeToggleComponent } from '../../shared/ui';
-
 @Component({
   selector: 'app-admin-login-page',
   standalone: true,
@@ -17,52 +12,125 @@ import { ThemeToggleComponent } from '../../shared/ui';
       <div class="theme-corner"><app-theme-toggle /></div>
       <div class="login-card">
         <div class="brand">
-          <img src="/img/log_orizzonti.png" alt="Orizzonti Training & Consulting" />
+          <img
+            src="/img/log_orizzonti.png"
+            alt="Orizzonti Training & Consulting"
+          />
         </div>
         <h1>Admin login</h1>
         <p class="subtitle">Sign in to the backoffice.</p>
 
         @if (message) {
-          <div class="status" [class.error]="isError" [attr.role]="isError ? 'alert' : 'status'">
+          <div
+            class="status"
+            [class.error]="isError"
+            [attr.role]="isError ? 'alert' : 'status'"
+          >
             {{ message }}
           </div>
         }
 
-        <form [formGroup]="form" (ngSubmit)="submit()">
-          <label class="field">
-            <span class="label">Username</span>
-            <input
-              formControlName="username"
-              autocomplete="username"
-              [attr.aria-invalid]="form.get('username')?.touched && form.get('username')?.invalid"
-            />
-            @if (form.get('username')?.touched && form.get('username')?.invalid) {
-              <span class="error" role="alert">Username is required.</span>
-            }
-          </label>
+        @if (!otpStep) {
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <label class="field">
+              <span class="label">Username</span>
+              <input
+                formControlName="username"
+                autocomplete="username"
+                [attr.aria-invalid]="
+                  form.get('username')?.touched && form.get('username')?.invalid
+                "
+              />
+              @if (
+                form.get('username')?.touched && form.get('username')?.invalid
+              ) {
+                <span class="error" role="alert">Username is required.</span>
+              }
+            </label>
 
-          <label class="field">
-            <span class="label">Password</span>
-            <input
-              formControlName="password"
-              type="password"
-              autocomplete="current-password"
-              [attr.aria-invalid]="form.get('password')?.touched && form.get('password')?.invalid"
-            />
-            @if (form.get('password')?.touched && form.get('password')?.invalid) {
-              <span class="error" role="alert">
-                {{ form.get('password')?.errors?.['minlength'] ? 'At least 6 characters.' : 'Password is required.' }}
-              </span>
-            }
-          </label>
+            <label class="field">
+              <span class="label">Password</span>
+              <input
+                formControlName="password"
+                type="password"
+                autocomplete="current-password"
+                [attr.aria-invalid]="
+                  form.get('password')?.touched && form.get('password')?.invalid
+                "
+              />
+              @if (
+                form.get('password')?.touched && form.get('password')?.invalid
+              ) {
+                <span class="error" role="alert">
+                  {{
+                    form.get('password')?.errors?.['minlength']
+                      ? 'At least 6 characters.'
+                      : 'Password is required.'
+                  }}
+                </span>
+              }
+            </label>
 
-          <button type="submit" class="login-btn" [disabled]="form.invalid || isSubmitting">
-            <span class="btn-label">{{ isSubmitting ? 'Signing in...' : 'Login' }}</span>
-            @if (isSubmitting) {
-              <span class="spinner" aria-hidden="true"></span>
-            }
-          </button>
-        </form>
+            <button
+              type="submit"
+              class="login-btn"
+              [disabled]="form.invalid || isSubmitting"
+            >
+              <span class="btn-label">{{
+                isSubmitting ? 'Signing in...' : 'Login'
+              }}</span>
+              @if (isSubmitting) {
+                <span class="spinner" aria-hidden="true"></span>
+              }
+            </button>
+          </form>
+        } @else {
+          <form [formGroup]="otpForm" (ngSubmit)="submitOtp()">
+            <p class="otp-hint">
+              We sent a verification code to your email. Enter it below to
+              complete sign-in.
+            </p>
+            <label class="field">
+              <span class="label">Verification code</span>
+              <input
+                formControlName="code"
+                autocomplete="one-time-code"
+                inputmode="numeric"
+                maxlength="10"
+                [attr.aria-invalid]="
+                  otpForm.get('code')?.touched && otpForm.get('code')?.invalid
+                "
+              />
+              @if (
+                otpForm.get('code')?.touched && otpForm.get('code')?.invalid
+              ) {
+                <span class="error" role="alert"
+                  >Enter the code from your email.</span
+                >
+              }
+            </label>
+            <button
+              type="submit"
+              class="login-btn"
+              [disabled]="otpForm.invalid || isSubmitting"
+            >
+              <span class="btn-label">{{
+                isSubmitting ? 'Verifying...' : 'Verify'
+              }}</span>
+              @if (isSubmitting) {
+                <span class="spinner" aria-hidden="true"></span>
+              }
+            </button>
+            <button
+              type="button"
+              class="back-btn"
+              (click)="cancelOtp()"
+              [disabled]="isSubmitting"
+            >
+              Back to login
+            </button>
+          </form>
+        }
       </div>
     </section>
   `,
@@ -140,7 +208,9 @@ import { ThemeToggleComponent } from '../../shared/ui';
       color: var(--adm-text, #1f2937);
       font: inherit;
       font-size: 0.9rem;
-      transition: border-color 150ms ease, box-shadow 150ms ease;
+      transition:
+        border-color 150ms ease,
+        box-shadow 150ms ease;
     }
     input:focus {
       outline: none;
@@ -165,7 +235,9 @@ import { ThemeToggleComponent } from '../../shared/ui';
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      transition: background 150ms ease, transform 100ms ease;
+      transition:
+        background 150ms ease,
+        transform 100ms ease;
     }
     .login-btn:hover:not(:disabled) {
       background: var(--adm-primary-dark, #084a99);
@@ -189,10 +261,42 @@ import { ThemeToggleComponent } from '../../shared/ui';
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .otp-hint {
+      margin: 0 0 1rem;
+      font-size: 0.85rem;
+      color: var(--adm-text-muted, #475569);
+      line-height: 1.4;
+    }
+    .back-btn {
+      margin-top: 0.5rem;
+      background: none;
+      border: none;
+      color: var(--adm-text-muted, #475569);
+      font: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0.5rem 0;
+    }
+    .back-btn:hover:not(:disabled) {
+      color: var(--adm-text, #1f2937);
+    }
+    .back-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     @media (prefers-reduced-motion: reduce) {
-      .spinner { animation: none; }
-      .login-btn { transition: none; }
+      .spinner {
+        animation: none;
+      }
+      .login-btn {
+        transition: none;
+      }
     }
   `,
 })
@@ -200,7 +304,10 @@ export class AdminLoginPageComponent {
   isSubmitting = false;
   message = '';
   isError = false;
+  otpStep = false;
+  private challengeId = '';
   readonly form: ReturnType<FormBuilder['group']>;
+  readonly otpForm: ReturnType<FormBuilder['group']>;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -210,6 +317,9 @@ export class AdminLoginPageComponent {
     this.form = this.fb.group({
       username: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
+    });
+    this.otpForm = this.fb.group({
+      code: ['', [Validators.required, Validators.minLength(4)]],
     });
   }
 
@@ -222,14 +332,23 @@ export class AdminLoginPageComponent {
     this.message = '';
     this.isError = false;
 
-    const value = this.form.getRawValue() as { username: string; password: string };
+    const value = this.form.getRawValue() as {
+      username: string;
+      password: string;
+    };
     this.apiService.loginAdmin(value).subscribe({
       next: (response) => {
-        this.message = 'Login successful.';
-        this.isSubmitting = false;
-        this.router.navigateByUrl(
-          response.user.mustChangePassword ? '/change-password' : '/admin',
-        );
+        if ('challengeRequired' in response && response.challengeRequired) {
+          this.challengeId = response.challengeId;
+          this.otpStep = true;
+          this.isSubmitting = false;
+          this.message = response.email
+            ? `A verification code was sent to ${this.maskEmail(response.email)}.`
+            : 'A verification code was sent to your email.';
+          this.isError = false;
+          return;
+        }
+        this.handleAuthSuccess(response);
       },
       error: () => {
         this.isError = true;
@@ -237,5 +356,65 @@ export class AdminLoginPageComponent {
         this.isSubmitting = false;
       },
     });
+  }
+
+  submitOtp() {
+    if (this.otpForm.invalid || this.isSubmitting) {
+      return;
+    }
+    this.isSubmitting = true;
+    this.message = '';
+    this.isError = false;
+
+    const code = (this.otpForm.get('code')?.value ?? '') as string;
+    this.apiService
+      .completeOtpVerification({ challengeId: this.challengeId, code })
+      .subscribe({
+        next: (response) => this.handleAuthSuccess(response),
+        error: () => {
+          this.isError = true;
+          this.message = 'Invalid or expired verification code.';
+          this.isSubmitting = false;
+        },
+      });
+  }
+
+  cancelOtp() {
+    this.otpStep = false;
+    this.challengeId = '';
+    this.otpForm.reset();
+    this.message = '';
+    this.isError = false;
+  }
+
+  private handleAuthSuccess(response: {
+    user: { mustChangePassword?: boolean };
+  }) {
+    this.message = 'Login successful.';
+    this.isError = false;
+    this.router
+      .navigateByUrl(
+        response.user.mustChangePassword ? '/change-password' : '/admin',
+      )
+      .then((navigated) => {
+        if (!navigated) {
+          this.isSubmitting = false;
+          this.isError = true;
+          this.message =
+            'Login succeeded but navigation failed. Please reload.';
+        }
+      })
+      .catch(() => {
+        this.isSubmitting = false;
+        this.isError = true;
+        this.message = 'Login succeeded but navigation failed. Please reload.';
+      });
+  }
+
+  private maskEmail(email: string): string {
+    const [local, domain] = email.split('@');
+    if (!domain || !local) return email;
+    const visible = local.slice(0, 2);
+    return `${visible}${'•'.repeat(Math.max(local.length - 2, 1))}@${domain}`;
   }
 }

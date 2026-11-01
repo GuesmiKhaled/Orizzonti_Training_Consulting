@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import {
   NavigationEnd,
+  NavigationError,
   NavigationStart,
   Router,
   RouterOutlet,
@@ -104,6 +105,21 @@ export class AppComponent {
       .subscribe(() => {
         // Brief delay so the animation has time to play before clearing.
         setTimeout(() => this.routeTransitioning.set(false), 250);
+      });
+
+    // Chunk loading failure (stale build): auto-reload to fetch fresh assets.
+    router.events
+      .pipe(filter((event) => event instanceof NavigationError))
+      .subscribe((event) => {
+        const error = (event as NavigationError).error;
+        if (
+          error instanceof TypeError &&
+          /Failed to fetch dynamically imported module|Loading chunk/.test(
+            error.message ?? '',
+          )
+        ) {
+          window.location.reload();
+        }
       });
   }
 }

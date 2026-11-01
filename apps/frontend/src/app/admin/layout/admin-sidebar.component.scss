@@ -12,19 +12,19 @@
 .brand {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 11px;
   padding: 2px 8px 18px;
-  font-size: 21px;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  color: #fff;
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
 }
 
-.brand-full { display: inline; }
-.brand-mini { display: none; }
+.brand-logo {
+  max-height: 36px;
+  width: auto;
+  display: block;
+}
 
 nav {
   display: flex;
@@ -118,11 +118,9 @@ nav {
 /* Collapsed (desktop icon rail): hide text labels, show only icons */
 :host-context(.sidebar-collapsed),
 :host(.collapsed) {
-  .brand-full { display: none; }
-  .brand-mini { display: block; font-size: 1.1rem; }
-  .label { display: none; }
-  .chevron { display: none; }
   .brand { justify-content: center; padding: 2px 0 14px; }
+  .brand-logo { max-height: 28px; }
+  .label { display: none; }
   .top-link { justify-content: center; height: 48px; padding: 0; }
   .group-title { justify-content: center; height: 48px; padding: 0; position: relative; }
 

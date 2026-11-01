@@ -48,23 +48,23 @@ describe('ExamRegistrationService', () => {
     const dataSource = {
       transaction: jest.fn((cb: (m: unknown) => unknown) => cb(manager)),
     };
-    const mailer = { sendMail: jest.fn().mockResolvedValue(undefined) };
+    const notifications = { enqueue: jest.fn().mockResolvedValue(undefined) };
     const service = new ExamRegistrationService(
       {} as never,
       dataSource as never,
-      mailer as never,
+      notifications as never,
     );
-    return { service, manager, mailer };
+    return { service, manager, notifications };
   }
 
-  it('creates a pending registration and sends a confirmation', async () => {
-    const { service, manager, mailer } = setup({ held: 1 });
+  it('creates a pending registration and enqueues a confirmation', async () => {
+    const { service, manager, notifications } = setup({ held: 1 });
     const result = await service.register(1, 2, 1, dto);
     expect(result).toMatchObject({ id: 9, status: 'pending' });
     expect(manager.save).toHaveBeenCalledWith(
       expect.objectContaining({ email: 'jane@example.com', status: 'pending' }),
     );
-    expect(mailer.sendMail).toHaveBeenCalledTimes(1);
+    expect(notifications.enqueue).toHaveBeenCalledTimes(1);
   });
 
   it('rejects when fully booked', async () => {
@@ -88,9 +88,9 @@ describe('ExamRegistrationService', () => {
     );
   });
 
-  it('does not fail the registration if email sending fails', async () => {
-    const { service, mailer } = setup({});
-    mailer.sendMail.mockRejectedValue(new Error('smtp down'));
+  it('does not fail the registration if email enqueue fails', async () => {
+    const { service, notifications } = setup({});
+    notifications.enqueue.mockRejectedValue(new Error('db down'));
     await expect(service.register(1, 2, 1, dto)).resolves.toMatchObject({
       status: 'pending',
     });
@@ -106,8 +106,8 @@ describe('ExamRegistrationService', () => {
     );
   });
 
-  it('accepts a pending registration and emails the applicant', async () => {
-    const { service, manager, mailer } = setup({ held: 2 });
+  it('accepts a pending registration and enqueues the email', async () => {
+    const { service, manager, notifications } = setup({ held: 2 });
     manager.findOne
       .mockResolvedValueOnce({
         id: 5,
@@ -116,11 +116,16 @@ describe('ExamRegistrationService', () => {
         email: 'a@b.c',
         fullName: 'A',
       })
-      .mockResolvedValueOnce({ id: 1, maxParticipants: 2, examDate: future(3) });
+      .mockResolvedValueOnce({
+        id: 1,
+        maxParticipants: 2,
+        examDate: future(3),
+      });
     const result = await service.updateStatus(5, 'accepted');
     expect(result.status).toBe('accepted');
-    expect(mailer.sendMail).toHaveBeenCalledWith(
-      expect.objectContaining({ to: 'a@b.c' }),
+    expect(notifications.enqueue).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ recipient: 'a@b.c' }),
     );
   });
 });

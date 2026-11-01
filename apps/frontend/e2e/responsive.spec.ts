@@ -104,6 +104,9 @@ for (const viewport of VIEWPORTS) {
       await page.getByRole('button', { name: 'Users' }).click();
       await page.getByRole('link', { name: 'Users list' }).click();
       await expect(page).toHaveURL(/\/admin\/users$/);
+      // Sidebar stays open after navigation — close it by clicking the backdrop
+      // (the visible part to the right of the 240px sidebar on a 360px screen).
+      await page.locator('.backdrop').click({ position: { x: 300, y: 400 } });
       await expect(sidebar).toBeHidden();
     });
 

@@ -1,15 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CourseRequest } from './course-request.entity';
 import { CreateCourseRequestDto } from './dto/create-course-request.dto';
 import { UpdateCourseRequestDto } from './dto/update-course-request.dto';
+import { NotificationService } from '../notification/notification.service';
+import { courseReservationEmailTemplate } from '../notification/email-templates';
 
 @Injectable()
 export class CourseRequestService {
   constructor(
     @InjectRepository(CourseRequest)
     private readonly courseRequestRepository: Repository<CourseRequest>,
+    private readonly dataSource: DataSource,
+    private readonly notifications: NotificationService,
   ) {}
 
   async findAll(): Promise<CourseRequest[]> {
@@ -27,11 +31,36 @@ export class CourseRequestService {
   }
 
   async create(payload: CreateCourseRequestDto): Promise<CourseRequest> {
-    const entity = this.courseRequestRepository.create({
-      ...payload,
-      status: payload.status ?? 'new',
+    return this.dataSource.transaction(async (manager) => {
+      const entity = manager.create(CourseRequest, {
+        ...payload,
+        status: payload.status ?? 'new',
+      });
+      const saved = await manager.save(entity);
+
+      const template = courseReservationEmailTemplate({
+        fullName: saved.fullName,
+        courseName: saved.courseName,
+        level: null,
+        reservationReference: `CR-${saved.id}`,
+        reservationDate: new Date(saved.createdAt).toISOString().slice(0, 10),
+        startDate: null,
+        status: saved.status,
+      });
+      try {
+        await this.notifications.enqueue(manager, {
+          recipient: saved.email,
+          notificationType: 'course_reservation',
+          relatedEntityId: saved.id,
+          subject: template.subject,
+          htmlBody: template.html,
+          textBody: template.text,
+        });
+      } catch {
+        // Enqueue failure must not block the reservation.
+      }
+      return saved;
     });
-    return this.courseRequestRepository.save(entity);
   }
 
   async update(

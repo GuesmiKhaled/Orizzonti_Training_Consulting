@@ -32,6 +32,12 @@ import { PermissionsGuard } from './auth/guards/permissions.guard';
 import { GLOBAL_THROTTLE } from './throttling';
 import { RequestIdMiddleware } from './common/request-id.middleware';
 import { HealthModule } from './health/health.module';
+import { TrustedDeviceModule } from './trusted-device/trusted-device.module';
+import { TrustedDevice } from './trusted-device/trusted-device.entity';
+import { OtpModule } from './otp/otp.module';
+import { OtpChallenge } from './otp/otp-challenge.entity';
+import { NotificationModule } from './notification/notification.module';
+import { EmailNotification } from './notification/email-notification.entity';
 
 const databaseConfig = {
   host: process.env.DB_HOST ?? 'localhost',
@@ -46,6 +52,30 @@ const databaseConfig = {
     // encrypted connections to SQL Server.
     encrypt: process.env.DB_ENCRYPT === 'true',
     trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE !== 'false',
+    // Recommended by Microsoft — prevents arithmetic abort errors that can
+    // cause query plan differences and intermittent failures. (The TypeORM
+    // mssql driver also sets this, but we set it explicitly for clarity.)
+    enableArithAbort: true,
+  },
+  // Pool and timeout tuning. Stale-connection timeouts (15s default
+  // requestTimeout) are common when the app runs in Docker Desktop on
+  // Windows: the WSL2 NAT layer silently drops idle TCP connections, so
+  // the pool hands out dead sockets and queries hang until the timeout
+  // fires. healthCheck runs SELECT 1 before reusing a pooled connection,
+  // and a shorter idleTimeoutMillis recycles connections before the NAT
+  // drops them.
+  requestTimeout: Number(process.env.DB_REQUEST_TIMEOUT_MS ?? 30000),
+  connectionTimeout: Number(process.env.DB_CONNECTION_TIMEOUT_MS ?? 15000),
+  // The pool config (including healthCheck, which is a tarn option not in
+  // TypeORM's typed pool interface) goes in extra — the driver spreads
+  // extra last, so it overrides the typed pool field.
+  extra: {
+    pool: {
+      max: Number(process.env.DB_POOL_MAX ?? 10),
+      min: 0,
+      idleTimeoutMillis: Number(process.env.DB_POOL_IDLE_TIMEOUT_MS ?? 10000),
+      healthCheck: true,
+    },
   },
 };
 
@@ -77,6 +107,9 @@ console.info(
         SliderMedia,
         CourseRequest,
         SiteSettings,
+        TrustedDevice,
+        OtpChallenge,
+        EmailNotification,
       ],
       synchronize: process.env.DB_SYNCHRONIZE === 'true',
       logging: false,
@@ -101,6 +134,9 @@ console.info(
     CourseRequestModule,
     SiteSettingsModule,
     HealthModule,
+    TrustedDeviceModule,
+    OtpModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [

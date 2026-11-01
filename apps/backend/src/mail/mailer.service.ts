@@ -8,6 +8,7 @@ export interface MailPayload {
   to: string;
   subject: string;
   text: string;
+  html?: string;
   from?: string;
 }
 
@@ -47,6 +48,7 @@ export class MailerService {
       to: payload.to,
       subject: payload.subject,
       text: payload.text,
+      html: payload.html,
     });
   }
 }

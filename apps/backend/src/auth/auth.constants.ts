@@ -24,6 +24,13 @@ export const CSRF_COOKIE = useHostPrefix
   : 'orizzonti_csrf';
 export const CSRF_HEADER = 'x-csrf-token';
 
+/** Trusted-device cookie (non-HttpOnly so the client can't read it, but sent
+ * automatically with credentials). Long-lived (30 days). */
+export const TRUSTED_DEVICE_COOKIE = useHostPrefix
+  ? '__Host-orizzonti_trusted_device'
+  : 'orizzonti_trusted_device';
+export const TRUSTED_DEVICE_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
+
 /** Lifetimes. Access token is short-lived; refresh token is longer. */
 export const ACCESS_TOKEN_TTL = '15m';
 export const ACCESS_TOKEN_TTL_SECONDS = 15 * 60;

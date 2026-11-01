@@ -1,5 +1,13 @@
-<app-page-header title="UI kit" subtitle="Shared components used across the admin portal.">
-  <button actions type="button" class="btn btn-primary" (click)="modalOpen.set(true)">
+<app-page-header
+  title="UI kit"
+  subtitle="Shared components used across the admin portal."
+>
+  <button
+    actions
+    type="button"
+    class="btn btn-primary"
+    (click)="modalOpen.set(true)"
+  >
     Open modal
   </button>
 </app-page-header>
@@ -28,7 +36,25 @@
 
 <section class="block">
   <h2>Stepper</h2>
-  <app-stepper [steps]="steps" [current]="step()" (stepSelected)="step.set($event)" />
+  <app-stepper
+    [steps]="steps"
+    [current]="step()"
+    (stepSelected)="step.set($event)"
+  />
+</section>
+
+<section class="block">
+  <h2>Glassy carousel</h2>
+  <app-glassy-carousel
+    [slides]="carouselSlides"
+    [autoplay]="true"
+    [loop]="true"
+  />
+</section>
+
+<section class="block">
+  <h2>SVG icon hover animations</h2>
+  <app-svg-icon-animations />
 </section>
 
 <section class="block form">
@@ -67,10 +93,18 @@
   <app-modal-shell title="Example modal" (closed)="modalOpen.set(false)">
     <app-form-field label="Name"><input class="form-input" /></app-form-field>
     <ng-container modal-footer>
-      <button type="button" class="btn btn-secondary" (click)="modalOpen.set(false)">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="modalOpen.set(false)"
+      >
         Cancel
       </button>
-      <button type="button" class="btn btn-primary" (click)="modalOpen.set(false)">
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="modalOpen.set(false)"
+      >
         Save
       </button>
     </ng-container>
