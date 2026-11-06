@@ -5,6 +5,46 @@ Dates follow ISO 8601 (YYYY-MM-DD).
 
 ---
 
+## [Unreleased] — 2026-11-07
+
+### Commit (agent) — Guardrails playbooks integrated (2026-11-07)
+
+Integrated `!guardrails-review` and `!guardrails-implement` playbooks into `guardrails/PLAYBOOK-guardrails-review.md`, referenced from `AGENTS.md`.
+
+#### Added
+
+- **`guardrails/PLAYBOOK-guardrails-review.md`** — Contains both playbooks:
+  - `!guardrails-review`: PR/file audit procedure with change classification, verification commands (backend/frontend/database), violation report format, specs, and advice.
+  - `!guardrails-implement`: Implementation procedure with NestJS backend rules, TypeORM/SQL Server rules, Angular 19 rules, security rules, verification commands, and PR description requirements.
+- **`AGENTS.md`** — New "Playbooks" section referencing both playbooks.
+
+---
+
+## [Unreleased] — 2026-11-07
+
+### Commit (agent) — Guardrails integration (2026-11-07)
+
+Integrated the `guardrails-generic` corpus into the project as `guardrails/`, adapted for the NestJS 11 / TypeORM / SQL Server / Angular 19 stack.
+
+#### Added
+
+- **Guardrails corpus** (`guardrails/`)
+  - 29 cards in 6 blocks: Security (S), Backend/Resilience (B), Frontend/Mobile (F), Persistence/DB (D), Architecture (A), Quality (T)
+  - `README.md` with variable substitutions for this project (stack, secrets, DB, API endpoints, compliance)
+  - `00-GUARDRAILS-SYSTEM-PROMPT.md` (v3.0) — 28-rule system prompt with CONTEXT VARIABLES filled in
+  - `GUARDRAILS-SYSTEM-PROMPT.md` (v2.1) — 29-rule system prompt with CONTEXT VARIABLES filled in
+  - Block files `01-security-S.md` through `06-quality-T.md`
+  - Individual card files `A-01`…`A-04`, `B-01`…`B-07`, `D-01`…`D-04`, `F-01`…`F-04`, `S-01`…`S-08`, `T-01`, `T-02`
+  - `PLAYBOOK-guardrails-review.md`
+- **AGENTS.md** — new "Guardrails (coding & security standards)" section cross-referencing `guardrails/`; cards marked N/A for this project documented (B-05, B-06, D-02, F-03, S-03)
+
+#### Notes
+
+- `guardrails-dotnet-angular/devin/` (Devin-specific scaffolding) was excluded — not applicable to Cline.
+- Cards B-05 (messaging), B-06 (saga), D-02 (analytics DB), F-03 (mobile), S-03 (HMAC webhook callbacks) are N/A — no corresponding infrastructure exists in this project.
+
+---
+
 ## [Unreleased] — 2026-11-02
 
 ### Commit `c755d80` — Feature: OTP checks (2026-11-02)
