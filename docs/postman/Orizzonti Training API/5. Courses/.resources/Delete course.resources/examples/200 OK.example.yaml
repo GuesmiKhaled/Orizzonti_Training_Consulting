@@ -1,0 +1,17 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/courses/{{courseId}}"
+  method: DELETE
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "deleted": true,
+        "id": 3
+      }
+order: 1000

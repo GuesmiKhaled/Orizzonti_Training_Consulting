@@ -19,6 +19,7 @@ services:
     volumes:
       - uploads:/app/uploads
     restart: unless-stopped
+    container_name: backend-v1.4.0
 
   frontend:
     build:
@@ -31,6 +32,7 @@ services:
     ports:
       - "8080:80"
     restart: unless-stopped
+    container_name: frontend-v1.4.0
 
 volumes:
   uploads:

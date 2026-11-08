@@ -1,0 +1,27 @@
+$kind: http-request
+description: Public. Limited to **5 requests per 10 minutes per IP**.
+url: "{{apiBaseUrl}}/course-requests"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Postman Requester",
+      "email": "requester@example.com",
+      "phone": "+216 21 111 111",
+      "courseName": "Italian for beginners",
+      "message": "Please send me the schedule."
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", () => pm.response.to.have.status(201));
+      const json = pm.response.json();
+      pm.collectionVariables.set("courseRequestId", json.id);
+    language: text/javascript
+examples: ./.resources/Submit a course request (public).resources/examples
+order: 1000

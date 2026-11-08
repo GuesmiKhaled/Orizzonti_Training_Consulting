@@ -1,0 +1,30 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/auth/roles"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "name": "postman-role",
+        "description": "Temporary role",
+        "permissionIds": [
+          "{{permissionIdManageBlog}}"
+        ]
+      }
+response:
+  statusCode: 409
+  statusText: Conflict
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": "Role name already exists",
+        "error": "Conflict",
+        "statusCode": 409
+      }
+order: 2000

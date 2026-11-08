@@ -1,0 +1,13 @@
+$kind: http-request
+description: Filter by `status` (pending, accepted, rejected) and/or `examSessionId`. Needs `manage_course_requests`.
+url: "{{apiBaseUrl}}/exam-registrations?status=&examSessionId="
+method: GET
+queryParams:
+  status: ""
+  examSessionId: ""
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+examples: ./.resources/List registrations.resources/examples
+order: 2000

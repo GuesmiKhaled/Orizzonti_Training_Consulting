@@ -1,0 +1,38 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/auth/users/{{adminUserId}}"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "fullName": "Postman User (edited)",
+        "phone": null
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "id": 2,
+        "username": "amel",
+        "fullName": "Postman User (edited)",
+        "email": "amel@example.com",
+        "phone": null,
+        "isActive": true,
+        "mustChangePassword": true,
+        "roleId": 2,
+        "role": "content-manager",
+        "permissions": [
+          "manage_blog"
+        ],
+        "createdAt": "2026-10-01T09:00:00.000Z",
+        "updatedAt": "2026-10-01T09:00:00.000Z"
+      }
+order: 1000

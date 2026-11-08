@@ -1,0 +1,13 @@
+$kind: http-request
+description: Counters, the top 5 courses by number of requests and the 5 latest requests (applicant shown as "First L.").
+url: "{{apiBaseUrl}}/dashboard/stats"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200", () => pm.response.to.have.status(200));
+      const json = pm.response.json();
+      pm.test("Has counters", () => pm.expect(json).to.include.keys("blogsCount", "coursesCount", "languagesCount"));
+    language: text/javascript
+examples: ./.resources/Dashboard stats.resources/examples
+order: 1000

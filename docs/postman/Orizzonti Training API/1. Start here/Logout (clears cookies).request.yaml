@@ -1,0 +1,8 @@
+$kind: http-request
+description: Clears the `orizzonti_access`, `orizzonti_refresh` and `orizzonti_csrf` cookies AND revokes the refresh token's jti in the server-side allowlist, so it cannot be reused even if the cookie is captured. Public; no body required. Refresh tokens are also revoked automatically on password change, password reset by an admin, account deactivation, and account deletion.
+url: "{{apiBaseUrl}}/auth/logout"
+method: POST
+auth:
+  type: noauth
+examples: ./.resources/Logout (clears cookies).resources/examples
+order: 4000

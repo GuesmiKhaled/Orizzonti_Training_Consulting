@@ -1,0 +1,30 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/media/{{mediaId}}"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "isActive": false
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "id": 7,
+        "title": "Classroom",
+        "imageUrl": "http://localhost:5007/uploads/3f2c9a1e-5d7b-4c1a-9e0f-1b2c3d4e5f60.png",
+        "altText": "Students in our classroom",
+        "isActive": false,
+        "createdAt": "2026-10-01T09:00:00.000Z",
+        "updatedAt": "2026-10-01T09:00:00.000Z"
+      }
+order: 1000

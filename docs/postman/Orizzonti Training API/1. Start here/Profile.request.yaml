@@ -1,0 +1,13 @@
+$kind: http-request
+description: Current account and permissions. Also allowed while a password change is pending.
+url: "{{apiBaseUrl}}/auth/profile"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200", () => pm.response.to.have.status(200));
+      const json = pm.response.json();
+      pm.test("Has permissions", () => pm.expect(json.permissions).to.be.an("array"));
+    language: text/javascript
+examples: ./.resources/Profile.resources/examples
+order: 7000

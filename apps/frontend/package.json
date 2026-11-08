@@ -7,7 +7,7 @@
     "images:check": "node scripts/generate-image-library.mjs --check",
     "prestart": "npm run images",
     "start": "ng serve",
-    "prebuild": "npm run images",
+    "prebuild": "node scripts/generate-version.mjs && npm run images",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "pretest": "npm run images",

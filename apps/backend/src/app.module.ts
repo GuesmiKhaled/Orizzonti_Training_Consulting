@@ -38,6 +38,7 @@ import { OtpModule } from './otp/otp.module';
 import { OtpChallenge } from './otp/otp-challenge.entity';
 import { NotificationModule } from './notification/notification.module';
 import { EmailNotification } from './notification/email-notification.entity';
+import { IdempotencyKey } from './auth/idempotency-key.entity';
 
 const databaseConfig = {
   host: process.env.DB_HOST ?? 'localhost',
@@ -110,6 +111,7 @@ console.info(
         TrustedDevice,
         OtpChallenge,
         EmailNotification,
+        IdempotencyKey,
       ],
       synchronize: process.env.DB_SYNCHRONIZE === 'true',
       logging: false,

@@ -1,0 +1,27 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/auth/change-password"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "currentPassword": "{{adminPassword}}",
+        "newPassword": "{{newPassword}}"
+      }
+response:
+  statusCode: 429
+  statusText: Too Many Requests
+  headers:
+    Content-Type: application/json; charset=utf-8
+    Retry-After: "60"
+  body:
+    type: json
+    content: |-
+      {
+        "statusCode": 429,
+        "message": "ThrottlerException: Too Many Requests"
+      }
+order: 7000

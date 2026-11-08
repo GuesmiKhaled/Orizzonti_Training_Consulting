@@ -1,0 +1,31 @@
+$kind: http-example
+auth:
+  type: noauth
+request:
+  url: "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}/register"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "fullName": "Postman Applicant",
+        "email": "applicant@example.com",
+        "phone": "+216 22 222 222",
+        "message": "Looking forward to it"
+      }
+response:
+  statusCode: 409
+  statusText: Conflict
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": "A registration with this email already exists for this exam",
+        "error": "Conflict",
+        "statusCode": 409
+      }
+order: 2000

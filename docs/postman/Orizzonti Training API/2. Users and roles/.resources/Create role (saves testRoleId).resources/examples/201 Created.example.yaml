@@ -1,0 +1,37 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/auth/roles"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "name": "postman-role",
+        "description": "Temporary role",
+        "permissionIds": [
+          "{{permissionIdManageBlog}}"
+        ]
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "id": 2,
+        "name": "content-manager",
+        "description": "content-manager access for the Orizzonti backoffice",
+        "permissions": [
+          {
+            "id": 4,
+            "name": "manage_blog",
+            "description": "manage_blog"
+          }
+        ]
+      }
+order: 1000

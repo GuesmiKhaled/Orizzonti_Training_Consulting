@@ -1,0 +1,41 @@
+$kind: collection
+description: |-
+  API collection for the Orizzonti Training & Consulting platform.
+
+  **Quick start**
+  1. Set `apiBaseUrl` (default http://localhost:5007), `adminUser` and `adminPassword`. There is no built-in password: the first admin is created from `DEFAULT_ADMIN_PASSWORD` in `apps/backend/.env`.
+  2. Run **1. Start here > Login**. If the account must change its password, set `newPassword` (12+ characters) and run **Change password**.
+  3. Run the other folders in order; requests save the ids they create (`blogId`, `languageId`, ...) for the next ones.
+
+  **Good to know**
+  - Public requests (no lock icon) need no token. Admin requests use the bearer token saved by Login.
+  - Rate limits (429, `Retry-After` header): login and change-password 5/min; contact, course request and exam registration 5 per 10 min; everything else 600/min (per IP).
+  - Bodies are validated: unknown fields, for example `id` in a PATCH, return 400.
+  - Each request has saved examples for success and for the errors it can return. They are illustrative.
+  - Uploaded images are served from `/uploads/<file>`; language pictures come from the site image library (`/img/...`).
+variables:
+  apiBaseUrl: http://localhost:5007
+  adminUser: admin
+  adminPassword: ""
+  newPassword: ""
+  accessToken: ""
+  mustChangePassword: ""
+  uploadedUrl: ""
+  blogId: ""
+  courseId: ""
+  languageId: ""
+  languageLevelId: ""
+  examSessionId: ""
+  examRegistrationId: ""
+  mediaId: ""
+  courseRequestId: ""
+  superAdminRoleId: ""
+  permissionIdManageBlog: ""
+  adminUserId: ""
+  testRoleId: ""
+auth:
+  - id: 5b610f4e-dca3-43a9-8cf0-39c509abe4a6
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{accessToken}}"

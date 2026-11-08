@@ -1,0 +1,9 @@
+$kind: http-request
+url: "{{apiBaseUrl}}/course-requests/{{courseRequestId}}"
+method: DELETE
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+examples: ./.resources/Delete course request.resources/examples
+order: 5000

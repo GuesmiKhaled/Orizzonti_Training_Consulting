@@ -1,0 +1,24 @@
+$kind: http-request
+description: "`imageUrl` is an http(s) URL or an absolute path such as `/img/carousel-1.jpg`."
+url: "{{apiBaseUrl}}/media"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Postman slide",
+      "imageUrl": "{{uploadedUrl}}",
+      "altText": "Describes the image for screen readers",
+      "isActive": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", () => pm.response.to.have.status(201));
+      const json = pm.response.json();
+      pm.collectionVariables.set("mediaId", json.id);
+    language: text/javascript
+examples: ./.resources/Create slider image (saves mediaId).resources/examples
+order: 4000

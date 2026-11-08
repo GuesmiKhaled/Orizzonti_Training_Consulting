@@ -1,0 +1,24 @@
+$kind: http-request
+description: "`price` and `courseHours` are strings."
+url: "{{apiBaseUrl}}/languages/{{languageId}}/levels"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "cefrLevel": "B1",
+      "courseHours": "350",
+      "price": "750",
+      "isActive": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", () => pm.response.to.have.status(201));
+      const json = pm.response.json();
+      pm.collectionVariables.set("languageLevelId", json.id);
+    language: text/javascript
+examples: ./.resources/Create level (saves languageLevelId).resources/examples
+order: 7000

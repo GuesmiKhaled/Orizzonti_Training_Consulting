@@ -1,0 +1,19 @@
+$kind: http-example
+name: 401 Unauthorized
+request:
+  url: "{{apiBaseUrl}}/auth/profile"
+  method: GET
+response:
+  statusCode: 401
+  statusText: Unauthorized
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": "Invalid or expired access token",
+        "error": "Unauthorized",
+        "statusCode": 401
+      }
+order: 3000
