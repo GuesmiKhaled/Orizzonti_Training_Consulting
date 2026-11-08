@@ -5,6 +5,16 @@ Dates follow ISO 8601 (YYYY-MM-DD).
 
 ---
 
+## [Unreleased] — 2026-11-08
+
+### Commit (agent) — Modern animated OTP verification UI (2026-11-08)
+
+#### Changed
+
+- `apps/frontend/src/app/pages/admin-login-page/admin-login-page.component.ts` — Replaced single OTP text input with six individual digit inputs; added auto-focus, paste, arrow-key navigation, backspace handling, success/error animations; updated validation to exactly 6 digits; preserves single `code` form control and existing `submitOtp()`/`cancelOtp()`/`isSubmitting` behavior.
+- `apps/frontend/src/app/pages/admin-login-page/admin-login-page.component.ts` — Added inline SCSS styles for OTP container, digit inputs, shake/error animation, checkmark success animation, dark theme support, and `prefers-reduced-motion` handling.
+- `apps/frontend/src/app/pages/admin-login-page/admin-login-page.component.spec.ts` — Added 26 tests covering OTP input behavior, form validation, authentication flows, and accessibility.
+
 ## [Unreleased] — 2026-11-07
 
 ### Commit (agent) — Guardrails playbooks integrated (2026-11-07)
