@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SiteContentService } from '../../../core/site/site-content.service';
+import { APP_VERSION } from '../../../core/version/version';
 
 /**
  * Token-based public site footer. Replaces the legacy Bootstrap footer.
@@ -67,6 +68,7 @@ import { SiteContentService } from '../../../core/site/site-content.service';
           <div class="legal-links">
             <a href="mailto:info&#64;orizzonti.tn" class="legal-link">Privacy</a>
             <a href="/other/terms.html" class="legal-link">Terms</a>
+            <span class="legal-version" aria-label="Application version">{{ appVersion }}</span>
           </div>
         </div>
       </div>
@@ -145,6 +147,11 @@ import { SiteContentService } from '../../../core/site/site-content.service';
     .legal-links { display: flex; gap: 1rem; }
     .legal-link { color: #e2e8f0; text-decoration: none; font-size: 0.85rem; }
     .legal-link:hover { text-decoration: underline; }
+    .legal-version {
+      font-size: 0.85rem;
+      color: var(--adm-text-subtle, #8a9994);
+      font-family: var(--adm-font-mono, monospace);
+    }
 
     @media (max-width: 767px) {
       .footer-grid { grid-template-columns: 1fr; gap: 1.5rem; }
@@ -154,5 +161,6 @@ import { SiteContentService } from '../../../core/site/site-content.service';
 })
 export class SiteFooterComponent {
   protected readonly site = inject(SiteContentService);
+  protected readonly appVersion = 'V1.4.0';
   protected readonly defaultLanguageLinks = ['Italiano', 'العربّية', 'English', 'Français'];
 }

@@ -1,0 +1,27 @@
+$kind: http-request
+description: The account must choose its own password at first login. `fullName`, `email` and `phone` are optional.
+url: "{{apiBaseUrl}}/auth/users"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "postman-user",
+      "password": "a-temporary-password-1",
+      "roleId": "{{superAdminRoleId}}",
+      "fullName": "Postman User",
+      "email": "postman@example.com",
+      "phone": "+216 20 000 000",
+      "isActive": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", () => pm.response.to.have.status(201));
+      const json = pm.response.json();
+      pm.collectionVariables.set("adminUserId", json.id);
+    language: text/javascript
+examples: ./.resources/Create user (saves adminUserId).resources/examples
+order: 2000

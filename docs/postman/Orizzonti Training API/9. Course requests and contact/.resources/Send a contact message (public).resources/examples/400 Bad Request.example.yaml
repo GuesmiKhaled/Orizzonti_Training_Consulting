@@ -1,0 +1,35 @@
+$kind: http-example
+auth:
+  type: noauth
+request:
+  url: "{{apiBaseUrl}}/contact"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "name": "Postman Visitor",
+        "email": "visitor@example.com",
+        "subject": "A question",
+        "message": "A message of at least ten characters."
+      }
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": [
+          "name should not be empty",
+          "email must be an email",
+          "message must be longer than or equal to 10 characters"
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+order: 2000

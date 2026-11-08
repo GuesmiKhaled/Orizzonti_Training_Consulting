@@ -1,0 +1,12 @@
+$kind: http-request
+description: Published posts only, newest first.
+url: "{{apiBaseUrl}}/blogs"
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+examples: ./.resources/List published blogs (public).resources/examples
+order: 1000

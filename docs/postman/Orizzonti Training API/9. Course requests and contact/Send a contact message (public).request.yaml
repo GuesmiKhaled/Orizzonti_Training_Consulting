@@ -1,0 +1,23 @@
+$kind: http-request
+description: Public. Limited to **5 messages per 10 minutes per IP**. Sends an email through the saved mail settings.
+url: "{{apiBaseUrl}}/contact"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Postman Visitor",
+      "email": "visitor@example.com",
+      "subject": "A question",
+      "message": "A message of at least ten characters."
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 201", () => pm.response.to.have.status(201));
+    language: text/javascript
+examples: ./.resources/Send a contact message (public).resources/examples
+order: 6000

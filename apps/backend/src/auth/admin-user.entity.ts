@@ -39,7 +39,6 @@ export class AdminUser {
   roleId?: number;
 
   @ManyToOne(() => Role, (role) => role.adminUsers, {
-    eager: true,
     nullable: true,
   })
   @JoinColumn({ name: 'roleId' })

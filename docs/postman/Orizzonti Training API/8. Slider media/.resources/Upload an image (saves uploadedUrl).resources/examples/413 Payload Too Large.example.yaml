@@ -1,0 +1,24 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/media/upload"
+  method: POST
+  body:
+    type: formdata
+    content:
+      - type: file
+        key: file
+        src: []
+response:
+  statusCode: 413
+  statusText: Payload Too Large
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": "File too large",
+        "error": "Payload Too Large",
+        "statusCode": 413
+      }
+order: 4000

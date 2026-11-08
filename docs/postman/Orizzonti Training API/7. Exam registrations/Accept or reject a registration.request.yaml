@@ -1,0 +1,18 @@
+$kind: http-request
+description: "`accepted`, `rejected` or `pending`. Accepting fails with 409 when no places are left. The applicant is emailed."
+url: "{{apiBaseUrl}}/exam-registrations/{{examRegistrationId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "status": "accepted"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+examples: ./.resources/Accept or reject a registration.resources/examples
+order: 3000

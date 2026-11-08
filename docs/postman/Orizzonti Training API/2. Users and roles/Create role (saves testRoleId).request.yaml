@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{apiBaseUrl}}/auth/roles"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "postman-role",
+      "description": "Temporary role",
+      "permissionIds": [
+        "{{permissionIdManageBlog}}"
+      ]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", () => pm.response.to.have.status(201));
+      const json = pm.response.json();
+      pm.collectionVariables.set("testRoleId", json.id);
+    language: text/javascript
+examples: ./.resources/Create role (saves testRoleId).resources/examples
+order: 7000

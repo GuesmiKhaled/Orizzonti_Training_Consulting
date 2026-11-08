@@ -1,0 +1,31 @@
+$kind: http-example
+auth:
+  type: noauth
+request:
+  url: "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}/register"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "fullName": "Postman Applicant",
+        "email": "applicant@example.com",
+        "phone": "+216 22 222 222",
+        "message": "Looking forward to it"
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "id": 11,
+        "status": "pending",
+        "message": "Registration request received. We will contact you shortly."
+      }
+order: 1000

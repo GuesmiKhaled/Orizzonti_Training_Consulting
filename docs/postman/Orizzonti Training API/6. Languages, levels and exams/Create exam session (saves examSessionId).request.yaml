@@ -1,0 +1,25 @@
+$kind: http-request
+description: Start < deadline < exam date. `maxParticipants` empty means unlimited; pending and accepted registrations hold a place.
+url: "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "examDate": "2026-12-10T09:00:00.000Z",
+      "registrationStartDate": "2026-11-01T09:00:00.000Z",
+      "registrationDeadline": "2026-11-30T09:00:00.000Z",
+      "location": "Tunis",
+      "maxParticipants": 20
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", () => pm.response.to.have.status(201));
+      const json = pm.response.json();
+      pm.collectionVariables.set("examSessionId", json.id);
+    language: text/javascript
+examples: ./.resources/Create exam session (saves examSessionId).resources/examples
+order: 11000

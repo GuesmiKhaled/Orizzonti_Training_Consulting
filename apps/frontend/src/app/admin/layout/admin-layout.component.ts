@@ -13,6 +13,7 @@ import {
 } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
+import { APP_VERSION } from '../../core/version/version';
 import { ADMIN_NAV, filterNav } from '../nav.config';
 import { AdminBreadcrumbsComponent } from './admin-breadcrumbs.component';
 import { AdminSidebarComponent } from './admin-sidebar.component';
@@ -35,6 +36,7 @@ import { AdminTopbarComponent } from './admin-topbar.component';
 export class AdminLayoutComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  readonly appVersion = signal('');
 
   protected readonly sidebarOpen = signal(
     typeof window !== 'undefined' && window.innerWidth >= 861,

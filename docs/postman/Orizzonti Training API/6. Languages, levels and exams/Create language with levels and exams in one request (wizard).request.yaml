@@ -1,0 +1,44 @@
+$kind: http-request
+description: "Transactional: the language, its levels and their exam sessions are created together or not at all. Duplicate CEFR levels or invalid exam dates return 400 and nothing is saved."
+url: "{{apiBaseUrl}}/languages/wizard"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "language": {
+        "name": "Wizard language",
+        "code": "WZD",
+        "nativeName": "Wizard",
+        "imageUrl": "/img/eng/english.jpg",
+        "isActive": true
+      },
+      "levels": [
+        {
+          "cefrLevel": "A1",
+          "courseHours": "120",
+          "price": "500",
+          "isActive": true,
+          "exams": [
+            {
+              "examDate": "2026-12-10T09:00:00.000Z",
+              "registrationStartDate": "2026-11-01T09:00:00.000Z",
+              "registrationDeadline": "2026-11-30T09:00:00.000Z",
+              "location": "Tunis",
+              "maxParticipants": 20
+            }
+          ]
+        }
+      ]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", () => pm.response.to.have.status(201));
+      const json = pm.response.json();
+      pm.test("Levels and exams created", () => pm.expect(json.levels[0].examSessions).to.have.length(1));
+    language: text/javascript
+examples: ./.resources/Create language with levels and exams in one request (wizard).resources/examples
+order: 4000

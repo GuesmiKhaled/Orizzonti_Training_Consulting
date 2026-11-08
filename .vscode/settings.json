@@ -1,0 +1,8 @@
+{
+    "nxConsole.nxWorkspacePath": "",
+    "angular-schematics.schematicsDefaultOptions": {
+        "angular-*": {
+            "externalTemplate": true
+        }
+    }
+}

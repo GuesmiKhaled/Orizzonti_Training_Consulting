@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{apiBaseUrl}}/auth/permissions"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200", () => pm.response.to.have.status(200));
+      const json = pm.response.json();
+      pm.collectionVariables.set("permissionIdManageBlog", json.find(p => p.name === "manage_blog").id);
+    language: text/javascript
+examples: ./.resources/List permissions.resources/examples
+order: 6000

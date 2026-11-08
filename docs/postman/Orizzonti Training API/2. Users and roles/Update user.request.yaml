@@ -1,0 +1,19 @@
+$kind: http-request
+description: Partial update. Send `null` for `fullName`, `email` or `phone` to clear them. Setting a password here forces that user to change it again (unless you are editing yourself).
+url: "{{apiBaseUrl}}/auth/users/{{adminUserId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Postman User (edited)",
+      "phone": null
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+examples: ./.resources/Update user.resources/examples
+order: 3000

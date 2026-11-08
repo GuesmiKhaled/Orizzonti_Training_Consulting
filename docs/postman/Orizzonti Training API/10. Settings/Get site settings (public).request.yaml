@@ -1,0 +1,12 @@
+$kind: http-request
+description: 'Content the public site reads: hero text, contact details, social links, About text, highlights and the next session date. Null fields mean "use the built-in text".'
+url: "{{apiBaseUrl}}/site-settings"
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+examples: ./.resources/Get site settings (public).resources/examples
+order: 1000

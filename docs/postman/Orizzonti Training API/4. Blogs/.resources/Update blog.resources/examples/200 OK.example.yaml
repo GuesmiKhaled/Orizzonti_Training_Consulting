@@ -1,0 +1,32 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/blogs/{{blogId}}"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "isPublished": false
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "id": 4,
+        "title": "Nursing in Italy",
+        "slug": "nursing-in-italy",
+        "excerpt": "What nurses need to know before moving.",
+        "content": "The full article text...",
+        "imageUrl": "http://localhost:5007/uploads/3f2c9a1e-5d7b-4c1a-9e0f-1b2c3d4e5f60.png",
+        "isPublished": false,
+        "createdAt": "2026-10-01T09:00:00.000Z",
+        "updatedAt": "2026-10-01T09:00:00.000Z"
+      }
+order: 1000

@@ -1,0 +1,25 @@
+$kind: http-example
+name: 400 Bad Request
+request:
+  url: "{{apiBaseUrl}}/media/upload"
+  method: POST
+  body:
+    type: formdata
+    content:
+      - type: file
+        key: file
+        src: []
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": "Attach an image in the \"file\" field",
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+order: 3000

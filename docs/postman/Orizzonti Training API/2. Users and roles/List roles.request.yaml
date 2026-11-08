@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{apiBaseUrl}}/auth/roles"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200", () => pm.response.to.have.status(200));
+      const json = pm.response.json();
+      pm.collectionVariables.set("superAdminRoleId", json.find(r => r.name === "super-admin").id);
+    language: text/javascript
+examples: ./.resources/List roles.resources/examples
+order: 5000
