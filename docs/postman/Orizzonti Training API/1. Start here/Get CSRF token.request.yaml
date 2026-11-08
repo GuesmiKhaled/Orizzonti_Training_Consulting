@@ -1,0 +1,8 @@
+$kind: http-request
+description: Returns a double-submit CSRF token and sets the `orizzonti_csrf` cookie (non-HttpOnly). The client must send the token back via the `x-csrf-token` header on state-changing requests. Call once after login/refresh.
+url: "{{apiBaseUrl}}/auth/csrf"
+method: GET
+auth:
+  type: noauth
+examples: ./.resources/Get CSRF token.resources/examples
+order: 5000

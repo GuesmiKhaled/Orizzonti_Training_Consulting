@@ -1,0 +1,33 @@
+$kind: http-example
+name: 400 Bad Request
+request:
+  url: "{{apiBaseUrl}}/settings/mail"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "host": "smtp.example.com",
+        "port": 587,
+        "username": "info@orizzonti.tn",
+        "fromAddress": "info@orizzonti.tn",
+        "secure": true
+      }
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": [
+          "property id should not exist"
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+order: 3000

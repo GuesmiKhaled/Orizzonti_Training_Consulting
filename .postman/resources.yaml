@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 68166076-d40a-41ed-8b8d-d971b9c045cc
+
+localResources:
+  collections:
+    - ../docs/postman/Orizzonti Training API

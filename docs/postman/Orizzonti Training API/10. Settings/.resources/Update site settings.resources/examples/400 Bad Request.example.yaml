@@ -1,0 +1,39 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/site-settings"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "heroTitle": "Learn with Orizzonti",
+        "heroSubtitle": "Classes in Tunis for every level.",
+        "contactEmail": "info@orizzonti.tn",
+        "contactPhone": "+216 24 422 753",
+        "facebookUrl": "https://www.facebook.com/orizzonti.tn",
+        "aboutText": "First paragraph.\n\nSecond paragraph.",
+        "studentsCount": 2500,
+        "coursesCount": 12,
+        "yearsOfExperience": 15,
+        "nextSessionDate": "2026-11-01T09:00:00.000Z"
+      }
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": [
+          "facebookUrl must be a URL address",
+          "contactEmail must be an email",
+          "heroTitle must be shorter than or equal to 150 characters"
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+order: 2000

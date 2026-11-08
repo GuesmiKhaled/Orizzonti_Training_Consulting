@@ -249,3 +249,5 @@ apps/backend/uploads/
 # Playwright
 apps/frontend/test-results/
 apps/frontend/playwright-report/
+other/phase8_idempotency_keys.sql
+postman/collections/Orizzonti Training API

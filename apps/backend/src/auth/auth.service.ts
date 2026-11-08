@@ -624,7 +624,9 @@ export class AuthService implements OnModuleInit {
       }
       if (
         !existingAdmin.mustChangePassword &&
-        (await this.usesKnownDefaultPassword(existingAdmin.password))
+        KNOWN_DEFAULT_PASSWORDS.some((p) =>
+          bcrypt.compareSync(p, existingAdmin.password),
+        )
       ) {
         existingAdmin.mustChangePassword = true;
         changed = true;
@@ -684,13 +686,6 @@ export class AuthService implements OnModuleInit {
     // Revoke all outstanding refresh tokens so other sessions end now.
     await this.revokeAllUserTokens(userId);
     return { success: true };
-  }
-
-  private async usesKnownDefaultPassword(hash: string): Promise<boolean> {
-    for (const candidate of KNOWN_DEFAULT_PASSWORDS) {
-      if (await bcrypt.compare(candidate, hash)) return true;
-    }
-    return false;
   }
 
   private async ensureRoleAndPermissionSeed() {

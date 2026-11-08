@@ -1,0 +1,18 @@
+$kind: http-request
+description: Partial body. Unknown fields such as `id` are rejected with 400.
+url: "{{apiBaseUrl}}/blogs/{{blogId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "isPublished": false
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+examples: ./.resources/Update blog.resources/examples
+order: 6000

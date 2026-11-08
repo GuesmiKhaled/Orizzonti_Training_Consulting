@@ -1,0 +1,18 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/auth/roles/{{testRoleId}}"
+  method: DELETE
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": "Role not found",
+        "error": "Not Found",
+        "statusCode": 404
+      }
+order: 3000

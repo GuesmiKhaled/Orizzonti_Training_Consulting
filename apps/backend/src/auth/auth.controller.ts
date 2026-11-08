@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   ParseIntPipe,
   Patch,
@@ -17,7 +18,7 @@ import type { Request, Response } from 'express';
 import { randomUUID } from 'node:crypto';
 import * as jwt from 'jsonwebtoken';
 import { AuthService } from './auth.service';
-import { LOGIN_THROTTLE, PASSWORD_CHANGE_THROTTLE } from '../throttling';
+import { LOGIN_THROTTLE, PASSWORD_CHANGE_THROTTLE, PUBLIC_FORM_THROTTLE } from '../throttling';
 import {
   ACCESS_TOKEN_COOKIE,
   CSRF_COOKIE,
@@ -44,6 +45,8 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
@@ -129,6 +132,9 @@ export class AuthController {
         }
       } catch {
         // Token invalid/expired — nothing to revoke; still clear cookies.
+        this.logger.debug(
+          'Logout: refresh token revocation skipped (invalid/expired)',
+        );
       }
     }
     this.clearAuthCookies(res);
@@ -188,6 +194,7 @@ export class AuthController {
 
   @Patch('users/:id')
   @RequirePermission('manage_users')
+  @Throttle(PUBLIC_FORM_THROTTLE)
   updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateAdminUserDto,
@@ -198,6 +205,7 @@ export class AuthController {
 
   @Delete('users/:id')
   @RequirePermission('manage_users')
+  @Throttle(PUBLIC_FORM_THROTTLE)
   deleteUser(
     @Param('id', ParseIntPipe) id: number,
     @Req() request: { authUserId: number },
@@ -213,6 +221,7 @@ export class AuthController {
 
   @Patch('roles/:id')
   @RequirePermission('manage_roles')
+  @Throttle(PUBLIC_FORM_THROTTLE)
   updateRole(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateRoleDto,
@@ -222,6 +231,7 @@ export class AuthController {
 
   @Delete('roles/:id')
   @RequirePermission('manage_roles')
+  @Throttle(PUBLIC_FORM_THROTTLE)
   deleteRole(@Param('id', ParseIntPipe) id: number) {
     return this.authService.deleteRole(id);
   }

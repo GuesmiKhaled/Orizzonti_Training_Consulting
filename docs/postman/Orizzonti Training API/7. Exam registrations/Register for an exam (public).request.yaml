@@ -1,0 +1,26 @@
+$kind: http-request
+description: Public. Limited to **5 requests per 10 minutes per IP**. The request holds a place while pending. The applicant receives an email when the mail settings are configured.
+url: "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Postman Applicant",
+      "email": "applicant@example.com",
+      "phone": "+216 22 222 222",
+      "message": "Looking forward to it"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", () => pm.response.to.have.status(201));
+      const json = pm.response.json();
+      pm.collectionVariables.set("examRegistrationId", json.id);
+    language: text/javascript
+examples: ./.resources/Register for an exam (public).resources/examples
+order: 1000

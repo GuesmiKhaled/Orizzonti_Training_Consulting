@@ -1,0 +1,31 @@
+$kind: http-example
+auth:
+  type: noauth
+request:
+  url: "{{apiBaseUrl}}/contact"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "name": "Postman Visitor",
+        "email": "visitor@example.com",
+        "subject": "A question",
+        "message": "A message of at least ten characters."
+      }
+response:
+  statusCode: 500
+  statusText: Internal Server Error
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": "Unable to send message right now.",
+        "error": "Internal Server Error",
+        "statusCode": 500
+      }
+order: 3000

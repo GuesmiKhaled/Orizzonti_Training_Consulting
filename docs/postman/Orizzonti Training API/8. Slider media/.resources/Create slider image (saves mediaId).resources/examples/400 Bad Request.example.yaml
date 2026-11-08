@@ -1,0 +1,32 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/media"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "title": "Postman slide",
+        "imageUrl": "{{uploadedUrl}}",
+        "altText": "Describes the image for screen readers",
+        "isActive": true
+      }
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": [
+          "imageUrl must be an http(s) URL or an absolute path",
+          "title should not be empty"
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+order: 2000

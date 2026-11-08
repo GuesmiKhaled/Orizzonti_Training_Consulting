@@ -1,0 +1,26 @@
+$kind: http-request
+description: 'Signs in and stores `accessToken`. Limited to **5 attempts per minute per IP** (429 afterwards). If `user.mustChangePassword` is true, call "Change password" next: every other endpoint answers 403 "Password change required" until then. There is no built-in password; the first admin comes from `DEFAULT_ADMIN_PASSWORD` in `apps/backend/.env`.'
+url: "{{apiBaseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "{{adminUser}}",
+      "password": "{{adminPassword}}"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", () => pm.response.to.have.status(201));
+      const json = pm.response.json();
+      pm.collectionVariables.set("mustChangePassword", String(json.user.mustChangePassword));
+      pm.test("A user object is returned", () => pm.expect(json.user).to.be.an("object"));
+      if (json.user.mustChangePassword) { console.warn("This account must change its password: run \"Change password\" now."); }
+    language: text/javascript
+examples: ./.resources/Login (saves accessToken).resources/examples
+order: 2000

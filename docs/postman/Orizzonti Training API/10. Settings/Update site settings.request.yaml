@@ -1,0 +1,27 @@
+$kind: http-request
+description: Needs `manage_site_settings`. Every field is optional; send `null` to clear one. Links must start with http:// or https://.
+url: "{{apiBaseUrl}}/site-settings"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "heroTitle": "Learn with Orizzonti",
+      "heroSubtitle": "Classes in Tunis for every level.",
+      "contactEmail": "info@orizzonti.tn",
+      "contactPhone": "+216 24 422 753",
+      "facebookUrl": "https://www.facebook.com/orizzonti.tn",
+      "aboutText": "First paragraph.\n\nSecond paragraph.",
+      "studentsCount": 2500,
+      "coursesCount": 12,
+      "yearsOfExperience": 15,
+      "nextSessionDate": "2026-11-01T09:00:00.000Z"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+examples: ./.resources/Update site settings.resources/examples
+order: 2000

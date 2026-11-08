@@ -1,0 +1,12 @@
+$kind: http-request
+description: "Legacy date-only check: it ignores the number of places. The website uses `isBookable`, `bookingStatus` and `placesLeft` from the exam objects instead."
+url: "{{apiBaseUrl}}/languages/{{languageId}}/levels/{{languageLevelId}}/exams/{{examSessionId}}/subscribe"
+method: POST
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 201", () => pm.response.to.have.status(201));
+    language: text/javascript
+examples: ./.resources/Check booking eligibility.resources/examples
+order: 14000

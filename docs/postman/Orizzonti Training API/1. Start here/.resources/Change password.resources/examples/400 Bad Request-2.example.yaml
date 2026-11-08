@@ -1,0 +1,28 @@
+$kind: http-example
+name: 400 Bad Request
+request:
+  url: "{{apiBaseUrl}}/auth/change-password"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "currentPassword": "{{adminPassword}}",
+        "newPassword": "{{newPassword}}"
+      }
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": "The new password must be different from the current one",
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+order: 4000

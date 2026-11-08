@@ -1,0 +1,20 @@
+$kind: http-request
+description: Multipart field `file`. JPEG, PNG, WebP or GIF up to 5 MB; the type is detected from the file content, not the name. Needs `manage_media`, `manage_blog` or `manage_courses`. Choose a file in the Body tab before sending. The returned `url` can be used as `imageUrl` for blogs, courses and slider images.
+url: "{{apiBaseUrl}}/media/upload"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src: []
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", () => pm.response.to.have.status(201));
+      const json = pm.response.json();
+      pm.collectionVariables.set("uploadedUrl", json.url);
+      pm.test("A public URL is returned", () => pm.expect(json.url).to.match(/\/uploads\//));
+    language: text/javascript
+examples: ./.resources/Upload an image (saves uploadedUrl).resources/examples
+order: 3000

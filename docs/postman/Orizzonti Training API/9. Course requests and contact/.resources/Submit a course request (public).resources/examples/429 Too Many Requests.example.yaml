@@ -1,0 +1,32 @@
+$kind: http-example
+auth:
+  type: noauth
+request:
+  url: "{{apiBaseUrl}}/course-requests"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "fullName": "Postman Requester",
+        "email": "requester@example.com",
+        "phone": "+216 21 111 111",
+        "courseName": "Italian for beginners",
+        "message": "Please send me the schedule."
+      }
+response:
+  statusCode: 429
+  statusText: Too Many Requests
+  headers:
+    Content-Type: application/json; charset=utf-8
+    Retry-After: "60"
+  body:
+    type: json
+    content: |-
+      {
+        "statusCode": 429,
+        "message": "ThrottlerException: Too Many Requests"
+      }
+order: 3000

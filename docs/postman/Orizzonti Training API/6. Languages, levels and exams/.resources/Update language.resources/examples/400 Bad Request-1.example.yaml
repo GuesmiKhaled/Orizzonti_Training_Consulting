@@ -1,0 +1,30 @@
+$kind: http-example
+name: 400 Bad Request
+request:
+  url: "{{apiBaseUrl}}/languages/{{languageId}}"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "nativeName": "Postman (edited)",
+        "imageUrl": "/img/cat-3.jpg"
+      }
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "message": [
+          "imageUrl must be an image from the library, for example /img/cat-1.jpg"
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+order: 4000

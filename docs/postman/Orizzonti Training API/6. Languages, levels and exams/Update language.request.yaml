@@ -1,0 +1,19 @@
+$kind: http-request
+description: "Partial body. `imageUrl: null` removes the picture. Unknown fields (for example `id`) return 400."
+url: "{{apiBaseUrl}}/languages/{{languageId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nativeName": "Postman (edited)",
+      "imageUrl": "/img/cat-3.jpg"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+examples: ./.resources/Update language.resources/examples
+order: 5000

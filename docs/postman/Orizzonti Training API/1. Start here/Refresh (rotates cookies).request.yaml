@@ -1,0 +1,8 @@
+$kind: http-request
+description: Exchanges the `orizzonti_refresh` httpOnly cookie for a new access+refresh cookie pair. Limited to 5/min per IP. Returns 401 if the refresh cookie is missing or invalid.
+url: "{{apiBaseUrl}}/auth/refresh"
+method: POST
+auth:
+  type: noauth
+examples: ./.resources/Refresh (rotates cookies).resources/examples
+order: 3000

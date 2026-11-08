@@ -1,0 +1,37 @@
+$kind: http-example
+request:
+  url: "{{apiBaseUrl}}/dashboard/stats"
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "blogsCount": 18,
+        "coursesCount": 12,
+        "languagesCount": 5,
+        "sliderCount": 3,
+        "courseRequestsCount": 40,
+        "newCourseRequestsCount": 7,
+        "adminUsersCount": 4,
+        "requestsByCourse": [
+          {
+            "name": "Italian for beginners",
+            "count": 12
+          }
+        ],
+        "latestRequests": [
+          {
+            "id": 6,
+            "applicant": "Sana B.",
+            "courseName": "Italian for beginners",
+            "status": "new",
+            "createdAt": "2026-10-01T09:00:00.000Z"
+          }
+        ]
+      }
+order: 1000
